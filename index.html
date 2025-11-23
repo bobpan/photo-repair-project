@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana AI 老照片修复 - 精致体验</title>
+    <style>
+        /* 苹果风格基础样式 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f7f7f7; 
+            color: #1c1c1e;
+        }
+        h1 { 
+            font-weight: 600; 
+            text-align: center;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+        p { 
+            text-align: center; 
+            color: #6a6a6a; 
+            margin-bottom: 30px; 
+        }
+
+        /* 卡片和输入区域样式 */
+        .card {
+            background: #ffffff;
+            border-radius: 12px; 
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); 
+            margin-bottom: 20px;
+        }
+
+        /* 表单元素 */
+        textarea, input[type="file"] { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 8px; 
+            border: 1px solid #d1d1d6; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            transition: border-color 0.2s; 
+        }
+        textarea:focus, input[type="file"]:focus {
+            border-color: #007aff; 
+            outline: none;
+        }
+
+        button { 
+            background-color: #007aff; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 15px;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        button:hover { 
+            opacity: 0.85; 
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        /* 结果展示区 */
+        .results-container { 
+            display: flex; 
+            gap: 20px; 
+        }
+        .result-column { flex: 1; }
+        .image-display { 
+            max-width: 100%; 
+            height: auto; 
+            border: 1px solid #e5e5ea; 
+            border-radius: 6px; 
+            display: block; 
+            margin-top: 10px;
+        }
+        
+        /* 状态信息 */
+        #loading { 
+            display: none; 
+            color: #007aff; 
+            font-weight: 500; 
+            margin-top: 15px;
+            text-align: center;
+        }
+        .error { color: #ff3b30; font-weight: bold; text-align: center; }
+
+        /* 响应式适配 (H5) */
+        @media screen and (max-width: 768px) {
+            body { padding: 15px; }
+            h1 { font-size: 28px; }
+            .results-container { 
+                flex-direction: column; 
+                gap: 15px;
+            }
+            .card { padding: 15px; }
+            button { padding: 10px 15px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Nano Banana | 记忆复原</h1>
+    <p>高品质 AI 修复和智能着色，让老照片焕发生机。</p>
+
+    <div class="card">
+        <form id="repairForm">
+            <label for="photoFile">💾 上传您的老照片 (JPG, PNG, WebP, 最大 10MB):</label><br>
+            <input type="file" id="photoFile" name="photo" accept="image/jpeg, image/png, image/webp" required><br><br>
+            
+            <label for="prompt">✨ 修复/着色指令 (可选):</label><br>
+            <textarea id="prompt" name="prompt" rows="3" placeholder="例如：保留背景，但把人物的脸修复得更清晰一些，并进行着色。"></textarea><br>
+            
+            <button type="submit" id="submitButton">开始 AI 修复</button>
+        </form>
+    </div>
+
+    <p id="loading">⏳ 正在使用 AI 模型处理中...</p>
+    <p id="errorMsg" class="error"></p>
+
+    <div id="results" class="results-container">
+        <div class="result-column card" style="display:none;" id="originalCard">
+            <h3>修复前</h3>
+            <img id="originalImage" class="image-display" src="" alt="原图">
+        </div>
+        <div class="result-column card" style="display:none;" id="fixedCard">
+            <h3>修复后</h3>
+            <img id="fixedImage" class="image-display" src="" alt="修复后图片">
+        </div>
+    </div>
+
+    <script>
+        // Pages Function 转发路径 (安全且无需硬编码 Worker URL)
+        const WORKER_ENDPOINT = '/api/repair'; 
+        const MAX_SIZE_MB = 10;
+
+        const form = document.getElementById('repairForm');
+        const photoInput = document.getElementById('photoFile');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const originalImage = document.getElementById('originalImage');
+        const fixedImage = document.getElementById('fixedImage');
+        const originalCard = document.getElementById('originalCard');
+        const fixedCard = document.getElementById('fixedCard');
+        const submitButton = document.getElementById('submitButton');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // UI 状态重置
+            errorMsg.textContent = '';
+            loading.style.display = 'block';
+            originalCard.style.display = 'none';
+            fixedCard.style.display = 'none';
+            submitButton.disabled = true;
+
+            const file = photoInput.files[0];
+            
+            if (!file) {
+                errorMsg.textContent = '请选择一张照片。';
+                resetState();
+                return;
+            }
+
+            if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+                errorMsg.textContent = `文件过大，请选择小于 ${MAX_SIZE_MB}MB 的文件。`;
+                resetState();
+                return;
+            }
+
+            // 1. 预览原图
+            originalImage.src = URL.createObjectURL(file);
+            originalCard.style.display = 'block';
+
+            // 2. 构造 FormData
+            const formData = new FormData();
+            formData.append('photo', file);
+            formData.append('prompt', document.getElementById('prompt').value);
+
+            // 3. 发送请求给 Pages Function (/api/repair)
+            try {
+                const response = await fetch(WORKER_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    // 4. 显示修复后的图片 (Base64 Data URL)
+                    fixedImage.src = result.image;
+                    fixedCard.style.display = 'block';
+                    errorMsg.textContent = '✅ 修复完成！请查看对比图。';
+                } else {
+                    errorMsg.textContent = `修复失败: ${result.message || '未知 Worker 错误'}`;
+                }
+            } catch (error) {
+                console.error('Network or processing error:', error);
+                errorMsg.textContent = '网络请求失败，请检查 Pages Function 或 Worker 部署。';
+            } finally {
+                resetState();
+            }
+        });
+
+        function resetState() {
+             loading.style.display = 'none';
+             submitButton.disabled = false;
+        }
+    </script>
+</body>
+</html>
