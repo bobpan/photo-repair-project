@@ -118,8 +118,15 @@
             <label for="photoFile">💾 上传您的老照片 (JPG, PNG, WebP, 最大 10MB):</label><br>
             <input type="file" id="photoFile" name="photo" accept="image/jpeg, image/png, image/webp" required><br><br>
             
-            <label for="prompt">✨ 修复/着色指令 (可选):</label><br>
-            <textarea id="prompt" name="prompt" rows="3" placeholder="例如：保留背景，但把人物的脸修复得更清晰一些，并进行着色。"></textarea><br>
+            <label for="presetPrompt">🎨 修复预设模式:</label><br>
+            <select id="presetPrompt" name="presetPrompt">
+                <option value="基础修复与着色">基础修复与着色 (推荐)</option>
+                <option value="面部增强与去模糊">面部增强与去模糊 (人像必备)</option>
+                <option value="风格化老照片（复古）">风格化老照片（保留复古感）</option>
+            </select><br><br>
+            
+            <label for="customPrompt">✨ 自定义指令 (可选):</label><br>
+            <textarea id="customPrompt" name="customPrompt" rows="3" placeholder="例如：把背景的颜色改成淡绿色，让左边人物的头发更黑一些。"></textarea><br>
             
             <button type="submit" id="submitButton">开始 AI 修复</button>
         </form>
@@ -185,7 +192,26 @@
             // 2. 构造 FormData
             const formData = new FormData();
             formData.append('photo', file);
-            formData.append('prompt', document.getElementById('prompt').value);
+        
+            // 获取预设值和自定义值
+            const presetValue = document.getElementById('presetPrompt').value;
+            const customValue = document.getElementById('customPrompt').value;
+        
+            // 组合最终提示词：预设提示词 + 用户的自定义指令
+            let finalPrompt = "";
+            if (presetValue) {
+                finalPrompt += `[预设模式: ${presetValue}] `;
+            }
+            if (customValue.trim()) {
+                finalPrompt += `[自定义指令: ${customValue.trim()}]`;
+            }
+            
+            // 如果两个都为空，则使用一个基础默认值
+            if (!finalPrompt) {
+                finalPrompt = "请修复并着色这张老照片，去除所有划痕和噪点。";
+            }
+        
+            formData.append('prompt', finalPrompt);
 
             // 3. 发送请求给 Pages Function (/api/repair)
             try {
