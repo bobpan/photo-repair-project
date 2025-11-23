@@ -1,0 +1,9 @@
+{
+  "name": "photo-repair-frontend",
+  "version": "1.0.0",
+  "description": "Cloudflare Pages Frontend for AI Photo Repair",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build steps required for static files/functions'"
+  }
+}
