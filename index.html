@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nano Banana AI | 魔法影像工作室</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         /* --- 1. 全局与苹果风格基础 --- */
         :root {
@@ -325,7 +326,9 @@
             <div class="chip" data-prompt="把背景换成下雪的巴黎街道，保持人物不变。">❄️ 换成雪景</div>
             <div class="chip" data-prompt="将图片转换为黑白素描风格，线条清晰。">✏️ 黑白素描</div>
         </div>
-
+        
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light" style="margin: 0 auto 10px auto;"></div>
+        
         <form id="commandForm" class="input-box">
             <input type="text" id="promptInput" placeholder="描述你想怎么改... (例如：把衣服换成红色的)" autocomplete="off">
             <button type="submit" id="submitBtn">
@@ -484,26 +487,26 @@
         // --- 4. 提交生成逻辑 ---
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            if (!currentFile) {
-                alert('请先上传一张图片！');
-                return;
-            }
-
-            const prompt = promptInput.value.trim();
-            if (!prompt) {
-                alert('请输入描述或选择一个预设指令。');
-                return;
-            }
 
             // UI Loading
             loadingOverlay.style.display = 'flex';
             submitBtn.disabled = true;
 
             const formData = new FormData();
+
+            // 获取 Turnstile Token
+            // turnstile-response 是组件自动生成的 input name
+            const turnstileToken = formData.get('cf-turnstile-response') || document.querySelector('[name="cf-turnstile-response"]')?.value;
+            
+            // 如果是 Managed 模式，可能有时候 token 还没生成，最好校验一下
+            if (!turnstileToken) {
+                alert('请完成人机验证 (如果未显示，请稍等)');
+                return;
+            }
+            
             formData.append('photo', currentFile);
             formData.append('prompt', prompt);
-
+            
             try {
                 const response = await fetch(WORKER_ENDPOINT, {
                     method: 'POST',
@@ -532,6 +535,10 @@
             } finally {
                 loadingOverlay.style.display = 'none';
                 submitBtn.disabled = false;
+            }
+            // 注意：请求完成后，无论成功失败，最好重置一下验证码，防止 token 过期
+            if (window.turnstile) {
+                window.turnstile.reset();
             }
         });
     </script>
