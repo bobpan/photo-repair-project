@@ -215,6 +215,36 @@
             border: none; cursor: pointer; font-weight: bold;
         }
 
+        .gallery-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 0 40px 20px 40px; /* 放在 header 下方 */
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .gallery-tabs::-webkit-scrollbar { display: none; }
+        
+        .tab-btn {
+            background: #f5f5f7;
+            color: var(--text-secondary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover { background: #e5e5ea; color: var(--text-main); }
+        
+        .tab-btn.active {
+            background: var(--text-main); /* 黑色背景 */
+            color: white; /* 白色文字 */
+        }
+        
         .gallery-grid {
             flex: 1;
             overflow-y: auto;
@@ -255,6 +285,7 @@
             .navbar { padding: 15px 20px; }
             .upload-placeholder { padding: 40px 20px; }
             .magic-bar-wrapper { width: 95%; bottom: 20px; }
+            .gallery-tabs { padding: 0 20px 15px 20px; }
             .gallery-grid { padding: 20px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
             .input-box input { font-size: 14px; }
         }
@@ -302,12 +333,16 @@
             </button>
         </form>
     </div>
-
+    
     <div class="gallery-modal" id="galleryModal">
         <div class="gallery-header">
             <h2 style="margin:0;">✨ 灵感广场</h2>
             <button class="close-btn" id="closeGallery">✕</button>
         </div>
+        
+        <div class="gallery-tabs" id="galleryTabs">
+            </div>
+    
         <div class="gallery-grid" id="galleryGrid">
             </div>
     </div>
@@ -315,41 +350,6 @@
     <script>
         // --- 配置 ---
         const WORKER_ENDPOINT = '/api/repair'; 
-        
-        // --- 灵感广场数据 (可随时在此添加) ---
-        // 注意：由于是演示，imgUrl 使用了 Unsplash 的占位符，您可以换成您自己的案例图
-        const galleryData = [
-            {
-                title: "赛博朋克风格",
-                prompt: "将这张照片变成赛博朋克风格，霓虹灯光效，蓝紫色调，高对比度，未来感城市背景。",
-                imgUrl: "https://images.unsplash.com/photo-1535295972055-1c762f4483e5?w=500&q=80"
-            },
-            {
-                title: "吉卜力动漫风",
-                prompt: "把这张图变成吉卜力工作室的动漫风格，色彩清新明亮，蓝天白云，手绘质感。",
-                imgUrl: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=500&q=80"
-            },
-            {
-                title: "复古胶片感",
-                prompt: "添加柯达 Portra 400 胶片滤镜效果，温暖的色调，轻微的颗粒感，柔和的光影。",
-                imgUrl: "https://images.unsplash.com/photo-1495570689269-d88bbb700980?w=500&q=80"
-            },
-            {
-                title: "超写实素描",
-                prompt: "将图片转换为超写实的铅笔素描，保留所有细节，黑白对比强烈。",
-                imgUrl: "https://images.unsplash.com/photo-1517627043994-b991abb62fc8?w=500&q=80"
-            },
-            {
-                title: "一键换西装",
-                prompt: "保持人物面部不变，将人物的衣服换成一套剪裁得体的高级黑色西装。",
-                imgUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80"
-            },
-            {
-                title: "梦幻柔光修复",
-                prompt: "修复老照片，并添加梦幻的柔光效果，使皮肤看起来更光滑，光线更唯美。",
-                imgUrl: "https://images.unsplash.com/photo-1520315342629-6ea920342047?w=500&q=80"
-            }
-        ];
 
         // --- DOM 元素 ---
         const photoFile = document.getElementById('photoFile');
@@ -368,39 +368,73 @@
         const galleryGrid = document.getElementById('galleryGrid');
 
         // --- 状态 ---
-        let currentFile = null;
-
-        // --- 1. 初始化灵感广场 ---
-        async function renderGallery() {
-            // 显示加载状态（可选）
-            galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">加载灵感中...</p>';
+        let allGalleryItems = []; // 存储所有从 DB 获取的数据
+        let currentCategory = '全部';
+        
+        // --- 初始化灵感广场 ---
+        async function fetchAndRenderGallery() {
+            galleryGrid.innerHTML = '<p style="text-align:center; width:100%; margin-top:40px; color:#888;">正在加载灵感...</p>';
         
             try {
-                // 1. 从刚才创建的 D1 API 获取数据
-                // 注意：这里 fetch 的是相对路径，会自动请求 functions/api/gallery.js
-                const response = await fetch('/api/gallery'); 
-                const galleryData = await response.json();
-        
-                // 2. 渲染数据
-                if (galleryData && galleryData.length > 0) {
-                    galleryGrid.innerHTML = galleryData.map(item => `
-                        <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
-                            <img src="${item.img_url}" class="gallery-img" loading="lazy">
-                            <div class="gallery-content">
-                                <div class="gallery-title">${item.title}</div>
-                                <div class="gallery-prompt">${item.prompt}</div>
-                            </div>
-                        </div>
-                    `).join('');
+                const response = await fetch('/api/gallery');
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    allGalleryItems = data;
+                    renderTabs(); // 渲染分类标签
+                    renderGrid(); // 渲染网格内容
                 } else {
-                    galleryGrid.innerHTML = '<p>暂无灵感数据。</p>';
+                    galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">暂无数据。</p>';
                 }
             } catch (error) {
                 console.error('Failed to load gallery:', error);
-                galleryGrid.innerHTML = '<p>加载失败，请刷新重试。</p>';
+                galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">加载失败，请刷新重试。</p>';
             }
         }
-        renderGallery();
+        
+        // 渲染分类标签
+        function renderTabs() {
+            // 1. 提取所有唯一分类
+            const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
+            
+            const tabsContainer = document.getElementById('galleryTabs');
+            tabsContainer.innerHTML = categories.map(cat => `
+                <button class="tab-btn ${cat === currentCategory ? 'active' : ''}" 
+                        onclick="switchCategory('${cat}')">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+        
+        // 切换分类
+        window.switchCategory = function(category) {
+            currentCategory = category;
+            renderTabs(); // 更新标签高亮
+            renderGrid(); // 重新渲染网格
+        }
+        
+        // 渲染网格内容 (带筛选)
+        function renderGrid() {
+            let items = allGalleryItems;
+            
+            // 如果不是"全部"，则筛选
+            if (currentCategory !== '全部') {
+                items = allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
+            }
+        
+            galleryGrid.innerHTML = items.map(item => `
+                <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
+                    <img src="${item.img_url}" class="gallery-img" loading="lazy">
+                    <div class="gallery-content">
+                        <div class="gallery-title">${item.title}</div>
+                        <div class="gallery-prompt">${item.prompt}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 页面加载时调用
+        fetchAndRenderGallery();
 
         // 广场交互
         function applyPrompt(text) {
