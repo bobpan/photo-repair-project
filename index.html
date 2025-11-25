@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Nano Banana AI | 魔法影像工作室</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
@@ -10,14 +10,13 @@
         :root {
             --primary-color: #007aff;
             --bg-color: #f5f5f7;
-            --surface-color: rgba(255, 255, 255, 0.85);
             --text-main: #1d1d1f;
             --text-secondary: #86868b;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
-            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
             --radius-lg: 24px;
             --radius-md: 16px;
             --radius-full: 999px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
 
         body {
@@ -26,38 +25,37 @@
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            height: 100vh; /* 使用 vh 兼容性更好 */
-            height: 100dvh; /* 针对移动端动态地址栏优化 */
+            height: 100dvh; 
             display: flex;
             flex-direction: column;
             overflow: hidden; 
         }
 
-        /* --- 2. 顶部导航 --- */
+        /* --- 导航 --- */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 30px;
             z-index: 100;
+            background: rgba(245, 245, 247, 0.8);
+            backdrop-filter: blur(10px);
         }
         .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
         .gallery-btn {
-            background: rgba(0,0,0,0.05);
-            border: none;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
             padding: 8px 16px;
             border-radius: var(--radius-full);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: var(--shadow-sm);
         }
-        .gallery-btn:hover { background: rgba(0,0,0,0.1); }
 
-        /* --- 3. 中央舞台 (Stage) --- */
+        /* --- 舞台 --- */
         .stage {
             flex: 1;
             display: flex;
@@ -65,9 +63,8 @@
             align-items: center;
             position: relative;
             padding: 20px;
-            /* 底部留白，防止被输入栏遮挡 */
-            padding-bottom: 160px; 
-            overflow: hidden;
+            padding-bottom: 180px; 
+            width: 100%; box-sizing: border-box;
         }
 
         .upload-placeholder {
@@ -76,261 +73,177 @@
             padding: 40px;
             border-radius: var(--radius-lg);
             cursor: pointer;
-            transition: all 0.3s;
             background: white;
             max-width: 400px;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: 0.3s;
         }
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
-        .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); display: block;}
-        
-        /* 文生图提示文本 */
-        .t2i-hint {
-            margin-top: 20px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            background: #f0f0f5;
-            padding: 8px 16px;
-            border-radius: 8px;
-        }
+        .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
+        .t2i-hint { margin-top: 20px; font-size: 13px; color: var(--text-secondary); background: #f0f0f5; padding: 8px 16px; border-radius: 8px; }
 
         .image-container {
             position: relative;
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 100%; max-height: 100%;
             border-radius: var(--radius-md);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            display: none; 
-            /* 确保图片在舞台中心缩放 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: none; justify-content: center; align-items: center;
+            background: #fff;
         }
-        
-        /* 隐藏，JS控制显示 */
-        #imageContainer { display: none; }
+        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; }
 
-        .image-display {
-            display: block;
-            max-width: 100%;
-            max-height: 65vh; /* 留出空间 */
-            object-fit: contain;
-        }
+        /* --- 优雅的 Loading 广告界面 (核心修改) --- */
         .loading-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.6);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: var(--primary-color);
-            font-weight: 600;
-            z-index: 10;
-        }
-
-        /* --- 4. 底部魔法指令栏 (Magic Bar) --- */
-        .magic-bar-wrapper {
-            position: fixed;
-            bottom: 20px; /* 稍微抬高 */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 700px;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            /* 适配 iPhone X 底部横条 */
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .chips-container {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-            scrollbar-width: none; 
-            justify-content: center;
-        }
-        .chips-container::-webkit-scrollbar { display: none; }
-        
-        .chip {
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0,0,0,0.05);
-            padding: 8px 16px;
-            border-radius: var(--radius-full);
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-main);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: transform 0.2s, background 0.2s;
-            box-shadow: var(--shadow-sm);
-        }
-        .chip:hover { transform: translateY(-2px); background: white; }
-        .chip.active { background: var(--primary-color); color: white; border-color: transparent; }
-
-        .input-box {
-            background: rgba(255, 255, 255, 0.95); /* 提高不透明度 */
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-full);
-            padding: 8px;
-            display: flex;
+            display: none; /* JS 控制 flex */
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 50;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .loading-overlay.visible { opacity: 1; }
+
+        /* 生成状态指示 */
+        .loader-status {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #e5e5ea; border-top-color: var(--primary-color);
+            border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-text { font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .status-sub { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
+
+        /* 赞助商卡片 (Ad Card) */
+        .sponsor-container {
+            width: 85%; max-width: 340px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 20px;
+            text-align: left;
+            transform: translateY(20px); opacity: 0;
+            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .loading-overlay.visible .sponsor-container { transform: translateY(0); opacity: 1; }
+
+        .ad-badge {
+            background: #f0f0f5; color: var(--text-secondary);
+            font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px;
+            text-transform: uppercase; display: inline-block; margin-bottom: 10px;
+        }
+        
+        .ad-content { display: flex; gap: 15px; align-items: center; cursor: pointer; }
+        .ad-img { width: 60px; height: 60px; border-radius: 12px; background: #eee; object-fit: cover; }
+        .ad-info h4 { margin: 0; font-size: 15px; font-weight: 600; color: #1d1d1f; }
+        .ad-info p { margin: 4px 0 0 0; font-size: 13px; color: #666; line-height: 1.4; }
+        .ad-arrow { margin-left: auto; color: #ccc; }
+
+        /* 无限模式开关 */
+        .unlimited-toggle {
+            margin-top: 25px;
+            display: flex; align-items: center; justify-content: space-between;
+            width: 85%; max-width: 340px;
+            background: rgba(0, 122, 255, 0.05);
+            padding: 12px 16px; border-radius: 12px;
+        }
+        .toggle-label { font-size: 13px; font-weight: 500; color: var(--primary-color); }
+        
+        /* iOS Switch 样式 */
+        .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* --- 底部指令栏 --- */
+        .magic-bar-wrapper {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 700px; z-index: 200;
+            display: flex; flex-direction: column; gap: 12px;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: center; }
+        .chips-container::-webkit-scrollbar { display: none; }
+        .chip {
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: var(--radius-full);
+            font-size: 13px; font-weight: 500; color: var(--text-main); cursor: pointer;
+            white-space: nowrap; transition: 0.2s; box-shadow: var(--shadow-sm);
+        }
+        .chip:hover { transform: translateY(-2px); background: white; }
+        .chip.active { background: var(--primary-color); color: white; }
+
+        .input-box {
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
+            border-radius: var(--radius-full); padding: 8px; display: flex; align-items: center;
+            box-shadow: var(--shadow-lg); border: 1px solid rgba(255,255,255,0.5);
         }
         .input-box input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 12px 20px;
-            /* 修改 2: 移动端必须 16px 防止 iOS 自动缩放 */
-            font-size: 16px; 
-            color: var(--text-main);
-            outline: none;
+            flex: 1; border: none; background: transparent; padding: 12px 20px;
+            font-size: 16px; color: var(--text-main); outline: none; min-width: 0;
         }
         .input-box button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.2s;
-            flex-shrink: 0; /* 防止按钮被压缩 */
+            background: var(--primary-color); color: white; border: none; width: 44px; height: 44px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        .input-box button:hover { opacity: 0.9; }
-        .input-box button:disabled { background: #ccc; cursor: default; }
+        .input-box button:disabled { background: #ccc; }
 
-        /* --- 5. 灵感广场 (优化版) --- */
+        /* --- 灵感广场 --- */
         .gallery-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(245, 245, 247, 0.98);
-            z-index: 300;
-            transform: translateY(100%);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f5f5f7; z-index: 300; transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
         .gallery-modal.open { transform: translateY(0); }
-        .gallery-header {
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-        .close-btn {
-            background: #e5e5ea;
-            width: 36px; height: 36px; border-radius: 50%;
-            border: none; cursor: pointer; font-weight: bold;
-            font-size: 18px;
-            color: #666;
-        }
-        .gallery-tabs {
-            display: flex;
-            gap: 10px;
-            padding: 0 40px 20px 40px; 
-            overflow-x: auto;
-            scrollbar-width: none;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
+        .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
+        .close-btn { background: #e5e5ea; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 18px; color: #666; }
+        .gallery-tabs { display: flex; gap: 10px; padding: 15px 40px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
         .gallery-tabs::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            background: #f5f5f7;
-            color: var(--text-secondary);
-            border: none;
-            padding: 8px 16px;
-            border-radius: var(--radius-full);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .tab-btn:hover { background: #e5e5ea; color: var(--text-main); }
-        .tab-btn.active { background: var(--text-main); color: white; }
+        .tab-btn { background: #f5f5f7; padding: 8px 18px; border-radius: var(--radius-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: #1d1d1f; color: white; }
         
-        /* 修改 3: 优化 Grid 布局，解决看不清的问题 */
         .gallery-grid {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px 40px;
-            display: grid;
-            /* 最小宽度加大到 280px，保证卡片够大 */
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-            /* 增加底部留白，防止被手机底部条遮挡 */
-            padding-bottom: 100px; 
+            flex: 1; overflow-y: auto; padding: 30px 40px; display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px; max-width: 1400px; margin: 0 auto; width: 100%;
+            box-sizing: border-box; padding-bottom: 100px;
         }
-        .gallery-item {
-            background: white;
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
-        .gallery-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
-        .gallery-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #eee; }
-        .gallery-content { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .gallery-title { font-weight: 600; font-size: 16px; margin-bottom: 8px; color: var(--text-main); }
-        
-        /* 修改 4: 增加显示行数，防止截断 */
-        .gallery-prompt { 
-            font-size: 13px; 
-            color: var(--text-secondary); 
-            line-height: 1.5; 
-            display: -webkit-box; 
-            -webkit-line-clamp: 4; /* 显示 4 行 */
-            -webkit-box-orient: vertical; 
-            overflow: hidden; 
-        }
+        .gallery-item { background: white; border-radius: var(--radius-md); overflow: hidden; cursor: pointer; height: 100%; min-height: 320px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column;}
+        .gallery-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .gallery-content { padding: 18px; flex:1; display:flex; flex-direction:column; }
+        .gallery-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
+        .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
 
         #photoFile { display: none; }
-        
-        .cf-turnstile {
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-        }
+        .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; }
 
-        /* 移动端适配优化 */
         @media (max-width: 600px) {
             .navbar { padding: 15px 20px; }
+            .stage { padding: 15px; padding-bottom: 160px; }
             .upload-placeholder { padding: 30px 20px; }
-            .magic-bar-wrapper { width: 92%; bottom: 15px; }
-            
-            /* 移动端强制单列，保证看得清 */
+            .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
-            .gallery-tabs { padding: 0 20px 15px 20px; }
-            .gallery-header { padding: 20px; }
-            
-            /* 隐藏长提示，移动端简洁一点 */
-            .t2i-hint { display: none; }
+            .gallery-img { height: 220px; }
         }
     </style>
 </head>
@@ -338,9 +251,7 @@
 
     <nav class="navbar">
         <div class="logo">Nano Banana 🍌</div>
-        <button class="gallery-btn" id="galleryToggle">
-            <span>✨ 灵感广场</span>
-        </button>
+        <button class="gallery-btn" id="galleryToggle">✨ 灵感广场</button>
     </nav>
 
     <main class="stage">
@@ -354,21 +265,39 @@
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
+            
             <div id="loadingOverlay" class="loading-overlay">
-                <div style="font-size:30px; margin-bottom:10px;">✨</div>
-                <div id="loadingText">AI 正在施法中...</div>
+                <div class="loader-status">
+                    <div class="spinner"></div>
+                    <div class="status-text">正在施展魔法...</div>
+                    <div class="status-sub">AI 正在绘制每一个像素</div>
+                </div>
+
+                <div class="sponsor-container" id="adCard" style="display:none;">
+                    <div class="ad-badge">✨ 赞助商精选</div>
+                    <div class="ad-content" onclick="window.open('https://www.printful.com/', '_blank')">
+                        <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&q=80" class="ad-img" alt="Ad">
+                        <div class="ad-info">
+                            <h4>把回忆装进相框</h4>
+                            <p>实木相框定制，限时 8 折特惠</p>
+                        </div>
+                        <div class="ad-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="unlimited-toggle">
+                    <div class="toggle-label">开启无限生成模式 (含广告)</div>
+                    <label class="switch">
+                        <input type="checkbox" id="adToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </main>
 
     <div class="magic-bar-wrapper">
-        
-        <div id="turnstileWidget" class="cf-turnstile" 
-             data-sitekey="0x4AAAAAACC22XM_s96N5NEw" 
-             data-theme="light"
-             data-callback="onTurnstileSuccess">
-        </div>
-
+        <div id="turnstileWidget" class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light" data-callback="onTurnstileSuccess"></div>
         <div class="chips-container" id="chipsContainer">
             <div class="chip" data-prompt="修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。">🪄 一键修复</div>
             <div class="chip" data-prompt="专注于人脸细节，进行高精度修复和去模糊处理，同时保留照片的历史质感。">👤 面部增强</div>
@@ -376,12 +305,9 @@
             <div class="chip" data-prompt="把背景换成下雪的巴黎街道，保持人物不变。">❄️ 换成雪景</div>
             <div class="chip" data-prompt="一只在太空喝咖啡的猫，写实风格，高分辨率。">🐱 生成图片(示例)</div>
         </div>
-
         <form id="commandForm" class="input-box">
-            <input type="text" id="promptInput" placeholder="描述你想怎么改，或者想生成什么..." autocomplete="off">
-            <button type="submit" id="submitBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
+            <input type="text" id="promptInput" placeholder="描述你想怎么改，或者想生成什么..." autocomplete="off" inputmode="search">
+            <button type="submit" id="submitBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
         </form>
     </div>
 
@@ -395,16 +321,33 @@
     </div>
 
     <script>
-        // --- 核心配置 ---
         const WORKER_ENDPOINT = '/api/repair'; 
+        const REWARD_ENDPOINT = '/api/reward'; // 奖励接口
+
+        // --- 状态与缓存 ---
+        const adToggle = document.getElementById('adToggle');
+        const adCard = document.getElementById('adCard');
         
-        // --- Turnstile 回调 ---
+        // 记住用户的选择
+        if (localStorage.getItem('isUnlimitedMode') === 'true') {
+            adToggle.checked = true;
+            adCard.style.display = 'block';
+        }
+
+        // 监听开关切换
+        adToggle.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            localStorage.setItem('isUnlimitedMode', isChecked);
+            adCard.style.display = isChecked ? 'block' : 'none';
+        });
+
+        // --- Turnstile ---
         window.onTurnstileSuccess = function(token) {
             const widget = document.getElementById('turnstileWidget');
             if (widget) widget.style.display = 'none';
         }
 
-        // --- DOM 元素 ---
+        // --- DOM ---
         const photoFile = document.getElementById('photoFile');
         const uploadArea = document.getElementById('uploadArea');
         const imageContainer = document.getElementById('imageContainer');
@@ -420,48 +363,26 @@
         const galleryGrid = document.getElementById('galleryGrid');
         const galleryTabs = document.getElementById('galleryTabs');
 
-        // --- 状态 ---
-        let currentFile = null;
+        // --- 灵感广场 ---
         let allGalleryItems = [];
         let currentCategory = '全部';
-
-        // --- 灵感广场逻辑 (D1) ---
         async function fetchAndRenderGallery() {
-            galleryGrid.innerHTML = '<p style="text-align:center; width:100%; margin-top:40px; color:#888;">正在加载灵感...</p>';
+            galleryGrid.innerHTML = '<p style="text-align:center;color:#888;">正在加载灵感...</p>';
             try {
                 const response = await fetch('/api/gallery');
                 const data = await response.json();
                 if (data && data.length > 0) {
-                    allGalleryItems = data;
-                    renderTabs();
-                    renderGrid();
-                } else {
-                    galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">暂无数据。</p>';
-                }
-            } catch (error) {
-                console.error('Failed to load gallery:', error);
-                galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">加载失败，请刷新重试。</p>';
-            }
+                    allGalleryItems = data; renderTabs(); renderGrid();
+                } else { galleryGrid.innerHTML = '<p style="text-align:center;">暂无数据。</p>'; }
+            } catch (error) { galleryGrid.innerHTML = '<p style="text-align:center;">加载失败。</p>'; }
         }
-
         function renderTabs() {
             const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
-            galleryTabs.innerHTML = categories.map(cat => `
-                <button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>
-            `).join('');
+            galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
         }
-
-        window.switchCategory = function(category) {
-            currentCategory = category;
-            renderTabs();
-            renderGrid();
-        }
-
+        window.switchCategory = function(category) { currentCategory = category; renderTabs(); renderGrid(); }
         function renderGrid() {
-            let items = allGalleryItems;
-            if (currentCategory !== '全部') {
-                items = allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
-            }
+            let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
             galleryGrid.innerHTML = items.map(item => `
                 <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
                     <img src="${item.img_url}" class="gallery-img" loading="lazy">
@@ -469,112 +390,118 @@
                         <div class="gallery-title">${item.title}</div>
                         <div class="gallery-prompt">${item.prompt}</div>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
-        
-        window.applyPrompt = function(text) {
-            promptInput.value = text;
-            galleryModal.classList.remove('open');
-            promptInput.focus();
-        }
-
+        window.applyPrompt = function(text) { promptInput.value = text; galleryModal.classList.remove('open'); promptInput.focus(); }
         galleryToggle.addEventListener('click', () => galleryModal.classList.add('open'));
         closeGallery.addEventListener('click', () => galleryModal.classList.remove('open'));
         fetchAndRenderGallery();
 
-        // --- 预设胶囊逻辑 ---
         chipsContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('chip')) {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 e.target.classList.add('active');
-                promptInput.value = e.target.getAttribute('data-prompt');
-                promptInput.focus();
+                promptInput.value = e.target.getAttribute('data-prompt'); promptInput.focus();
             }
         });
 
-        // --- 图片上传逻辑 ---
+        // --- 上传逻辑 ---
+        let currentFile = null;
         photoFile.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 10 * 1024 * 1024) {
-                alert('图片太大，请上传 10MB 以内的图片');
-                return;
-            }
+            if (file.size > 10 * 1024 * 1024) { alert('图片太大 (Max 10MB)'); return; }
             currentFile = file;
             const reader = new FileReader();
             reader.onload = function(e) {
                 displayImage.src = e.target.result;
-                uploadArea.style.display = 'none';
-                // 使用 flex 以保持居中
-                imageContainer.style.display = 'flex';
+                uploadArea.style.display = 'none'; imageContainer.style.display = 'flex';
             }
             reader.readAsDataURL(file);
         });
 
-        // --- 提交生成逻辑 (核心修改：允许无图提交) ---
+        // --- 核心提交逻辑 (含无限模式) ---
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const prompt = promptInput.value.trim();
-            
-            // 修改 5: 校验逻辑更新，允许 [有图+无Prompt] (如一键修复) 或 [无图+有Prompt] (文生图)
-            if (!currentFile && !prompt) {
-                alert('请上传一张图片，或者输入一段描述来生成新图片。');
-                return;
-            }
+            if (!currentFile && !prompt) { alert('请上传图片或输入描述。'); return; }
 
-            const formData = new FormData();
             const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
             const turnstileToken = turnstileInput ? turnstileInput.value : null;
+            if (!turnstileToken) { alert('人机验证中，请稍候...'); return; }
 
-            if (!turnstileToken) {
-                alert('人机验证中，请稍候再试...');
-                return;
-            }
-
-            // UI Loading
+            // 1. 显示 Loading 界面
             loadingOverlay.style.display = 'flex';
+            // 强制重绘触发过渡动画
+            requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
 
-            // 只有当有文件时才 append
-            if (currentFile) {
-                formData.append('photo', currentFile);
-            }
+            // 2. 检查是否开启无限模式
+            const isUnlimited = adToggle.checked;
+            
+            // 准备请求 Promise
+            const formData = new FormData();
+            if (currentFile) formData.append('photo', currentFile);
             formData.append('prompt', prompt);
             formData.append('turnstileToken', turnstileToken);
 
-            try {
-                const response = await fetch(WORKER_ENDPOINT, {
-                    method: 'POST',
-                    body: formData,
-                });
+            const generatePromise = fetch(WORKER_ENDPOINT, { method: 'POST', body: formData });
+            
+            // 3. 构建任务列表
+            const tasks = [generatePromise];
 
+            // 如果开启无限模式，我们需要“假装”观看广告至少 3 秒，并静默调用奖励接口
+            if (isUnlimited) {
+                // 任务 A: 至少等待 3 秒 (让用户看一眼广告)
+                const adTimerPromise = new Promise(resolve => setTimeout(resolve, 3000));
+                tasks.push(adTimerPromise);
+
+                // 任务 B: 后台调用奖励接口 (补充额度)
+                const rewardForm = new FormData();
+                rewardForm.append('turnstileToken', turnstileToken);
+                // 不阻塞主流程，静默发送
+                fetch(REWARD_ENDPOINT, { method: 'POST', body: rewardForm }).catch(console.error);
+            }
+
+            try {
+                // 等待所有必要任务完成 (生成 + 广告时间)
+                const [response] = await Promise.all(tasks);
                 const result = await response.json();
+
+                if (response.status === 429) {
+                    if (!isUnlimited) {
+                        alert('今日免费额度已用完。请勾选“开启无限生成模式”以继续使用！');
+                        // 自动打开开关引导用户
+                        adToggle.checked = true; 
+                        adCard.style.display = 'block';
+                    } else {
+                        // 理论上无限模式不应该429，除非并发太高，重试一下
+                        alert('生成繁忙，请重试');
+                    }
+                    return;
+                }
 
                 if (response.ok && result.status === 'success') {
                     displayImage.src = result.image;
-                    uploadArea.style.display = 'none';
-                    imageContainer.style.display = 'flex'; // 确保显示
-                    
+                    uploadArea.style.display = 'none'; imageContainer.style.display = 'flex';
                     const res = await fetch(result.image);
                     const blob = await res.blob();
                     currentFile = new File([blob], "edited_image.png", { type: "image/png" });
-                    promptInput.value = ''; 
+                    promptInput.value = '';
                 } else {
                     alert(`生成失败: ${result.message || '未知错误'}`);
                 }
             } catch (error) {
                 console.error(error);
-                alert('网络请求失败，请检查网络。');
+                alert('网络请求失败');
             } finally {
-                loadingOverlay.style.display = 'none';
+                loadingOverlay.classList.remove('visible');
+                setTimeout(() => loadingOverlay.style.display = 'none', 300);
                 submitBtn.disabled = false;
-                
                 if (window.turnstile) {
                     window.turnstile.reset();
                     const widget = document.getElementById('turnstileWidget');
-                    if (widget) widget.style.display = 'flex'; // 重新显示验证码
+                    if (widget) widget.style.display = 'flex';
                 }
             }
         });
