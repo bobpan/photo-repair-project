@@ -29,7 +29,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* 防止页面整体滚动，只允许特定区域滚动 */
+            overflow: hidden; 
         }
 
         /* --- 2. 顶部导航 --- */
@@ -64,10 +64,9 @@
             align-items: center;
             position: relative;
             padding: 20px;
-            padding-bottom: 120px; /* 为底部栏留出空间 */
+            padding-bottom: 140px; /* 增加底部留白给指令栏和验证码 */
         }
 
-        /* 上传区域状态 */
         .upload-placeholder {
             text-align: center;
             border: 2px dashed #d1d1d6;
@@ -82,7 +81,6 @@
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); display: block;}
         
-        /* 图片展示状态 */
         .image-container {
             position: relative;
             max-width: 90%;
@@ -90,7 +88,7 @@
             border-radius: var(--radius-md);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            display: none; /* 初始隐藏 */
+            display: none; 
         }
         .image-display {
             display: block;
@@ -125,13 +123,12 @@
             gap: 12px;
         }
 
-        /* 预设胶囊 (Chips) */
         .chips-container {
             display: flex;
             gap: 10px;
             overflow-x: auto;
             padding-bottom: 5px;
-            scrollbar-width: none; /* 隐藏滚动条 */
+            scrollbar-width: none; 
             justify-content: center;
         }
         .chips-container::-webkit-scrollbar { display: none; }
@@ -153,7 +150,6 @@
         .chip:hover { transform: translateY(-2px); background: white; }
         .chip.active { background: var(--primary-color); color: white; border-color: transparent; }
 
-        /* 输入框区域 */
         .input-box {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
@@ -190,7 +186,7 @@
         .input-box button:hover { opacity: 0.9; }
         .input-box button:disabled { background: #ccc; cursor: default; }
 
-        /* --- 5. 灵感广场 (Prompt Gallery) --- */
+        /* --- 5. 灵感广场 --- */
         .gallery-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -202,7 +198,6 @@
             flex-direction: column;
         }
         .gallery-modal.open { transform: translateY(0); }
-        
         .gallery-header {
             padding: 20px 40px;
             display: flex;
@@ -215,17 +210,15 @@
             width: 36px; height: 36px; border-radius: 50%;
             border: none; cursor: pointer; font-weight: bold;
         }
-
         .gallery-tabs {
             display: flex;
             gap: 10px;
-            padding: 0 40px 20px 40px; /* 放在 header 下方 */
+            padding: 0 40px 20px 40px; 
             overflow-x: auto;
             scrollbar-width: none;
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
         .gallery-tabs::-webkit-scrollbar { display: none; }
-        
         .tab-btn {
             background: #f5f5f7;
             color: var(--text-secondary);
@@ -238,14 +231,8 @@
             white-space: nowrap;
             transition: all 0.2s;
         }
-        
         .tab-btn:hover { background: #e5e5ea; color: var(--text-main); }
-        
-        .tab-btn.active {
-            background: var(--text-main); /* 黑色背景 */
-            color: white; /* 白色文字 */
-        }
-        
+        .tab-btn.active { background: var(--text-main); color: white; }
         .gallery-grid {
             flex: 1;
             overflow-y: auto;
@@ -258,7 +245,6 @@
             width: 100%;
             box-sizing: border-box;
         }
-
         .gallery-item {
             background: white;
             border-radius: var(--radius-md);
@@ -268,27 +254,27 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
         .gallery-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
-        .gallery-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background: #eee;
-        }
+        .gallery-img { width: 100%; height: 180px; object-fit: cover; background: #eee; }
         .gallery-content { padding: 15px; }
         .gallery-title { font-weight: 600; font-size: 15px; margin-bottom: 5px; }
         .gallery-prompt { font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* 隐藏文件上传 input */
         #photoFile { display: none; }
         
-        /* 移动端适配 */
+        /* Turnstile 样式 */
+        .cf-turnstile {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
         @media (max-width: 600px) {
             .navbar { padding: 15px 20px; }
             .upload-placeholder { padding: 40px 20px; }
             .magic-bar-wrapper { width: 95%; bottom: 20px; }
-            .gallery-tabs { padding: 0 20px 15px 20px; }
             .gallery-grid { padding: 20px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
             .input-box input { font-size: 14px; }
+            .gallery-tabs { padding: 0 20px 15px 20px; }
         }
     </style>
 </head>
@@ -319,6 +305,9 @@
     </main>
 
     <div class="magic-bar-wrapper">
+        
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light"></div>
+
         <div class="chips-container" id="chipsContainer">
             <div class="chip" data-prompt="修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。">🪄 一键修复</div>
             <div class="chip" data-prompt="专注于人脸细节，进行高精度修复和去模糊处理，同时保留照片的历史质感。">👤 面部增强</div>
@@ -326,9 +315,7 @@
             <div class="chip" data-prompt="把背景换成下雪的巴黎街道，保持人物不变。">❄️ 换成雪景</div>
             <div class="chip" data-prompt="将图片转换为黑白素描风格，线条清晰。">✏️ 黑白素描</div>
         </div>
-        
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light" style="margin: 0 auto 10px auto;"></div>
-        
+
         <form id="commandForm" class="input-box">
             <input type="text" id="promptInput" placeholder="描述你想怎么改... (例如：把衣服换成红色的)" autocomplete="off">
             <button type="submit" id="submitBtn">
@@ -336,24 +323,19 @@
             </button>
         </form>
     </div>
-    
+
     <div class="gallery-modal" id="galleryModal">
         <div class="gallery-header">
             <h2 style="margin:0;">✨ 灵感广场</h2>
             <button class="close-btn" id="closeGallery">✕</button>
         </div>
-        
-        <div class="gallery-tabs" id="galleryTabs">
-            </div>
-    
-        <div class="gallery-grid" id="galleryGrid">
-            </div>
+        <div class="gallery-tabs" id="galleryTabs"></div>
+        <div class="gallery-grid" id="galleryGrid"></div>
     </div>
 
     <script>
-        // --- 配置 ---
         const WORKER_ENDPOINT = '/api/repair'; 
-
+        
         // --- DOM 元素 ---
         const photoFile = document.getElementById('photoFile');
         const uploadArea = document.getElementById('uploadArea');
@@ -364,28 +346,27 @@
         const submitBtn = document.getElementById('submitBtn');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const chipsContainer = document.getElementById('chipsContainer');
-        
         const galleryToggle = document.getElementById('galleryToggle');
         const galleryModal = document.getElementById('galleryModal');
         const closeGallery = document.getElementById('closeGallery');
         const galleryGrid = document.getElementById('galleryGrid');
+        const galleryTabs = document.getElementById('galleryTabs');
 
         // --- 状态 ---
-        let allGalleryItems = []; // 存储所有从 DB 获取的数据
+        let currentFile = null;
+        let allGalleryItems = [];
         let currentCategory = '全部';
-        
-        // --- 初始化灵感广场 ---
+
+        // --- 灵感广场逻辑 (D1) ---
         async function fetchAndRenderGallery() {
             galleryGrid.innerHTML = '<p style="text-align:center; width:100%; margin-top:40px; color:#888;">正在加载灵感...</p>';
-        
             try {
                 const response = await fetch('/api/gallery');
                 const data = await response.json();
-                
                 if (data && data.length > 0) {
                     allGalleryItems = data;
-                    renderTabs(); // 渲染分类标签
-                    renderGrid(); // 渲染网格内容
+                    renderTabs();
+                    renderGrid();
                 } else {
                     galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">暂无数据。</p>';
                 }
@@ -394,37 +375,25 @@
                 galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">加载失败，请刷新重试。</p>';
             }
         }
-        
-        // 渲染分类标签
+
         function renderTabs() {
-            // 1. 提取所有唯一分类
             const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
-            
-            const tabsContainer = document.getElementById('galleryTabs');
-            tabsContainer.innerHTML = categories.map(cat => `
-                <button class="tab-btn ${cat === currentCategory ? 'active' : ''}" 
-                        onclick="switchCategory('${cat}')">
-                    ${cat}
-                </button>
+            galleryTabs.innerHTML = categories.map(cat => `
+                <button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>
             `).join('');
         }
-        
-        // 切换分类
+
         window.switchCategory = function(category) {
             currentCategory = category;
-            renderTabs(); // 更新标签高亮
-            renderGrid(); // 重新渲染网格
+            renderTabs();
+            renderGrid();
         }
-        
-        // 渲染网格内容 (带筛选)
+
         function renderGrid() {
             let items = allGalleryItems;
-            
-            // 如果不是"全部"，则筛选
             if (currentCategory !== '全部') {
                 items = allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
             }
-        
             galleryGrid.innerHTML = items.map(item => `
                 <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
                     <img src="${item.img_url}" class="gallery-img" loading="lazy">
@@ -436,44 +405,34 @@
             `).join('');
         }
         
-        // 页面加载时调用
-        fetchAndRenderGallery();
-
-        // 广场交互
-        function applyPrompt(text) {
+        window.applyPrompt = function(text) {
             promptInput.value = text;
             galleryModal.classList.remove('open');
-            promptInput.focus(); // 聚焦输入框，方便用户直接修改
-            // 如果用户已经上传了图片，可以直接高亮“发送”按钮提示用户
+            promptInput.focus();
         }
 
         galleryToggle.addEventListener('click', () => galleryModal.classList.add('open'));
         closeGallery.addEventListener('click', () => galleryModal.classList.remove('open'));
+        fetchAndRenderGallery();
 
-        // --- 2. 预设胶囊交互 ---
+        // --- 预设胶囊逻辑 ---
         chipsContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('chip')) {
-                // 移除其他激活状态
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 e.target.classList.add('active');
-                
-                // 填入输入框
                 promptInput.value = e.target.getAttribute('data-prompt');
                 promptInput.focus();
             }
         });
 
-        // --- 3. 图片上传逻辑 ---
+        // --- 图片上传逻辑 ---
         photoFile.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
-            // 简单校验
             if (file.size > 10 * 1024 * 1024) {
                 alert('图片太大，请上传 10MB 以内的图片');
                 return;
             }
-
             currentFile = file;
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -484,29 +443,43 @@
             reader.readAsDataURL(file);
         });
 
-        // --- 4. 提交生成逻辑 ---
+        // --- 提交生成逻辑 (核心修改) ---
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (!currentFile) {
+                alert('请先上传一张图片！');
+                return;
+            }
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('请输入描述或选择一个预设指令。');
+                return;
+            }
+
+            // 3. 获取 Turnstile Token (前端修正的关键)
+            // 当 Widget Mode 为 Managed 时，会自动生成一个 hidden input，name 为 cf-turnstile-response
+            const formData = new FormData();
+            
+            // 尝试从 DOM 获取 token
+            const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+            const turnstileToken = turnstileInput ? turnstileInput.value : null;
+
+            if (!turnstileToken) {
+                alert('人机验证中，请稍候再试...');
+                return;
+            }
 
             // UI Loading
             loadingOverlay.style.display = 'flex';
             submitBtn.disabled = true;
 
-            const formData = new FormData();
-
-            // 获取 Turnstile Token
-            // turnstile-response 是组件自动生成的 input name
-            const turnstileToken = formData.get('cf-turnstile-response') || document.querySelector('[name="cf-turnstile-response"]')?.value;
-            
-            // 如果是 Managed 模式，可能有时候 token 还没生成，最好校验一下
-            if (!turnstileToken) {
-                alert('请完成人机验证 (如果未显示，请稍等)');
-                return;
-            }
-            
             formData.append('photo', currentFile);
             formData.append('prompt', prompt);
-            
+            // 发送 Token 给后端
+            formData.append('turnstileToken', turnstileToken);
+
             try {
                 const response = await fetch(WORKER_ENDPOINT, {
                     method: 'POST',
@@ -516,16 +489,11 @@
                 const result = await response.json();
 
                 if (response.ok && result.status === 'success') {
-                    // 更新显示的图片为新生成的图片
                     displayImage.src = result.image;
-                    
-                    // 这里有一个 trick: 我们需要把 Base64 转回 File 对象，
-                    // 这样用户可以基于新生成的图继续修改（无限套娃编辑）
                     const res = await fetch(result.image);
                     const blob = await res.blob();
                     currentFile = new File([blob], "edited_image.png", { type: "image/png" });
-                    
-                    promptInput.value = ''; // 清空输入框
+                    promptInput.value = ''; 
                 } else {
                     alert(`生成失败: ${result.message || '未知错误'}`);
                 }
@@ -535,10 +503,11 @@
             } finally {
                 loadingOverlay.style.display = 'none';
                 submitBtn.disabled = false;
-            }
-            // 注意：请求完成后，无论成功失败，最好重置一下验证码，防止 token 过期
-            if (window.turnstile) {
-                window.turnstile.reset();
+                
+                // 重置验证码，防止 token 重复使用导致无效
+                if (window.turnstile) {
+                    window.turnstile.reset();
+                }
             }
         });
     </script>
