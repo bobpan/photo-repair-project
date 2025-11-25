@@ -371,16 +371,34 @@
         let currentFile = null;
 
         // --- 1. 初始化灵感广场 ---
-        function renderGallery() {
-            galleryGrid.innerHTML = galleryData.map(item => `
-                <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
-                    <img src="${item.imgUrl}" class="gallery-img" loading="lazy">
-                    <div class="gallery-content">
-                        <div class="gallery-title">${item.title}</div>
-                        <div class="gallery-prompt">${item.prompt}</div>
-                    </div>
-                </div>
-            `).join('');
+        async function renderGallery() {
+            // 显示加载状态（可选）
+            galleryGrid.innerHTML = '<p style="text-align:center; width:100%;">加载灵感中...</p>';
+        
+            try {
+                // 1. 从刚才创建的 D1 API 获取数据
+                // 注意：这里 fetch 的是相对路径，会自动请求 functions/api/gallery.js
+                const response = await fetch('/api/gallery'); 
+                const galleryData = await response.json();
+        
+                // 2. 渲染数据
+                if (galleryData && galleryData.length > 0) {
+                    galleryGrid.innerHTML = galleryData.map(item => `
+                        <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
+                            <img src="${item.img_url}" class="gallery-img" loading="lazy">
+                            <div class="gallery-content">
+                                <div class="gallery-title">${item.title}</div>
+                                <div class="gallery-prompt">${item.prompt}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    galleryGrid.innerHTML = '<p>暂无灵感数据。</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load gallery:', error);
+                galleryGrid.innerHTML = '<p>加载失败，请刷新重试。</p>';
+            }
         }
         renderGallery();
 
