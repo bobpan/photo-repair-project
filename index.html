@@ -8,41 +8,35 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
 
     <style>
-        /* --- 全局与基础 --- */
+        /* --- 样式部分保持不变 --- */
         :root { --primary-color: #007aff; --bg-color: #f5f5f7; --text-main: #1d1d1f; --text-secondary: #86868b; --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px; --shadow-sm: 0 2px 8px rgba(0,0,0,0.04); --shadow-lg: 0 12px 30px rgba(0,0,0,0.12); }
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* --- 导航 --- */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); }
         .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
         .gallery-btn { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); }
-
-        /* --- 舞台 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
         .upload-placeholder { text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg); cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .t2i-hint { margin-top: 20px; font-size: 13px; color: var(--text-secondary); background: #f0f0f5; padding: 8px 16px; border-radius: 8px; }
-        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; }
+        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; }
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; }
-
-        /* --- 操作栏 --- */
+        .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; transition: all 0.2s; opacity: 0; pointer-events: none; }
+        .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
+        .clear-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
         .action-bar { position: absolute; bottom: 20px; right: 20px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); padding: 8px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.3); z-index: 20; animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popUp { from { transform: translateY(20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s; }
         .action-btn:hover { background: rgba(0,0,0,0.05); }
         .action-btn svg { width: 22px; height: 22px; stroke-width: 2; }
-
-        /* --- Loading & 广告 --- */
-        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 50; opacity: 0; transition: opacity 0.3s; }
+        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); display: none; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 50; opacity: 0; transition: opacity 0.3s; overflow-y: auto; padding: 40px 20px; box-sizing: border-box; }
         .loading-overlay.visible { opacity: 1; }
-        .loading-header-compact { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background: #fff; padding: 10px 20px; border-radius: 99px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+        .loading-header-compact { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-shrink: 0; background: #fff; padding: 10px 20px; border-radius: 99px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
         .pulse-icon { font-size: 24px; animation: bounce 1.5s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
         .status-text-compact { font-size: 14px; font-weight: 600; color: var(--text-main); width: 140px; white-space: nowrap; }
-        .ad-container-box { width: 100%; max-width: 360px; min-height: 280px; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px; }
-        
-        .unlimited-toggle { display: flex; align-items: center; justify-content: space-between; width: 85%; max-width: 300px; background: rgba(0, 122, 255, 0.06); padding: 12px 16px; border-radius: 16px; transition: all 0.3s; }
+        .ad-container-box { width: 100%; max-width: 360px; min-height: 280px; flex-shrink: 0; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px; }
+        .unlimited-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px; flex-shrink: 0; background: rgba(0, 122, 255, 0.06); padding: 12px 16px; border-radius: 16px; transition: all 0.3s; }
         .toggle-label { font-size: 13px; font-weight: 600; color: var(--primary-color); }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -50,8 +44,6 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(18px); }
-
-        /* --- 底部指令栏 --- */
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
         .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: center; }
         .chips-container::-webkit-scrollbar { display: none; }
@@ -62,8 +54,6 @@
         .input-box input { flex: 1; border: none; background: transparent; padding: 12px 20px; font-size: 16px; color: var(--text-main); outline: none; min-width: 0; }
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
-
-        /* --- 灵感广场 --- */
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -78,10 +68,8 @@
         .gallery-content { padding: 18px; flex:1; display:flex; flex-direction:column; }
         .gallery-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
-
         #photoFile { display: none; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; }
-
         @media (max-width: 600px) {
             .navbar { padding: 15px 20px; }
             .stage { padding: 15px; padding-bottom: 160px; }
@@ -90,13 +78,14 @@
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .gallery-img { height: 220px; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
+            .loading-overlay { justify-content: flex-start; padding: 20px; }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="logo">Nano Banana 🍌</div>
+        <div class="logo">Nano Banana PRO 🍌</div>
         <button class="gallery-btn" id="galleryToggle">✨ 灵感广场</button>
     </nav>
 
@@ -112,6 +101,8 @@
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
             
+            <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="清除/换图">✕</button>
+
             <div id="actionBar" class="action-bar">
                 <button class="action-btn" onclick="downloadImage()" title="保存图片">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -138,7 +129,7 @@
                 </div>
 
                 <div class="unlimited-toggle">
-                    <div class="toggle-label">⚡️ 开启无限生成 (自动补充)</div>
+                    <div class="toggle-label">⚡️ 开启无限生成 (含广告)</div>
                     <label class="switch">
                         <input type="checkbox" id="adToggle">
                         <span class="slider"></span>
@@ -209,6 +200,7 @@
         const imageContainer = document.getElementById('imageContainer');
         const displayImage = document.getElementById('displayImage');
         const actionBar = document.getElementById('actionBar');
+        const clearBtn = document.getElementById('clearBtn');
         const promptInput = document.getElementById('promptInput');
         const commandForm = document.getElementById('commandForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -265,11 +257,24 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 displayImage.src = e.target.result;
-                uploadArea.style.display = 'none'; imageContainer.style.display = 'flex';
+                uploadArea.style.display = 'none'; 
+                imageContainer.style.display = 'flex';
+                imageContainer.classList.add('loaded');
                 actionBar.style.display = 'none'; 
             }
             reader.readAsDataURL(file);
         });
+
+        window.resetCanvas = function() {
+            currentFile = null;
+            photoFile.value = '';
+            displayImage.src = '';
+            imageContainer.style.display = 'none';
+            imageContainer.classList.remove('loaded');
+            uploadArea.style.display = 'flex'; 
+            actionBar.style.display = 'none';
+            promptInput.value = '';
+        }
 
         function downloadImage() {
             if (!currentFile) return;
@@ -287,39 +292,37 @@
             }
         }
 
-        // --- 核心提交逻辑 (修复版) ---
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const prompt = promptInput.value.trim();
             if (!currentFile && !prompt) { alert('请上传图片或输入描述。'); return; }
 
+            let turnstileToken = null;
             const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
-            let turnstileToken = turnstileInput ? turnstileInput.value : null;
+            if (turnstileInput) turnstileToken = turnstileInput.value;
             if (!turnstileToken) { alert('人机验证中...'); return; }
 
-            // 1. UI 显示 Loading
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
             actionBar.style.display = 'none';
+            clearBtn.style.opacity = '0';
             startStatusLoop();
 
             const isUnlimited = adToggle.checked;
-            
             const formData = new FormData();
             if (currentFile) formData.append('photo', currentFile);
             formData.append('prompt', prompt);
             formData.append('turnstileToken', turnstileToken);
-
-            // ⚠️ 关键修改：不再并发调用 reward 接口
-            // 我们只调用生成接口。
-            // 如果勾选了无限模式，我们在前端做一个延时 (展示广告)，
-            // 但不消耗 Token 去做后端验证，避免 403。
             
+            // 💡 核心逻辑：勾选无限模式时，向后端发送 isUnlimited=true
+            if (isUnlimited) {
+                formData.append('isUnlimited', 'true');
+            }
+
             const tasks = [ fetch(WORKER_ENDPOINT, { method: 'POST', body: formData }) ];
 
             if (isUnlimited) {
-                // 强制等待 3 秒展示广告
                 tasks.push(new Promise(resolve => setTimeout(resolve, 3000)));
             }
 
@@ -327,20 +330,16 @@
                 const [response] = await Promise.all(tasks);
                 const result = await response.json();
 
-                // 🛑 处理 429: 只有真正耗尽时才触发
                 if (response.status === 429) {
-                    // 提示用户开启无限模式来“解救”
-                    if (!isUnlimited) {
-                        if (confirm("今日免费额度已用完！\n\n开启【无限模式】(含广告) 可继续使用，是否开启？")) {
-                            adToggle.checked = true;
-                            adBox.style.display = 'flex';
+                    if(!isUnlimited) {
+                        if(confirm("今日免费额度已用完！\n\n开启【无限模式】(含广告) 可继续使用，是否开启？")) {
+                            adToggle.checked = true; 
+                            adBox.style.display = 'flex'; 
                             localStorage.setItem('isUnlimitedMode', true);
                             alert("无限模式已开启。请重新验证并生成。");
                         }
                     } else {
-                        // 如果已经是无限模式还报 429，说明后端计数器没重置
-                        // 此时需要引导用户手动触发一次“解锁”流程
-                        alert("系统繁忙，请稍后再试，或刷新页面重置连接。");
+                        alert("请求过于频繁，请稍后再试。");
                     }
                     return;
                 }
@@ -353,6 +352,7 @@
                     currentFile = new File([blob], "edited_image.png", { type: "image/png" });
                     promptInput.value = '';
                     actionBar.style.display = 'flex';
+                    imageContainer.classList.add('loaded');
                 } else {
                     alert(`生成失败: ${result.message || '未知错误'}`);
                 }
@@ -362,8 +362,7 @@
                 loadingOverlay.classList.remove('visible');
                 setTimeout(() => loadingOverlay.style.display = 'none', 300);
                 submitBtn.disabled = false; stopStatusLoop();
-                
-                // ⚠️ 重置 Turnstile 确保下一次请求有效
+                clearBtn.style.opacity = '';
                 if (window.turnstile) {
                     window.turnstile.reset();
                     const widget = document.getElementById('turnstileWidget');
