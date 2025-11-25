@@ -306,7 +306,7 @@
 
     <div class="magic-bar-wrapper">
         
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAACC22XM_s96N5NEw" data-theme="light" data-callback="onTurnstileSuccess"></div>
 
         <div class="chips-container" id="chipsContainer">
             <div class="chip" data-prompt="修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。">🪄 一键修复</div>
@@ -443,6 +443,16 @@
             reader.readAsDataURL(file);
         });
 
+        // --- Turnstile 回调逻辑 ---
+        // 当验证成功时，Cloudflare 会自动调用这个函数
+        window.onTurnstileSuccess = function(token) {
+            // 验证通过，隐藏组件，保持界面整洁
+            const widget = document.getElementById('turnstileWidget');
+            if (widget) {
+                widget.style.display = 'none';
+            }
+        }
+        
         // --- 提交生成逻辑 (核心修改) ---
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -504,9 +514,16 @@
                 loadingOverlay.style.display = 'none';
                 submitBtn.disabled = false;
                 
-                // 重置验证码，防止 token 重复使用导致无效
+                // 重置验证码状态
                 if (window.turnstile) {
                     window.turnstile.reset();
+                    
+                    // ✅ 新增：重置后，必须把组件重新显示出来，
+                    // 否则用户无法进行下一次验证
+                    const widget = document.getElementById('turnstileWidget');
+                    if (widget) {
+                        widget.style.display = 'flex'; // 恢复显示
+                    }
                 }
             }
         });
