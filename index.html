@@ -46,44 +46,65 @@
         .image-container {
             position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); overflow: hidden;
             box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
+            transition: box-shadow 0.3s;
         }
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; }
+        
+        /* 加载时移除阴影，避免与边框冲突 */
+        .image-container.is-loading { box-shadow: none; }
 
-        /* 🆕 全息扫描特效 (Holo-Scan) */
-        .scan-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 122, 255, 0.1);
-            z-index: 5; display: none; pointer-events: none;
+        /* 🆕 围绕边框旋转的 Loading 动画 */
+        .border-loader {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 60;
+            pointer-events: none; border-radius: var(--radius-md);
+            display: none; /* 默认隐藏 */
+            overflow: hidden;
         }
-        .scan-line {
-            position: absolute; width: 100%; height: 2px; background: #007aff;
-            box-shadow: 0 0 10px #007aff, 0 0 20px #007aff;
-            top: 0; animation: scan 2s linear infinite;
-        }
-        @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        /* 当容器标记为 is-loading 时显示 */
+        .image-container.is-loading .border-loader { display: block; }
 
-        /* --- 🆕 创意 Loading 界面 --- */
+        /* 使用 mask 和 conic-gradient 实现边框跑马灯 */
+        .border-loader::before {
+            content: ""; position: absolute; inset: 0;
+            padding: 4px; /* 边框厚度 */
+            border-radius: var(--radius-md);
+            background: conic-gradient(from 0deg, transparent 30%, var(--primary-color) 70%, transparent 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            animation: rotateBorder 1.5s linear infinite;
+        }
+        @keyframes rotateBorder { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 旧的全息扫描特效 (已移除，用新边框代替) */
+        /* .scan-overlay { ... } */
+
+        /* --- 🆕 半透明 Loading 界面 --- */
         .loading-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(15px);
+            /* 修改为半透明背景 */
+            background: rgba(255, 255, 255, 0.5);
+            /* 降低模糊度，让背后图片可见 */
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
             display: none; flex-direction: column; justify-content: center; align-items: center;
             z-index: 50; opacity: 0; transition: opacity 0.3s;
-            padding: 20px; box-sizing: border-box;
+            padding: 20px; box-sizing: border-box; overflow-y: auto;
         }
         .loading-overlay.visible { opacity: 1; }
 
         /* 趣味知识卡片 */
         .fun-fact-card {
-            text-align: center; margin-bottom: 20px; max-width: 320px;
+            text-align: center; margin-bottom: 30px; max-width: 320px;
             animation: fadeUp 0.5s ease-out;
+            /* 增加一个半透明背景让文字更清晰 */
+            background: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .fact-icon { font-size: 32px; margin-bottom: 10px; animation: bounce 2s infinite; display: inline-block; }
         .fact-title { font-size: 14px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .fact-text { font-size: 15px; font-weight: 500; color: var(--text-main); line-height: 1.5; min-height: 45px; transition: opacity 0.3s; }
         
-        /* 进度条 */
-        .progress-wrapper { width: 200px; height: 4px; background: #e5e5ea; border-radius: 2px; overflow: hidden; margin-bottom: 20px; }
-        .progress-bar { height: 100%; background: var(--primary-color); width: 0%; transition: width 0.2s linear; border-radius: 2px; }
+        /* (已移除旧进度条样式 .progress-wrapper) */
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -93,12 +114,15 @@
             width: 100%; max-width: 336px; height: 280px; flex-shrink: 0;
             background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
             justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
         }
 
         /* 开关 */
         .unlimited-toggle {
             display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px;
-            background: rgba(0, 122, 255, 0.06); padding: 10px 16px; border-radius: 16px; transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+            padding: 10px 16px; border-radius: 16px; transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
         }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
@@ -108,8 +132,8 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* --- 其他组件 (Action Bar, Modal, Chips) --- */
-        .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 60; transition: all 0.2s; opacity: 0; pointer-events: none; }
+        /* --- 其他组件 --- */
+        .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
         
         .action-bar { position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); padding: 8px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 20; animation: popUp 0.4s; }
@@ -163,7 +187,6 @@
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .gallery-img { height: 220px; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
-            .loading-overlay { padding: 20px; }
         }
     </style>
 </head>
@@ -191,9 +214,7 @@
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
             
-            <div id="scanOverlay" class="scan-overlay">
-                <div class="scan-line"></div>
-            </div>
+            <div class="border-loader"></div>
 
             <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="Close">✕</button>
 
@@ -208,10 +229,6 @@
                     <div class="fact-icon">💡</div>
                     <div class="fact-title">DID YOU KNOW?</div>
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
-                </div>
-
-                <div class="progress-wrapper">
-                    <div class="progress-bar" id="fakeProgressBar"></div>
                 </div>
 
                 <div class="ad-container-box" id="adBox">
@@ -318,10 +335,8 @@
                 document.getElementById('promptInput').focus();
             }
         });
-        updateLanguage(); // init
+        updateLanguage(); 
 
-        // --- 全局功能 ---
-        // 1. 修复 applyPrompt 作用域问题
         window.applyPrompt = function(text) {
             const input = document.getElementById('promptInput');
             input.value = text;
@@ -350,15 +365,13 @@
             if(window.turnstile) window.turnstile.reset();
         }
 
-        // --- 创意动画控制 ---
+        // --- 创意动画控制 (更新版) ---
         const factText = document.getElementById('factText');
-        const progressBar = document.getElementById('fakeProgressBar');
-        const scanOverlay = document.getElementById('scanOverlay');
-        let factInterval, progressInterval;
+        let factInterval;
 
-        function startCreativeLoading(hasImage) {
-            // 1. 扫描特效 (仅当有图时)
-            if (hasImage) scanOverlay.style.display = 'block';
+        function startCreativeLoading() {
+            // 1. 添加 Loading 状态类 (触发边框动画)
+            imageContainer.classList.add('is-loading');
 
             // 2. 趣味知识轮播
             const facts = i18nData[curLang].facts;
@@ -366,30 +379,19 @@
             factText.style.opacity = 1;
             factText.innerText = facts[0];
             factInterval = setInterval(() => {
-                factText.style.opacity = 0; // fade out
+                factText.style.opacity = 0; 
                 setTimeout(() => {
                     i = (i + 1) % facts.length;
                     factText.innerText = facts[i];
-                    factText.style.opacity = 1; // fade in
+                    factText.style.opacity = 1; 
                 }, 300);
-            }, 2500); // 每2.5秒换一次
-
-            // 3. 模拟进度条
-            progressBar.style.width = '0%';
-            let w = 0;
-            progressInterval = setInterval(() => {
-                if (w < 90) {
-                    w += Math.random() * 5; // 随机增加
-                    progressBar.style.width = w + '%';
-                }
-            }, 300);
+            }, 2500);
         }
 
         function stopCreativeLoading() {
-            scanOverlay.style.display = 'none';
+            // 移除状态类
+            imageContainer.classList.remove('is-loading');
             clearInterval(factInterval);
-            clearInterval(progressInterval);
-            progressBar.style.width = '100%';
         }
 
         // --- DOM & Logic ---
@@ -475,9 +477,7 @@
             const prompt = promptInput.value.trim();
             if (!currentFile && !prompt) return;
 
-            // 1. Check Turnstile Token (only if modal is open, otherwise we trust session)
             let turnstileToken = null;
-            // 如果当前弹窗开着，就取值
             const input = document.querySelector('#verifyModal [name="cf-turnstile-response"]');
             if (input && input.value) turnstileToken = input.value;
 
@@ -488,8 +488,8 @@
             actionBar.style.display = 'none';
             clearBtn.style.opacity = '0';
             
-            // 🚀 启动创意动画
-            startCreativeLoading(!!currentFile);
+            // 🚀 启动创意动画 (新版)
+            startCreativeLoading();
 
             const isUnlimited = adToggle.checked;
             const formData = new FormData();
@@ -499,7 +499,7 @@
             if(turnstileToken) formData.append('turnstileToken', turnstileToken);
 
             const tasks = [ fetch(WORKER_ENDPOINT, { method: 'POST', body: formData }) ];
-            if (isUnlimited) tasks.push(new Promise(r => setTimeout(r, 4000))); // 至少展示 4 秒广告
+            if (isUnlimited) tasks.push(new Promise(r => setTimeout(r, 4000))); 
 
             try {
                 const [response] = await Promise.all(tasks);
@@ -529,7 +529,7 @@
             } catch (err) { console.error(err); alert('Network Error'); }
             finally {
                 if (!pendingSubmit) {
-                    stopCreativeLoading();
+                    stopCreativeLoading(); // 停止动画
                     loadingOverlay.classList.remove('visible');
                     setTimeout(() => loadingOverlay.style.display = 'none', 300);
                     submitBtn.disabled = false;
