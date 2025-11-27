@@ -38,6 +38,7 @@
         .upload-placeholder {
             text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
             cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
+            position: relative; /* 为了 Onboarding 高亮 */
         }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .t2i-hint { margin-top: 20px; font-size: 13px; color: var(--text-secondary); background: #f0f0f5; padding: 8px 16px; border-radius: 8px; }
@@ -49,55 +50,47 @@
             overflow: hidden; 
         }
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
-        /* 文生图时的模糊效果 */
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🆕 完美圆角贪吃蛇边框 (Mask 实现) */
+        /* 圆角贪吃蛇边框 */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 55;
-            border-radius: var(--radius-md); 
-            padding: 3px; /* 边框厚度 */
-            /* 关键：使用 mask 合成，只保留 padding 区域 */
+            border-radius: var(--radius-md); padding: 3px; 
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor; mask-composite: exclude;
             background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color));
-            animation: rotateSnake 3s linear infinite;
-            display: none;
+            animation: rotateSnake 3s linear infinite; display: none;
         }
         .image-container.is-loading .snake-border { display: block; }
-        
-        /* 使用 @property 实现平滑角度旋转 (现代浏览器) */
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* Loading Overlay */
+        /* --- 🆕 修复版 Loading Overlay (全屏 Fixed) --- */
         .loading-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.6); /* 更通透一点 */
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            /* 改为 fixed 覆盖全屏，解决移动端横图遮挡问题 */
+            position: fixed; inset: 0;
+            background: rgba(255, 255, 255, 0.8); /* 稍微不透明一点，遮住背景 */
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 50; opacity: 0; transition: opacity 0.3s;
+            z-index: 999; /* 必须极高 */
+            opacity: 0; transition: opacity 0.3s;
             padding: 20px; box-sizing: border-box; overflow-y: auto;
         }
         .loading-overlay.visible { opacity: 1; }
 
         .fun-fact-card {
-            text-align: center; margin-bottom: 20px; max-width: 320px;
+            text-align: center; margin-bottom: 20px; max-width: 320px; flex-shrink: 0;
             animation: fadeUp 0.5s ease-out;
             background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         .fact-title { font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; }
         .fact-text { font-size: 14px; font-weight: 500; color: var(--text-main); min-height: 40px; transition: opacity 0.3s; }
-        
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 🆕 广告位高度优化 (4:3) */
+        /* 广告位 (4:3) */
         .ad-container-box {
-            width: 100%; max-width: 320px; 
-            aspect-ratio: 4/3; /* 强制比例 */
-            max-height: 240px; /* 限制最大高度 */
-            flex-shrink: 0;
+            width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0;
             background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
             justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px;
         }
@@ -105,6 +98,7 @@
         .unlimited-toggle {
             display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px;
             background: rgba(255, 255, 255, 0.9); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
         }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
@@ -135,13 +129,15 @@
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 500; display: none; justify-content: center; align-items: center; }
+        /* Verify Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; min-height: 65px; }
 
+        /* Gallery */
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -155,15 +151,32 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* 🆕 Onboarding 引导页 */
-        .onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 999; display: none; justify-content: center; align-items: center; color: white; text-align: center; }
-        .onboarding-card { max-width: 320px; padding: 20px; }
-        .ob-step { margin-bottom: 40px; opacity: 0; transition: opacity 0.5s; display: none; }
-        .ob-step.active { opacity: 1; display: block; }
-        .ob-icon { font-size: 60px; margin-bottom: 20px; display: block; }
-        .ob-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
-        .ob-desc { font-size: 16px; opacity: 0.8; line-height: 1.6; }
-        .ob-btn { margin-top: 30px; background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 99px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        /* --- 🆕 Onboarding (聚光灯风格) --- */
+        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
+        .ob-backdrop.visible { opacity: 1; }
+        
+        /* 高亮元素样式 */
+        .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
+        
+        /* 气泡提示框 */
+        .ob-tooltip {
+            position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
+            width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: floatUp 0.3s ease-out; display: none;
+        }
+        .ob-tooltip::after { /* 小三角 */
+            content: ""; position: absolute; width: 12px; height: 12px; background: white;
+            transform: rotate(45deg);
+        }
+        /* 三角位置类 */
+        .ob-tooltip.top::after { bottom: -6px; left: 50%; margin-left: -6px; }
+        .ob-tooltip.bottom::after { top: -6px; left: 50%; margin-left: -6px; }
+
+        .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .ob-step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px; }
+        .ob-step-btn { background: var(--primary-color); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
+        
+        @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
         @media (max-width: 600px) {
             .navbar { padding: 15px 20px; }
@@ -173,11 +186,19 @@
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .gallery-img { height: 220px; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
-            .loading-overlay { padding: 20px; }
+            /* Loading 全屏居中 */
+            .loading-overlay { padding: 20px; justify-content: center; } 
         }
     </style>
 </head>
 <body>
+
+    <div id="obBackdrop" class="ob-backdrop"></div>
+    <div id="obTooltip" class="ob-tooltip">
+        <div class="ob-step-title" id="obTitle">Title</div>
+        <div class="ob-step-desc" id="obDesc">Description</div>
+        <button class="ob-step-btn" id="obBtn">Next</button>
+    </div>
 
     <nav class="navbar">
         <div class="logo">Nano Banana 🍌</div>
@@ -243,29 +264,6 @@
         </div>
     </div>
 
-    <div id="onboarding" class="onboarding-overlay">
-        <div class="onboarding-card">
-            <div class="ob-step active" id="step1">
-                <span class="ob-icon">👋</span>
-                <div class="ob-title">欢迎来到 Nano Banana</div>
-                <div class="ob-desc">这里是您的魔法影像工作室。一键修复老照片、智能换背景，或用文字创造全新世界。</div>
-                <button class="ob-btn" onclick="nextStep(2)">下一步</button>
-            </div>
-            <div class="ob-step" id="step2">
-                <span class="ob-icon">📷</span>
-                <div class="ob-title">上传或输入</div>
-                <div class="ob-desc">点击屏幕中央上传照片，或者直接在底部输入框告诉 AI 您想画什么。</div>
-                <button class="ob-btn" onclick="nextStep(3)">下一步</button>
-            </div>
-            <div class="ob-step" id="step3">
-                <span class="ob-icon">✨</span>
-                <div class="ob-title">灵感无限</div>
-                <div class="ob-desc">不知道写什么？点击顶部的「灵感广场」，发现更多创意玩法。</div>
-                <button class="ob-btn" onclick="finishOnboarding()">开始创作</button>
-            </div>
-        </div>
-    </div>
-
     <div class="gallery-modal" id="galleryModal">
         <div class="gallery-header">
             <h2 data-i18n="galleryTitle">✨ 灵感广场</h2>
@@ -284,12 +282,22 @@
             cn: {
                 galleryBtn: "✨ 灵感广场", uploadTitle: "上传图片 / 开始创作", uploadDesc: "支持 JPG, PNG, WebP (Max 10MB)", uploadHint: "💡 提示：不想上传？直接在底部输入描述，即可生成新图片！", unlimitedToggle: "⚡️ 开启无限生成 (自动补充)", verifyTitle: "安全验证", verifyDesc: "为了确保服务稳定，请完成一次验证。验证成功后 1 小时内无需再次验证。", galleryTitle: "✨ 灵感广场", promptPlaceholder: "描述你想怎么改，或者想生成什么...", alertLimit: "今日免费额度已用完！\n\n开启【无限模式】(含广告) 可继续使用，是否开启？",
                 facts: ["世界上第一张彩色照片拍摄于 1861 年。", "Nano Banana 使用了最先进的 Gemini 3.0 视觉模型。", "AI 正在重构每一个像素的光影细节...", "人脑处理图像的速度比文字快 60,000 倍。", "最早的数码相机重达 3.6 公斤。", "如果网络较慢，请耐心等待 AI 绘制..."],
-                chips: [ { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。" }, { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复和去模糊处理。" }, { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画，笔触粗犷，色彩鲜艳。" }, { text: "❄️ 换成雪景", prompt: "把背景换成下雪的巴黎街道，保持人物不变。" }, { text: "🐱 生成图片", prompt: "一只在太空喝咖啡的猫，写实风格，高分辨率。" } ]
+                chips: [ { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。" }, { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复和去模糊处理。" }, { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画，笔触粗犷，色彩鲜艳。" }, { text: "❄️ 换成雪景", prompt: "把背景换成下雪的巴黎街道，保持人物不变。" }, { text: "🐱 生成图片", prompt: "一只在太空喝咖啡的猫，写实风格，高分辨率。" } ],
+                ob: {
+                    s1: { t: "上传或创作", d: "点击这里上传照片，或者直接在下方输入描述。" },
+                    s2: { t: "输入指令", d: "告诉 AI 你想怎么改，比如“换个背景”或“修复划痕”。" },
+                    s3: { t: "灵感广场", d: "不知道怎么写？点这里查看 50+ 种创意玩法。" }
+                }
             },
             en: {
                 galleryBtn: "✨ Gallery", uploadTitle: "Upload / Create", uploadDesc: "JPG, PNG, WebP (Max 10MB)", uploadHint: "💡 Tip: Type a description below to generate a new image!", unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)", verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.", galleryTitle: "✨ Inspiration Gallery", promptPlaceholder: "Describe what you want...", alertLimit: "Daily limit reached! Enable Unlimited Mode to continue?",
                 facts: ["The first color photograph was taken in 1861.", "Powered by Gemini 3.0 Vision.", "Reconstructing pixels with AI magic...", "The first digital camera weighed 8 pounds.", "AI is analyzing the lighting...", "Please wait while AI paints your image..."],
-                chips: [ { text: "🪄 Fix Photo", prompt: "Restore old photo, remove scratches, realistic colorization." }, { text: "👤 Face Enhance", prompt: "Enhance face details, deblur, keep texture." }, { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style oil painting." }, { text: "❄️ Snow Scene", prompt: "Change background to snowy street." }, { text: "🐱 Gen Image", prompt: "A cat drinking coffee in space, photorealistic." } ]
+                chips: [ { text: "🪄 Fix Photo", prompt: "Restore old photo, remove scratches, realistic colorization." }, { text: "👤 Face Enhance", prompt: "Enhance face details, deblur, keep texture." }, { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style oil painting." }, { text: "❄️ Snow Scene", prompt: "Change background to snowy street." }, { text: "🐱 Gen Image", prompt: "A cat drinking coffee in space, photorealistic." } ],
+                ob: {
+                    s1: { t: "Upload or Create", d: "Click here to upload, or just type below." },
+                    s2: { t: "Type Command", d: "Tell AI what to do, e.g. 'Fix scratches' or 'Change background'." },
+                    s3: { t: "Get Inspired", d: "Stuck? Click here to explore 50+ creative styles." }
+                }
             }
         };
 
@@ -330,23 +338,73 @@
             adBox.style.display = e.target.checked ? 'flex' : 'none';
         });
 
-        // --- Onboarding Logic ---
-        function checkOnboarding() {
-            if (!localStorage.getItem('hasSeenOnboarding')) {
-                document.getElementById('onboarding').style.display = 'flex';
+        // --- 🆕 Onboarding System (Spotlight) ---
+        const obSteps = [
+            { id: 'uploadArea', key: 's1', pos: 'bottom' },
+            { id: 'commandForm', key: 's2', pos: 'top' },
+            { id: 'galleryToggle', key: 's3', pos: 'bottom' }
+        ];
+        let curStepIdx = 0;
+
+        function initOnboarding() {
+            if (!localStorage.getItem('hasSeenOb')) {
+                document.getElementById('obBackdrop').style.display = 'block';
+                setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
+                showStep(0);
             }
         }
-        window.nextStep = function(step) {
-            document.querySelectorAll('.ob-step').forEach(el => el.classList.remove('active'));
-            document.getElementById('step'+step).classList.add('active');
-        }
-        window.finishOnboarding = function() {
-            document.getElementById('onboarding').style.display = 'none';
-            localStorage.setItem('hasSeenOnboarding', 'true');
-        }
-        checkOnboarding();
 
-        // Turnstile
+        function showStep(idx) {
+            // Cleanup previous
+            document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
+            const tooltip = document.getElementById('obTooltip');
+            tooltip.style.display = 'none';
+
+            if (idx >= obSteps.length) {
+                // Finish
+                document.getElementById('obBackdrop').classList.remove('visible');
+                setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
+                localStorage.setItem('hasSeenOb', 'true');
+                return;
+            }
+
+            curStepIdx = idx;
+            const step = obSteps[idx];
+            const el = document.getElementById(step.id);
+            const content = i18nData[curLang].ob[step.key];
+
+            // Highlight element
+            el.classList.add('ob-highlight');
+
+            // Position Tooltip
+            const rect = el.getBoundingClientRect();
+            tooltip.style.display = 'block';
+            document.getElementById('obTitle').innerText = content.t;
+            document.getElementById('obDesc').innerText = content.d;
+            document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? 'Start' : 'Next';
+
+            // Simple positioning logic
+            if (step.pos === 'bottom') {
+                tooltip.style.top = (rect.bottom + 15) + 'px';
+                tooltip.style.left = (rect.left + rect.width/2 - 140) + 'px'; // Center width 280
+                tooltip.className = 'ob-tooltip top'; // Arrow points up
+            } else {
+                tooltip.style.top = (rect.top - 160) + 'px'; // Height approx
+                tooltip.style.left = (rect.left + rect.width/2 - 140) + 'px';
+                tooltip.className = 'ob-tooltip bottom'; // Arrow points down
+            }
+            
+            // Boundary check (mobile)
+            if (parseInt(tooltip.style.left) < 10) tooltip.style.left = '10px';
+        }
+
+        document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
+        
+        // Start Onboarding after language init
+        setTimeout(initOnboarding, 500);
+
+
+        // --- Turnstile & Logic ---
         let turnstileWidgetId = null;
         let currentTurnstileToken = null;
         function renderTurnstile() {
@@ -440,13 +498,13 @@
             handleFileSelect(file);
         });
 
-        // 🆕 统一处理文件选择 (含 T2I 占位逻辑)
+        // 🆕 统一处理逻辑 + T2I 占位
         function handleFileSelect(file) {
             currentFile = file;
             const reader = new FileReader();
             reader.onload = (ev) => {
                 displayImage.src = ev.target.result;
-                displayImage.classList.remove('pixelating'); // 清除可能的 T2I 特效
+                displayImage.classList.remove('pixelating'); 
                 uploadArea.style.display = 'none'; 
                 imageContainer.style.display = 'flex';
                 imageContainer.classList.add('loaded'); 
@@ -455,12 +513,11 @@
             reader.readAsDataURL(file);
         }
 
-        // 🆕 模拟文生图占位 (T2I Experience)
+        // 🆕 T2I 占位逻辑 (Latent Noise Style)
         function simulateT2IPlaceholder() {
-            // 随便弄个噪点图或者 logo 作为底图，并应用模糊
-            // 这里简单用一个灰色背景，配合 CSS blur
-            displayImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI1MCIgZmlsbD0iI2NjYyI+QUk8L3RleHQ+PC9zdmc+';
-            displayImage.classList.add('pixelating'); // 添加模糊 CSS
+            // 灰底+模糊
+            displayImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
+            displayImage.classList.add('pixelating');
             uploadArea.style.display = 'none';
             imageContainer.style.display = 'flex';
             imageContainer.classList.add('loaded');
@@ -530,10 +587,8 @@
             const input = document.querySelector('#verifyModal [name="cf-turnstile-response"]');
             if (input && input.value) turnstileToken = input.value;
 
-            // 1. 如果没有图，是文生图，先显示占位效果
-            if (!currentFile && prompt) {
-                simulateT2IPlaceholder();
-            }
+            // 1. T2I 占位
+            if (!currentFile && prompt) simulateT2IPlaceholder();
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
@@ -559,6 +614,12 @@
 
             try {
                 const [response] = await Promise.all(tasks);
+                
+                if (!response.ok && response.status !== 401 && response.status !== 429) {
+                    if (response.status === 524) throw new Error("Timeout: AI is busy");
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (response.status === 401) {
@@ -588,7 +649,7 @@
 
                     if (finalImage) {
                         displayImage.src = finalImage;
-                        displayImage.classList.remove('pixelating'); // 移除模糊
+                        displayImage.classList.remove('pixelating');
                         const res = await fetch(finalImage);
                         const blob = await res.blob();
                         currentFile = new File([blob], "edited.png", { type: "image/png" });
