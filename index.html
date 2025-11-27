@@ -42,18 +42,14 @@
         /* --- 舞台区域 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
         
-        /* 模式容器: 默认隐藏 */
         .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
-        /* 激活状态 */
         .mode-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Edit Mode Upload */
         .upload-placeholder {
             text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
-            cursor: pointer; background: white; max-width: 400px; width: 100%; 
-            /* 关键：默认 flex，通过 JS 控制显隐，但 CSS 要保证它是 flex */
-            display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
+            cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
         }
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
@@ -78,25 +74,34 @@
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
-        /* Snake Border */
+        /* 🐍 修复版：流光贪吃蛇边框 */
         .snake-border {
-            position: absolute; inset: 0; pointer-events: none; z-index: 55;
-            border-radius: var(--radius-md); padding: 3px; 
+            position: absolute; inset: 0; pointer-events: none; z-index: 60; /* 提高层级 */
+            border-radius: var(--radius-md); padding: 4px; /* 边框粗细 */
+            
+            /* 使用 Mask 实现镂空 */
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor; mask-composite: exclude;
-            background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color));
-            animation: rotateSnake 3s linear infinite; display: none;
+            
+            /* 锥形渐变背景 */
+            background: conic-gradient(from var(--angle, 0deg), transparent 75%, var(--primary-color));
+            
+            /* 默认隐藏，有 .active 类时显示 */
+            display: none;
+            animation: rotateSnake 2s linear infinite;
         }
-        .image-container.is-loading .snake-border { display: block; }
+        .snake-border.active { display: block; }
+        
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* Loading Overlay */
+        /* Loading Overlay (Fixed) */
         .loading-overlay {
             position: absolute; inset: 0;
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 60; opacity: 0; transition: opacity 0.3s;
+            z-index: 50; /* 比蛇低一点，但在图片之上 */
+            opacity: 0; transition: opacity 0.3s;
             padding: 10px; box-sizing: border-box; overflow-y: auto;
         }
         .loading-overlay.visible { opacity: 1; }
@@ -149,7 +154,6 @@
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
 
-        /* Modal & Gallery */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -170,29 +174,21 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* --- 🆕 Onboarding (Smart Spotlight) --- */
+        /* Onboarding */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
-        
         .ob-tooltip {
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             animation: floatUp 0.3s ease-out; display: none;
-            /* 动态箭头水平偏移 */
             --arrow-left: 50%;
         }
-        
         .ob-tooltip::after { 
             content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); 
-            left: var(--arrow-left); margin-left: -6px; /* 使用变量控制水平位置 */
+            left: var(--arrow-left); margin-left: -6px; 
         }
-        
-        /* ⬇️ 修复箭头方向逻辑 ⬇️ */
-        /* 气泡在元素下方 (arrow-top) -> 箭头朝上，位于气泡顶部 */
         .ob-tooltip.arrow-top::after { top: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); } 
-        
-        /* 气泡在元素上方 (arrow-bottom) -> 箭头朝下，位于气泡底部 */
         .ob-tooltip.arrow-bottom::after { bottom: -6px; box-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
 
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
@@ -224,8 +220,8 @@
         
         <div class="mode-switcher" id="modeSwitcher">
             <div class="mode-slider" id="modeSlider"></div>
-            <button class="mode-btn active" data-mode="create" onclick="switchMode('create')">✨ 创意</button>
-            <button class="mode-btn" data-mode="edit" onclick="switchMode('edit')">🛠️ 修复</button>
+            <button class="mode-btn active" data-mode="create" onclick="switchMode('create')" data-i18n="modeCreate">✨ 创意</button>
+            <button class="mode-btn" data-mode="edit" onclick="switchMode('edit')" data-i18n="modeEdit">🛠️ 修复</button>
         </div>
 
         <div class="nav-right">
@@ -256,11 +252,12 @@
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
-            <div class="snake-border"></div>
+            <div class="snake-border" id="snakeBorder"></div>
             <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="Close">✕</button>
+
             <div id="actionBar" class="action-bar">
-                <button class="action-btn" onclick="downloadImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
-                <button class="action-btn" onclick="shareImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
+                <button class="action-btn" onclick="downloadImage()" data-title-i18n="btnDownload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+                <button class="action-btn" onclick="shareImage()" data-title-i18n="btnShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
             </div>
             
             <div id="loadingOverlay" class="loading-overlay">
@@ -317,6 +314,7 @@
         // --- I18n Data ---
         const i18nData = {
             cn: {
+                modeCreate: "✨ 创意", modeEdit: "🛠️ 修复",
                 createTitle: "输入文字，创造世界",
                 createDesc: "无需画笔，只需文字。输入你的想象，AI 为你实现。",
                 uploadTitle: "上传图片修复",
@@ -327,19 +325,11 @@
                 alertLimit: "今日额度已尽！开启无限模式继续？",
                 promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." },
                 facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
+                obBtnNext: "下一步", obBtnStart: "开始创作",
+                btnDownload: "保存图片", btnShare: "分享图片",
                 chips: {
-                    create: [
-                        { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." },
-                        { text: "3D 渲染", prompt: "Cute 3D rendered character, pixar style, soft lighting." },
-                        { text: "水彩风景", prompt: "Watercolor landscape painting, mountains, misty, serene." },
-                        { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." }
-                    ],
-                    edit: [
-                        { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点." },
-                        { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复." },
-                        { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画." },
-                        { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道." }
-                    ]
+                    create: [ { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." }, { text: "3D 渲染", prompt: "Cute 3D rendered character, pixar style, soft lighting." }, { text: "水彩风景", prompt: "Watercolor landscape painting, mountains, misty, serene." }, { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." } ],
+                    edit: [ { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点." }, { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复." }, { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画." }, { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道." } ]
                 },
                 ob: {
                     s1: { t: "选择模式", d: "左边是「文生图」，右边是「修图」。" },
@@ -348,6 +338,7 @@
                 }
             },
             en: {
+                modeCreate: "✨ Create", modeEdit: "🛠️ Edit",
                 createTitle: "Imagine & Create",
                 createDesc: "Just type your imagination, AI will paint it.",
                 uploadTitle: "Upload to Fix",
@@ -358,19 +349,11 @@
                 alertLimit: "Limit reached! Enable Unlimited Mode?",
                 promptPlaceholder: { create: "A cat in space...", edit: "Fix scratches..." },
                 facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."],
+                obBtnNext: "Next", obBtnStart: "Start",
+                btnDownload: "Save Image", btnShare: "Share Image",
                 chips: {
-                    create: [
-                        { text: "Cyberpunk", prompt: "Cyberpunk city street, neon lights." },
-                        { text: "3D Render", prompt: "Cute 3D character, pixar style." },
-                        { text: "Watercolor", prompt: "Watercolor landscape painting." },
-                        { text: "Sci-Fi", prompt: "Futuristic spaceship interior." }
-                    ],
-                    edit: [
-                        { text: "🪄 Fix", prompt: "Restore old photo, remove scratches." },
-                        { text: "👤 Face", prompt: "Enhance face details." },
-                        { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style." },
-                        { text: "❄️ Snow", prompt: "Change background to snow." }
-                    ]
+                    create: [ { text: "Cyberpunk", prompt: "Cyberpunk city street, neon lights." }, { text: "3D Render", prompt: "Cute 3D character, pixar style." }, { text: "Watercolor", prompt: "Watercolor landscape painting." }, { text: "Sci-Fi", prompt: "Futuristic spaceship interior." } ],
+                    edit: [ { text: "🪄 Fix", prompt: "Restore old photo, remove scratches." }, { text: "👤 Face", prompt: "Enhance face details." }, { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style." }, { text: "❄️ Snow", prompt: "Change background to snow." } ]
                 },
                 ob: {
                     s1: { t: "Choose Mode", d: "Create from scratch OR Edit photos." },
@@ -380,36 +363,29 @@
             }
         };
 
-        // --- 核心模式切换逻辑 ---
         window.switchMode = function(mode) {
             currentMode = mode;
-            
-            // 1. UI Switch
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
             const slider = document.getElementById('modeSlider');
             slider.style.transform = mode === 'create' ? 'translateX(0)' : 'translateX(100%)';
 
-            // 2. Content Switch (Only if no image generated yet)
             if (document.getElementById('imageContainer').style.display === 'none') {
                 document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
                 document.getElementById(`${mode}Content`).classList.add('active');
-                
-                // 🛑 修复：确保在 Edit 模式下上传区必须显示
-                // (清除可能残留的 inline display: none)
-                if (mode === 'edit') {
-                    document.getElementById('uploadArea').style.display = ''; // Clear inline style
-                } else {
-                    document.getElementById('createPlaceholder').style.display = ''; // Clear inline style
-                }
+                if (mode === 'edit') document.getElementById('uploadArea').style.display = '';
+                else document.getElementById('createPlaceholder').style.display = '';
             }
-
             updateLanguage();
         }
 
         function updateLanguage() {
             const t = i18nData[curLang];
+            // 文本内容
             document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t[el.getAttribute('data-i18n')]; });
+            // 工具提示
+            document.querySelectorAll('[data-title-i18n]').forEach(el => { el.title = t[el.getAttribute('data-title-i18n')]; });
+            
             document.getElementById('promptInput').placeholder = t.promptPlaceholder[currentMode];
             const chips = t.chips[currentMode];
             const chipsHTML = chips.map(c => `<div class="chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`).join('');
@@ -444,14 +420,13 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('imageContainer').classList.remove('loaded');
             
-            // 🛑 修复：重置时强制恢复模式默认视图
             switchMode(currentMode); 
             
             document.getElementById('actionBar').style.display = 'none';
             document.getElementById('promptInput').value = '';
         }
 
-        // --- 🆕 修复 2: 智能 Onboarding (防止溢出) ---
+        // --- Onboarding (Smart Spotlight) ---
         const obSteps = [
             { id: 'modeSwitcher', key: 's1', pos: 'bottom' },
             { id: 'magicBar', key: 's2', pos: 'top' }, 
@@ -460,7 +435,7 @@
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb_v5')) { 
+            if (!localStorage.getItem('hasSeenOb_v6')) { 
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -471,14 +446,12 @@
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip');
             tooltip.style.display = 'none';
-            
-            // Remove directional classes
-            tooltip.classList.remove('arrow-top', 'arrow-bottom');
+            tooltip.className = 'ob-tooltip'; // Reset
 
             if (idx >= obSteps.length) {
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb_v5', 'true');
+                localStorage.setItem('hasSeenOb_v6', 'true');
                 return;
             }
 
@@ -493,13 +466,15 @@
             tooltip.style.display = 'block';
             document.getElementById('obTitle').innerText = content.t;
             document.getElementById('obDesc').innerText = content.d;
-            document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? 'Start' : 'Next';
+            
+            // 修复：按钮文字国际化
+            const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
+            document.getElementById('obBtn').innerText = btnText;
 
             const tooltipWidth = 280;
             let left = rect.left + rect.width / 2 - (tooltipWidth / 2);
             let arrowPos = '50%';
 
-            // Edge detection
             const padding = 20;
             if (left + tooltipWidth > window.innerWidth - padding) {
                 left = window.innerWidth - tooltipWidth - padding;
@@ -515,7 +490,6 @@
             document.documentElement.style.setProperty('--arrow-pos', arrowPos);
             tooltip.style.left = left + 'px';
 
-            // 修复：箭头逻辑
             if (step.pos === 'bottom') {
                 tooltip.style.top = (rect.bottom + 15) + 'px';
                 tooltip.classList.add('arrow-top');
@@ -586,7 +560,9 @@
         const factText = document.getElementById('factText');
         let factInterval;
         function startCreativeLoading() {
-            document.querySelector('.image-container').classList.add('is-loading');
+            // 修复：添加类名触发蛇动画
+            document.getElementById('snakeBorder').classList.add('active');
+            
             const facts = i18nData[curLang].facts;
             let i = 0; factText.style.opacity = 1; factText.innerText = facts[0];
             factInterval = setInterval(() => {
@@ -595,7 +571,8 @@
             }, 2500);
         }
         function stopCreativeLoading() {
-            document.querySelector('.image-container').classList.remove('is-loading');
+            // 修复：移除类名停止动画
+            document.getElementById('snakeBorder').classList.remove('active');
             clearInterval(factInterval);
         }
 
