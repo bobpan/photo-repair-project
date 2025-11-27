@@ -17,8 +17,8 @@
             --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
-            /* 动态箭头位置变量 */
-            --arrow-pos: 50%; 
+            /* 动态箭头位置 */
+            --arrow-pos: 50%;
         }
 
         body {
@@ -28,123 +28,62 @@
         }
 
         /* --- 导航栏 --- */
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px; z-index: 100;
-            background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px);
-        }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); }
         .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; }
         
-        .mode-switcher {
-            background: rgba(118, 118, 128, 0.12);
-            padding: 2px; border-radius: 8px;
-            display: flex; position: relative;
-            margin: 0 auto; 
-        }
-        .mode-btn {
-            border: none; background: transparent;
-            padding: 6px 12px; font-size: 13px; font-weight: 500;
-            cursor: pointer; color: var(--text-main);
-            border-radius: 6px; z-index: 2; width: 80px; transition: color 0.2s;
-        }
+        .mode-switcher { background: rgba(118, 118, 128, 0.12); padding: 2px; border-radius: 8px; display: flex; position: relative; margin: 0 auto; }
+        .mode-btn { border: none; background: transparent; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-main); border-radius: 6px; z-index: 2; width: 80px; transition: color 0.2s; }
         .mode-btn.active { font-weight: 600; }
-        .mode-slider {
-            position: absolute; top: 2px; left: 2px; bottom: 2px; width: 80px;
-            background: white; border-radius: 6px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 1;
-        }
+        .mode-slider { position: absolute; top: 2px; left: 2px; bottom: 2px; width: 80px; background: white; border-radius: 6px; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 1; }
 
         .nav-right { display: flex; gap: 8px; }
-        .nav-icon-btn {
-            background: transparent; border: none; font-size: 18px; cursor: pointer;
-            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
+        .nav-icon-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .nav-icon-btn:hover { background: rgba(0,0,0,0.05); }
 
         /* --- 舞台区域 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
         
+        /* 模式容器 */
         .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
         .mode-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Edit Mode Upload */
-        .upload-placeholder {
-            text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
-            cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
-        }
+        /* 上传框 (Edit模式) */
+        .upload-placeholder { text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg); cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .hint-text { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 
-        /* Create Mode Placeholder */
+        /* 创意引导 (Create模式) */
         .create-placeholder { text-align: center; max-width: 450px; }
         .create-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .create-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
         .create-desc { font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 30px; }
         .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-        .s-chip { 
-            background: white; border: 1px solid rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 99px; 
-            font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: 0.2s; 
-        }
+        .s-chip { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 99px; font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
         .s-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
 
-        /* Image Container */
-        .image-container {
-            position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); 
-            box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
-            overflow: hidden; 
-        }
+        /* 图片容器 */
+        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; }
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
-        /* Snake Border */
-        .snake-border {
-            position: absolute; inset: 0; pointer-events: none; z-index: 55;
-            border-radius: var(--radius-md); padding: 3px; 
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color));
-            animation: rotateSnake 3s linear infinite; display: none;
-        }
+        /* 贪吃蛇边框 */
+        .snake-border { position: absolute; inset: 0; pointer-events: none; z-index: 55; border-radius: var(--radius-md); padding: 3px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color)); animation: rotateSnake 3s linear infinite; display: none; }
         .image-container.is-loading .snake-border { display: block; }
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* Loading Overlay (Fixed) */
-        .loading-overlay {
-            position: fixed; inset: 0;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 999; opacity: 0; transition: opacity 0.3s;
-            padding: 20px; box-sizing: border-box; overflow-y: auto;
-        }
+        /* Loading (Fixed Fullscreen) */
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; opacity: 0; transition: opacity 0.3s; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .loading-overlay.visible { opacity: 1; }
-
-        .fun-fact-card {
-            text-align: center; margin-bottom: 20px; max-width: 320px; flex-shrink: 0;
-            animation: fadeUp 0.5s ease-out;
-            background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+        .fun-fact-card { text-align: center; margin-bottom: 20px; max-width: 320px; flex-shrink: 0; animation: fadeUp 0.5s ease-out; background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .fact-title { font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; }
         .fact-text { font-size: 14px; font-weight: 500; color: var(--text-main); min-height: 40px; transition: opacity 0.3s; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .ad-container-box {
-            width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0;
-            background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
-            justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px;
-        }
-
-        .unlimited-toggle {
-            display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px;
-            background: rgba(255, 255, 255, 0.9); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm);
-            flex-shrink: 0;
-        }
+        .ad-container-box { width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px; }
+        .unlimited-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px; background: rgba(255, 255, 255, 0.9); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm); flex-shrink: 0; }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -153,15 +92,14 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(18px); }
 
+        /* Other UI */
         .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
-        
         .action-bar { position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); padding: 8px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 20; animation: popUp 0.4s; }
         @keyframes popUp { from { transform: translateY(20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s; }
         .action-btn:hover { background: rgba(0,0,0,0.05); }
         .action-btn svg { width: 22px; height: 22px; stroke-width: 2; }
-
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
         .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: center; }
         .chips-container::-webkit-scrollbar { display: none; }
@@ -172,14 +110,12 @@
         .input-box input { flex: 1; border: none; background: transparent; padding: 12px 20px; font-size: 16px; color: var(--text-main); outline: none; min-width: 0; }
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; min-height: 65px; }
-
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -193,7 +129,7 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* --- 🆕 Onboarding (Smart Spotlight) --- */
+        /* --- 🆕 修复版 Onboarding (智能定位) --- */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
@@ -202,15 +138,21 @@
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             animation: floatUp 0.3s ease-out; display: none;
-            /* 关键：使用 var 控制箭头位置 */
+            /* 动态箭头水平偏移 */
             --arrow-left: 50%;
         }
+        
         .ob-tooltip::after { 
             content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); 
-            left: var(--arrow-left); margin-left: -6px; /* 使用变量 */
+            left: var(--arrow-left); margin-left: -6px; /* 使用变量控制水平位置 */
         }
-        .ob-tooltip.top::after { bottom: -6px; }
-        .ob-tooltip.bottom::after { top: -6px; }
+        
+        /* ⬇️ 修复箭头方向逻辑 ⬇️ */
+        /* 气泡在元素下方 (arrow-top) -> 箭头朝上，位于气泡顶部 */
+        .ob-tooltip.arrow-top::after { top: -6px; } 
+        
+        /* 气泡在元素上方 (arrow-bottom) -> 箭头朝下，位于气泡底部 */
+        .ob-tooltip.arrow-bottom::after { bottom: -6px; }
 
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px; }
@@ -223,7 +165,6 @@
             .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
-            /* Loading 全屏居中 */
             .loading-overlay { padding: 20px; justify-content: center; } 
         }
     </style>
@@ -327,12 +268,10 @@
         const WORKER_ENDPOINT = '/api/repair'; 
         const STATUS_ENDPOINT = '/api/status';
 
-        // --- 全局状态 ---
         let currentMode = 'create'; 
         let currentFile = null;
         let curLang = localStorage.getItem('lang') || 'cn';
 
-        // --- I18n Data ---
         const i18nData = {
             cn: {
                 createTitle: "输入文字，创造世界",
@@ -353,10 +292,10 @@
                         { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." }
                     ],
                     edit: [
-                        { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点。" },
-                        { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复。" },
-                        { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画。" },
-                        { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道。" }
+                        { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点." },
+                        { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复." },
+                        { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画." },
+                        { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道." }
                     ]
                 },
                 ob: {
@@ -398,26 +337,27 @@
             }
         };
 
-        // --- 核心模式切换逻辑 ---
         window.switchMode = function(mode) {
             currentMode = mode;
             
-            // UI Switch
+            // 1. UI Switch
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
-            
             const slider = document.getElementById('modeSlider');
             slider.style.transform = mode === 'create' ? 'translateX(0)' : 'translateX(100%)';
 
-            // Content Switch
+            // 2. Content Switch (Only if no image generated yet)
             if (document.getElementById('imageContainer').style.display === 'none') {
                 document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
                 document.getElementById(`${mode}Content`).classList.add('active');
-            }
-            
-            // 🆕 修复 1：确保上传按钮在 Edit 模式下可见
-            if (mode === 'edit' && document.getElementById('imageContainer').style.display === 'none') {
-                document.getElementById('uploadArea').style.display = 'flex';
+                
+                // 🛑 修复：确保在 Edit 模式下上传区必须显示
+                // (清除可能残留的 inline display: none)
+                if (mode === 'edit') {
+                    document.getElementById('uploadArea').style.display = ''; // Clear inline style
+                } else {
+                    document.getElementById('createPlaceholder').style.display = ''; // Clear inline style
+                }
             }
 
             updateLanguage();
@@ -460,20 +400,14 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('imageContainer').classList.remove('loaded');
             
-            // 重置时切回当前模式，并确保 UI 状态正确
-            document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`${currentMode}Content`).classList.add('active');
-            
-            // 强制显示上传区 (如果是 Edit 模式)
-            if (currentMode === 'edit') {
-                document.getElementById('uploadArea').style.display = 'flex';
-            }
+            // 🛑 修复：重置时强制恢复模式默认视图
+            switchMode(currentMode); 
             
             document.getElementById('actionBar').style.display = 'none';
             document.getElementById('promptInput').value = '';
         }
 
-        // --- 🆕 修复 2: 智能 Onboarding (防止溢出) ---
+        // --- Smart Onboarding ---
         const obSteps = [
             { id: 'modeSwitcher', key: 's1', pos: 'bottom' },
             { id: 'magicBar', key: 's2', pos: 'top' }, 
@@ -482,7 +416,7 @@
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb_v3')) { // Bump version
+            if (!localStorage.getItem('hasSeenOb_v4')) { 
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -493,11 +427,14 @@
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip');
             tooltip.style.display = 'none';
+            
+            // Remove directional classes
+            tooltip.classList.remove('arrow-top', 'arrow-bottom');
 
             if (idx >= obSteps.length) {
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb_v3', 'true');
+                localStorage.setItem('hasSeenOb_v4', 'true');
                 return;
             }
 
@@ -515,39 +452,35 @@
             document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? 'Start' : 'Next';
 
             const tooltipWidth = 280;
-            // 默认居中
             let left = rect.left + rect.width / 2 - (tooltipWidth / 2);
             let arrowPos = '50%';
 
-            // 边缘检测 logic
+            // Edge detection
             const padding = 20;
-            // 如果右侧溢出
             if (left + tooltipWidth > window.innerWidth - padding) {
                 left = window.innerWidth - tooltipWidth - padding;
-                // 计算箭头偏移量，使其仍指向目标中心
                 const targetCenter = rect.left + rect.width / 2;
-                const tooltipLeftEdge = left;
-                const offset = targetCenter - tooltipLeftEdge;
-                arrowPos = `${offset}px`;
+                arrowPos = `${targetCenter - left}px`;
             }
-            // 如果左侧溢出
             if (left < padding) {
                 left = padding;
                 const targetCenter = rect.left + rect.width / 2;
-                const offset = targetCenter - padding;
-                arrowPos = `${offset}px`;
+                arrowPos = `${targetCenter - padding}px`;
             }
 
             document.documentElement.style.setProperty('--arrow-pos', arrowPos);
-
-            if (step.pos === 'bottom') {
-                tooltip.style.top = (rect.bottom + 15) + 'px';
-                tooltip.className = 'ob-tooltip top';
-            } else {
-                tooltip.style.top = (rect.top - 160) + 'px';
-                tooltip.className = 'ob-tooltip bottom';
-            }
             tooltip.style.left = left + 'px';
+
+            // 🛑 修复：箭头方向逻辑
+            if (step.pos === 'bottom') {
+                // 气泡在元素下方 -> 箭头在气泡顶部 (arrow-top)
+                tooltip.style.top = (rect.bottom + 15) + 'px';
+                tooltip.classList.add('arrow-top');
+            } else {
+                // 气泡在元素上方 -> 箭头在气泡底部 (arrow-bottom)
+                tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px';
+                tooltip.classList.add('arrow-bottom');
+            }
         }
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
