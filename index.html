@@ -8,45 +8,104 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
 
     <style>
-        /* --- 样式保持不变 --- */
-        :root { --primary-color: #007aff; --bg-color: #f5f5f7; --text-main: #1d1d1f; --text-secondary: #86868b; --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px; --shadow-sm: 0 2px 8px rgba(0,0,0,0.04); --shadow-lg: 0 12px 30px rgba(0,0,0,0.12); }
-        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        /* --- 基础变量 --- */
+        :root {
+            --primary-color: #007aff;
+            --bg-color: #f5f5f7;
+            --text-main: #1d1d1f;
+            --text-secondary: #86868b;
+            --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
+            background-color: var(--bg-color); color: var(--text-main);
+            margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* --- 导航 --- */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); }
         .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
         .nav-right { display: flex; gap: 10px; }
         .nav-btn { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
         .nav-btn:hover { transform: scale(1.02); }
+
+        /* --- 舞台 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
-        .upload-placeholder { text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg); cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
-        .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
+        
+        .upload-placeholder {
+            text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
+            cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
+        }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .t2i-hint { margin-top: 20px; font-size: 13px; color: var(--text-secondary); background: #f0f0f5; padding: 8px 16px; border-radius: 8px; }
-        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; }
-        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; }
-        
-        /* 贪吃蛇边框 */
-        .snake-box { position: absolute; inset: 0; pointer-events: none; z-index: 55; display: none; }
-        .image-container.is-loading .snake-box { display: block; }
-        .snake-box span { position: absolute; display: block; }
-        .snake-box span:nth-child(1) { top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary-color)); animation: snake1 1.5s linear infinite; }
-        .snake-box span:nth-child(2) { top: -100%; right: 0; width: 4px; height: 100%; background: linear-gradient(180deg, transparent, var(--primary-color)); animation: snake2 1.5s linear infinite; animation-delay: 0.375s; }
-        .snake-box span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 4px; background: linear-gradient(270deg, transparent, var(--primary-color)); animation: snake3 1.5s linear infinite; animation-delay: 0.75s; }
-        .snake-box span:nth-child(4) { bottom: -100%; left: 0; width: 4px; height: 100%; background: linear-gradient(360deg, transparent, var(--primary-color)); animation: snake4 1.5s linear infinite; animation-delay: 1.125s; }
-        @keyframes snake1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-        @keyframes snake2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-        @keyframes snake3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-        @keyframes snake4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
 
-        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 50; opacity: 0; transition: opacity 0.3s; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* 图片容器 */
+        .image-container {
+            position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
+            overflow: hidden; 
+        }
+        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
+        /* 文生图时的模糊效果 */
+        .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
+
+        /* 🆕 完美圆角贪吃蛇边框 (Mask 实现) */
+        .snake-border {
+            position: absolute; inset: 0; pointer-events: none; z-index: 55;
+            border-radius: var(--radius-md); 
+            padding: 3px; /* 边框厚度 */
+            /* 关键：使用 mask 合成，只保留 padding 区域 */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color));
+            animation: rotateSnake 3s linear infinite;
+            display: none;
+        }
+        .image-container.is-loading .snake-border { display: block; }
+        
+        /* 使用 @property 实现平滑角度旋转 (现代浏览器) */
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.6); /* 更通透一点 */
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 50; opacity: 0; transition: opacity 0.3s;
+            padding: 20px; box-sizing: border-box; overflow-y: auto;
+        }
         .loading-overlay.visible { opacity: 1; }
-        .fun-fact-card { text-align: center; margin-bottom: 30px; max-width: 320px; animation: fadeUp 0.5s ease-out; background: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .fact-icon { font-size: 32px; margin-bottom: 10px; display: inline-block; animation: bounce 2s infinite; }
-        .fact-title { font-size: 14px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; }
-        .fact-text { font-size: 15px; font-weight: 500; color: var(--text-main); min-height: 45px; transition: opacity 0.3s; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .fun-fact-card {
+            text-align: center; margin-bottom: 20px; max-width: 320px;
+            animation: fadeUp 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .fact-title { font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; }
+        .fact-text { font-size: 14px; font-weight: 500; color: var(--text-main); min-height: 40px; transition: opacity 0.3s; }
+        
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .ad-container-box { width: 100%; max-width: 336px; height: 280px; flex-shrink: 0; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
-        .unlimited-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px; background: rgba(255, 255, 255, 0.8); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+
+        /* 🆕 广告位高度优化 (4:3) */
+        .ad-container-box {
+            width: 100%; max-width: 320px; 
+            aspect-ratio: 4/3; /* 强制比例 */
+            max-height: 240px; /* 限制最大高度 */
+            flex-shrink: 0;
+            background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
+            justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px;
+        }
+
+        .unlimited-toggle {
+            display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px;
+            background: rgba(255, 255, 255, 0.9); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm);
+        }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -54,13 +113,17 @@
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(18px); }
+
+        /* --- 其他组件 --- */
         .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
+        
         .action-bar { position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); padding: 8px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 20; animation: popUp 0.4s; }
         @keyframes popUp { from { transform: translateY(20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
         .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s; }
         .action-btn:hover { background: rgba(0,0,0,0.05); }
         .action-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
         .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: center; }
         .chips-container::-webkit-scrollbar { display: none; }
@@ -71,12 +134,14 @@
         .input-box input { flex: 1; border: none; background: transparent; padding: 12px 20px; font-size: 16px; color: var(--text-main); outline: none; min-width: 0; }
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 500; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; min-height: 65px; }
+
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -89,6 +154,17 @@
         .gallery-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
+
+        /* 🆕 Onboarding 引导页 */
+        .onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 999; display: none; justify-content: center; align-items: center; color: white; text-align: center; }
+        .onboarding-card { max-width: 320px; padding: 20px; }
+        .ob-step { margin-bottom: 40px; opacity: 0; transition: opacity 0.5s; display: none; }
+        .ob-step.active { opacity: 1; display: block; }
+        .ob-icon { font-size: 60px; margin-bottom: 20px; display: block; }
+        .ob-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .ob-desc { font-size: 16px; opacity: 0.8; line-height: 1.6; }
+        .ob-btn { margin-top: 30px; background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 99px; font-size: 16px; font-weight: 600; cursor: pointer; }
+
         @media (max-width: 600px) {
             .navbar { padding: 15px 20px; }
             .stage { padding: 15px; padding-bottom: 160px; }
@@ -124,15 +200,18 @@
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
-            <div class="snake-box"><span></span><span></span><span></span><span></span></div>
+            
+            <div class="snake-border"></div>
+
             <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="Close">✕</button>
+
             <div id="actionBar" class="action-bar">
                 <button class="action-btn" onclick="downloadImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
                 <button class="action-btn" onclick="shareImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
             </div>
+
             <div id="loadingOverlay" class="loading-overlay">
                 <div class="fun-fact-card">
-                    <div class="fact-icon">💡</div>
                     <div class="fact-title">DID YOU KNOW?</div>
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
@@ -164,6 +243,29 @@
         </div>
     </div>
 
+    <div id="onboarding" class="onboarding-overlay">
+        <div class="onboarding-card">
+            <div class="ob-step active" id="step1">
+                <span class="ob-icon">👋</span>
+                <div class="ob-title">欢迎来到 Nano Banana</div>
+                <div class="ob-desc">这里是您的魔法影像工作室。一键修复老照片、智能换背景，或用文字创造全新世界。</div>
+                <button class="ob-btn" onclick="nextStep(2)">下一步</button>
+            </div>
+            <div class="ob-step" id="step2">
+                <span class="ob-icon">📷</span>
+                <div class="ob-title">上传或输入</div>
+                <div class="ob-desc">点击屏幕中央上传照片，或者直接在底部输入框告诉 AI 您想画什么。</div>
+                <button class="ob-btn" onclick="nextStep(3)">下一步</button>
+            </div>
+            <div class="ob-step" id="step3">
+                <span class="ob-icon">✨</span>
+                <div class="ob-title">灵感无限</div>
+                <div class="ob-desc">不知道写什么？点击顶部的「灵感广场」，发现更多创意玩法。</div>
+                <button class="ob-btn" onclick="finishOnboarding()">开始创作</button>
+            </div>
+        </div>
+    </div>
+
     <div class="gallery-modal" id="galleryModal">
         <div class="gallery-header">
             <h2 data-i18n="galleryTitle">✨ 灵感广场</h2>
@@ -177,7 +279,7 @@
         const WORKER_ENDPOINT = '/api/repair'; 
         const STATUS_ENDPOINT = '/api/status';
 
-        // --- I18n & Facts ---
+        // --- I18n ---
         const i18nData = {
             cn: {
                 galleryBtn: "✨ 灵感广场", uploadTitle: "上传图片 / 开始创作", uploadDesc: "支持 JPG, PNG, WebP (Max 10MB)", uploadHint: "💡 提示：不想上传？直接在底部输入描述，即可生成新图片！", unlimitedToggle: "⚡️ 开启无限生成 (自动补充)", verifyTitle: "安全验证", verifyDesc: "为了确保服务稳定，请完成一次验证。验证成功后 1 小时内无需再次验证。", galleryTitle: "✨ 灵感广场", promptPlaceholder: "描述你想怎么改，或者想生成什么...", alertLimit: "今日免费额度已用完！\n\n开启【无限模式】(含广告) 可继续使用，是否开启？",
@@ -227,6 +329,22 @@
             localStorage.setItem('isUnlimitedMode', e.target.checked);
             adBox.style.display = e.target.checked ? 'flex' : 'none';
         });
+
+        // --- Onboarding Logic ---
+        function checkOnboarding() {
+            if (!localStorage.getItem('hasSeenOnboarding')) {
+                document.getElementById('onboarding').style.display = 'flex';
+            }
+        }
+        window.nextStep = function(step) {
+            document.querySelectorAll('.ob-step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step'+step).classList.add('active');
+        }
+        window.finishOnboarding = function() {
+            document.getElementById('onboarding').style.display = 'none';
+            localStorage.setItem('hasSeenOnboarding', 'true');
+        }
+        checkOnboarding();
 
         // Turnstile
         let turnstileWidgetId = null;
@@ -319,24 +437,43 @@
         let currentFile = null;
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
+            handleFileSelect(file);
+        });
+
+        // 🆕 统一处理文件选择 (含 T2I 占位逻辑)
+        function handleFileSelect(file) {
             currentFile = file;
             const reader = new FileReader();
             reader.onload = (ev) => {
                 displayImage.src = ev.target.result;
-                uploadArea.style.display = 'none'; imageContainer.style.display = 'flex';
-                imageContainer.classList.add('loaded'); actionBar.style.display = 'none';
+                displayImage.classList.remove('pixelating'); // 清除可能的 T2I 特效
+                uploadArea.style.display = 'none'; 
+                imageContainer.style.display = 'flex';
+                imageContainer.classList.add('loaded'); 
+                actionBar.style.display = 'none';
             }
             reader.readAsDataURL(file);
-        });
+        }
+
+        // 🆕 模拟文生图占位 (T2I Experience)
+        function simulateT2IPlaceholder() {
+            // 随便弄个噪点图或者 logo 作为底图，并应用模糊
+            // 这里简单用一个灰色背景，配合 CSS blur
+            displayImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI1MCIgZmlsbD0iI2NjYyI+QUk8L3RleHQ+PC9zdmc+';
+            displayImage.classList.add('pixelating'); // 添加模糊 CSS
+            uploadArea.style.display = 'none';
+            imageContainer.style.display = 'flex';
+            imageContainer.classList.add('loaded');
+        }
 
         window.resetCanvas = function() {
             currentFile = null; photoFile.value = ''; displayImage.src = '';
+            displayImage.classList.remove('pixelating');
             imageContainer.style.display = 'none'; imageContainer.classList.remove('loaded');
             uploadArea.style.display = 'flex'; actionBar.style.display = 'none'; promptInput.value = '';
         }
 
-        // 🚀 激进压缩：1024px + 0.6 quality (解决 Timeout)
-        async function compressImage(file, maxWidth = 1024) {
+        async function compressImage(file, maxWidth = 1280) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -345,14 +482,12 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
+                        let width = img.width; let height = img.height;
                         if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
                         else { if (height > maxWidth) { width *= maxWidth / height; height = maxWidth; } }
                         canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.6);
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.8);
                     };
                 };
             });
@@ -369,7 +504,6 @@
             else { try { await navigator.clipboard.write([new ClipboardItem({[currentFile.type]:currentFile})]); alert('Copied!'); } catch(e){ alert('Share not supported'); } }
         }
 
-        // --- 轮询逻辑 (Poll Task) ---
         async function pollTask(taskId) {
             const maxAttempts = 100; // 5 mins
             let attempts = 0;
@@ -396,6 +530,11 @@
             const input = document.querySelector('#verifyModal [name="cf-turnstile-response"]');
             if (input && input.value) turnstileToken = input.value;
 
+            // 1. 如果没有图，是文生图，先显示占位效果
+            if (!currentFile && prompt) {
+                simulateT2IPlaceholder();
+            }
+
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
@@ -415,16 +554,11 @@
             if(isUnlimited) formData.append('isUnlimited', 'true');
             if(turnstileToken) formData.append('turnstileToken', turnstileToken);
 
-            try {
-                // 1. 提交任务 (POST)
-                const response = await fetch(WORKER_ENDPOINT, { method: 'POST', body: formData });
-                
-                // 🛡️ 捕获非 JSON 响应 (如 524 Timeout, 500)
-                if (!response.ok && response.status !== 401 && response.status !== 429) {
-                    if (response.status === 524) throw new Error("Timeout: AI is busy");
-                    throw new Error(`Server Error: ${response.status}`);
-                }
+            const tasks = [ fetch(WORKER_ENDPOINT, { method: 'POST', body: formData }) ];
+            if (isUnlimited) tasks.push(new Promise(r => setTimeout(r, 4000))); 
 
+            try {
+                const [response] = await Promise.all(tasks);
                 const result = await response.json();
 
                 if (response.status === 401) {
@@ -444,32 +578,29 @@
                     return;
                 }
 
-                // 2. 轮询结果 (GET)
-                let finalImage = null;
-                if (result.status === 'queued' && result.taskId) {
-                    finalImage = await pollTask(result.taskId);
-                } else if (result.image) {
-                    finalImage = result.image;
-                }
+                if (response.ok) {
+                    let finalImage = null;
+                    if (result.status === 'queued' && result.taskId) {
+                        finalImage = await pollTask(result.taskId);
+                    } else if (result.image) {
+                        finalImage = result.image;
+                    }
 
-                if (finalImage) {
-                    displayImage.src = finalImage;
-                    const res = await fetch(finalImage);
-                    const blob = await res.blob();
-                    currentFile = new File([blob], "edited.png", { type: "image/png" });
-                    promptInput.value = '';
-                    actionBar.style.display = 'flex';
+                    if (finalImage) {
+                        displayImage.src = finalImage;
+                        displayImage.classList.remove('pixelating'); // 移除模糊
+                        const res = await fetch(finalImage);
+                        const blob = await res.blob();
+                        currentFile = new File([blob], "edited.png", { type: "image/png" });
+                        promptInput.value = '';
+                        actionBar.style.display = 'flex';
+                    }
                 } else {
                     alert(result.message || 'Error');
                 }
-
             } catch (err) { 
                 console.error(err); 
-                if(err.message.includes("Timeout")) {
-                    alert("AI is busy. Please try smaller image.");
-                } else {
-                    alert('Network Error');
-                }
+                if(err.message.includes("Timeout")) { alert("AI is busy."); } else { alert('Network Error'); }
             } finally {
                 if (!pendingSubmit) {
                     stopCreativeLoading();
