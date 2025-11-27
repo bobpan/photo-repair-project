@@ -17,6 +17,8 @@
             --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+            /* 动态箭头位置变量 */
+            --arrow-pos: 50%; 
         }
 
         body {
@@ -25,7 +27,7 @@
             margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- 导航栏 & 模式切换器 --- */
+        /* --- 导航栏 --- */
         .navbar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 20px; z-index: 100;
@@ -33,12 +35,11 @@
         }
         .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; }
         
-        /* 🆕 模式切换器 (Segmented Control) */
         .mode-switcher {
             background: rgba(118, 118, 128, 0.12);
             padding: 2px; border-radius: 8px;
             display: flex; position: relative;
-            margin: 0 auto; /* 居中 */
+            margin: 0 auto; 
         }
         .mode-btn {
             border: none; background: transparent;
@@ -47,7 +48,6 @@
             border-radius: 6px; z-index: 2; width: 80px; transition: color 0.2s;
         }
         .mode-btn.active { font-weight: 600; }
-        /* 滑块背景 */
         .mode-slider {
             position: absolute; top: 2px; left: 2px; bottom: 2px; width: 80px;
             background: white; border-radius: 6px;
@@ -63,15 +63,14 @@
         }
         .nav-icon-btn:hover { background: rgba(0,0,0,0.05); }
 
-        /* --- 舞台区域 (根据模式变化) --- */
+        /* --- 舞台区域 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
         
-        /* 模式内容容器 */
         .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
         .mode-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 🛠️ Edit 模式：上传框 */
+        /* Edit Mode Upload */
         .upload-placeholder {
             text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
             cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
@@ -80,10 +79,8 @@
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .hint-text { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 
-        /* ✨ Create 模式：创意引导 */
-        .create-placeholder {
-            text-align: center; max-width: 450px;
-        }
+        /* Create Mode Placeholder */
+        .create-placeholder { text-align: center; max-width: 450px; }
         .create-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .create-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
@@ -95,7 +92,7 @@
         }
         .s-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
 
-        /* 通用图片容器 */
+        /* Image Container */
         .image-container {
             position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); 
             box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
@@ -104,7 +101,7 @@
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
-        /* 圆角贪吃蛇边框 */
+        /* Snake Border */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 55;
             border-radius: var(--radius-md); padding: 3px; 
@@ -176,7 +173,6 @@
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
 
-        /* Modal & Gallery */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -197,18 +193,25 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* Onboarding */
+        /* --- 🆕 Onboarding (Smart Spotlight) --- */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
+        
         .ob-tooltip {
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             animation: floatUp 0.3s ease-out; display: none;
+            /* 关键：使用 var 控制箭头位置 */
+            --arrow-left: 50%;
         }
-        .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); }
-        .ob-tooltip.top::after { bottom: -6px; left: 50%; margin-left: -6px; }
-        .ob-tooltip.bottom::after { top: -6px; left: 50%; margin-left: -6px; }
+        .ob-tooltip::after { 
+            content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); 
+            left: var(--arrow-left); margin-left: -6px; /* 使用变量 */
+        }
+        .ob-tooltip.top::after { bottom: -6px; }
+        .ob-tooltip.bottom::after { top: -6px; }
+
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px; }
         .ob-step-btn { background: var(--primary-color); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
@@ -220,6 +223,7 @@
             .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
+            /* Loading 全屏居中 */
             .loading-overlay { padding: 20px; justify-content: center; } 
         }
     </style>
@@ -254,8 +258,7 @@
                 <div class="create-icon">✨</div>
                 <h3 class="create-title" data-i18n="createTitle">输入文字，创造世界</h3>
                 <p class="create-desc" data-i18n="createDesc">只需输入描述，AI 即可为您生成独一无二的图像。</p>
-                <div class="suggestion-chips" id="createChips">
-                    </div>
+                <div class="suggestion-chips" id="createChips"></div>
             </div>
         </div>
 
@@ -325,11 +328,11 @@
         const STATUS_ENDPOINT = '/api/status';
 
         // --- 全局状态 ---
-        let currentMode = 'create'; // 'create' or 'edit'
+        let currentMode = 'create'; 
         let currentFile = null;
         let curLang = localStorage.getItem('lang') || 'cn';
 
-        // --- I18n Data (区分模式) ---
+        // --- I18n Data ---
         const i18nData = {
             cn: {
                 createTitle: "输入文字，创造世界",
@@ -342,7 +345,6 @@
                 alertLimit: "今日额度已尽！开启无限模式继续？",
                 promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." },
                 facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
-                // 区分模式的 Chips
                 chips: {
                     create: [
                         { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." },
@@ -400,45 +402,36 @@
         window.switchMode = function(mode) {
             currentMode = mode;
             
-            // 1. UI 状态切换
+            // UI Switch
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
             
-            // 滑块动画
             const slider = document.getElementById('modeSlider');
             slider.style.transform = mode === 'create' ? 'translateX(0)' : 'translateX(100%)';
 
-            // 2. 内容区域切换 (如果未生成图片)
+            // Content Switch
             if (document.getElementById('imageContainer').style.display === 'none') {
                 document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
                 document.getElementById(`${mode}Content`).classList.add('active');
             }
-
-            // 3. 刷新 Chips 和 Placeholder
-            updateLanguage();
             
-            // 4. 重置状态 (可选)
-            // if (mode === 'create') currentFile = null; 
+            // 🆕 修复 1：确保上传按钮在 Edit 模式下可见
+            if (mode === 'edit' && document.getElementById('imageContainer').style.display === 'none') {
+                document.getElementById('uploadArea').style.display = 'flex';
+            }
+
+            updateLanguage();
         }
 
-        // --- I18N Update ---
         function updateLanguage() {
             const t = i18nData[curLang];
-            // Static Text
             document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t[el.getAttribute('data-i18n')]; });
-            // Dynamic Inputs
             document.getElementById('promptInput').placeholder = t.promptPlaceholder[currentMode];
-            // Chips (Contextual)
             const chips = t.chips[currentMode];
             const chipsHTML = chips.map(c => `<div class="chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`).join('');
-            
             document.getElementById('chipsContainer').innerHTML = chipsHTML;
-            
-            // Populate Create Placeholder Chips too
             if(document.getElementById('createChips')) {
-                document.getElementById('createChips').innerHTML = t.chips['create'].map(c => 
-                    `<div class="s-chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`
-                ).join('');
+                document.getElementById('createChips').innerHTML = t.chips['create'].map(c => `<div class="s-chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`).join('');
             }
         }
         
@@ -449,13 +442,8 @@
 
         const langBtn = document.getElementById('langToggle');
         langBtn.addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
-
-        // --- Init ---
         updateLanguage();
-        // 绑定模式切换点击
-        // HTML onClick handles it.
 
-        // --- 模拟 T2I 占位图 ---
         function simulateT2IPlaceholder() {
             document.getElementById('displayImage').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
             document.getElementById('displayImage').classList.add('pixelating');
@@ -464,7 +452,6 @@
             document.getElementById('imageContainer').classList.add('loaded');
         }
 
-        // --- Reset Canvas ---
         window.resetCanvas = function() {
             currentFile = null; 
             document.getElementById('photoFile').value = ''; 
@@ -473,23 +460,29 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('imageContainer').classList.remove('loaded');
             
-            // Show correct mode content
-            switchMode(currentMode);
+            // 重置时切回当前模式，并确保 UI 状态正确
+            document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${currentMode}Content`).classList.add('active');
+            
+            // 强制显示上传区 (如果是 Edit 模式)
+            if (currentMode === 'edit') {
+                document.getElementById('uploadArea').style.display = 'flex';
+            }
             
             document.getElementById('actionBar').style.display = 'none';
             document.getElementById('promptInput').value = '';
         }
 
-        // --- Onboarding (Updated Steps) ---
+        // --- 🆕 修复 2: 智能 Onboarding (防止溢出) ---
         const obSteps = [
             { id: 'modeSwitcher', key: 's1', pos: 'bottom' },
-            { id: 'magicBar', key: 's2', pos: 'top' }, // Target container ID
+            { id: 'magicBar', key: 's2', pos: 'top' }, 
             { id: 'galleryToggle', key: 's3', pos: 'bottom' }
         ];
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb_v2')) { // Use v2 key to show again for new design
+            if (!localStorage.getItem('hasSeenOb_v3')) { // Bump version
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -504,13 +497,12 @@
             if (idx >= obSteps.length) {
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb_v2', 'true');
+                localStorage.setItem('hasSeenOb_v3', 'true');
                 return;
             }
 
             curStepIdx = idx;
             const step = obSteps[idx];
-            // Use fallback if ID missing (e.g. dynamic elements)
             const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); 
             const content = i18nData[curLang].ob[step.key];
 
@@ -522,9 +514,31 @@
             document.getElementById('obDesc').innerText = content.d;
             document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? 'Start' : 'Next';
 
-            let left = rect.left + rect.width/2 - 140;
-            if (left < 10) left = 10;
-            if (left + 280 > window.innerWidth) left = window.innerWidth - 290;
+            const tooltipWidth = 280;
+            // 默认居中
+            let left = rect.left + rect.width / 2 - (tooltipWidth / 2);
+            let arrowPos = '50%';
+
+            // 边缘检测 logic
+            const padding = 20;
+            // 如果右侧溢出
+            if (left + tooltipWidth > window.innerWidth - padding) {
+                left = window.innerWidth - tooltipWidth - padding;
+                // 计算箭头偏移量，使其仍指向目标中心
+                const targetCenter = rect.left + rect.width / 2;
+                const tooltipLeftEdge = left;
+                const offset = targetCenter - tooltipLeftEdge;
+                arrowPos = `${offset}px`;
+            }
+            // 如果左侧溢出
+            if (left < padding) {
+                left = padding;
+                const targetCenter = rect.left + rect.width / 2;
+                const offset = targetCenter - padding;
+                arrowPos = `${offset}px`;
+            }
+
+            document.documentElement.style.setProperty('--arrow-pos', arrowPos);
 
             if (step.pos === 'bottom') {
                 tooltip.style.top = (rect.bottom + 15) + 'px';
@@ -538,12 +552,11 @@
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
 
-        // --- Standard Logic (Upload, Submit, etc) ---
+        // --- Standard Logic ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
             currentFile = file;
-            // Auto switch to edit mode if user uploads
             if (currentMode !== 'edit') switchMode('edit');
             
             const reader = new FileReader();
@@ -558,21 +571,18 @@
             reader.readAsDataURL(file);
         });
 
-        // 提交逻辑
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const submitBtn = document.getElementById('submitBtn');
         const adToggle = document.getElementById('adToggle');
         const adBox = document.getElementById('adBox');
         
-        // Ad State
         if (localStorage.getItem('isUnlimitedMode') === 'true') { adToggle.checked = true; adBox.style.display = 'flex'; }
         adToggle.addEventListener('change', (e) => {
             localStorage.setItem('isUnlimitedMode', e.target.checked);
             adBox.style.display = e.target.checked ? 'flex' : 'none';
         });
 
-        // Turnstile
         let turnstileWidgetId = null;
         let currentTurnstileToken = null;
         function renderTurnstile() {
@@ -598,7 +608,6 @@
             setTimeout(renderTurnstile, 100);
         }
 
-        // 创意动画
         const factText = document.getElementById('factText');
         let factInterval;
         function startCreativeLoading() {
@@ -654,12 +663,10 @@
             const prompt = document.getElementById('promptInput').value.trim();
             if (!currentFile && !prompt) return;
 
-            // 如果当前在 Create 模式且没有文件，先展示 T2I 占位
             if (currentMode === 'create' && !currentFile) {
                 simulateT2IPlaceholder();
             }
 
-            // UI
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
@@ -733,7 +740,7 @@
             }
         });
 
-        // Gallery & Download helpers (Keep existing logic)
+        // Gallery & Download helpers
         const galleryToggle = document.getElementById('galleryToggle');
         const galleryModal = document.getElementById('galleryModal');
         const closeGallery = document.getElementById('closeGallery');
@@ -753,7 +760,6 @@
         window.switchCategory = function(cat) { currentCategory = cat; renderGalleryTabs(); renderGalleryGrid(); }
         function renderGalleryGrid() {
             let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
-            // Filter by Mode if needed, or show all for inspiration
             galleryGrid.innerHTML = items.map(item => `
                 <div class="gallery-item" onclick="applyGallery('${item.prompt.replace(/'/g, "\\'")}')">
                     <img src="${item.img_url}" class="gallery-img" loading="lazy">
