@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Nano Banana AI | 魔法影像工作室</title>
+    <title>Nano Banana AI | 创意与修复</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
 
@@ -25,25 +25,77 @@
             margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- 导航 --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); }
-        .logo { font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
-        .nav-right { display: flex; gap: 10px; }
-        .nav-btn { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 8px 16px; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-sm); }
-        .nav-btn:hover { transform: scale(1.02); }
+        /* --- 导航栏 & 模式切换器 --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 20px; z-index: 100;
+            background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px);
+        }
+        .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; }
+        
+        /* 🆕 模式切换器 (Segmented Control) */
+        .mode-switcher {
+            background: rgba(118, 118, 128, 0.12);
+            padding: 2px; border-radius: 8px;
+            display: flex; position: relative;
+            margin: 0 auto; /* 居中 */
+        }
+        .mode-btn {
+            border: none; background: transparent;
+            padding: 6px 12px; font-size: 13px; font-weight: 500;
+            cursor: pointer; color: var(--text-main);
+            border-radius: 6px; z-index: 2; width: 80px; transition: color 0.2s;
+        }
+        .mode-btn.active { font-weight: 600; }
+        /* 滑块背景 */
+        .mode-slider {
+            position: absolute; top: 2px; left: 2px; bottom: 2px; width: 80px;
+            background: white; border-radius: 6px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 1;
+        }
 
-        /* --- 舞台 --- */
+        .nav-right { display: flex; gap: 8px; }
+        .nav-icon-btn {
+            background: transparent; border: none; font-size: 18px; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .nav-icon-btn:hover { background: rgba(0,0,0,0.05); }
+
+        /* --- 舞台区域 (根据模式变化) --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
         
+        /* 模式内容容器 */
+        .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
+        .mode-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 🛠️ Edit 模式：上传框 */
         .upload-placeholder {
             text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
             cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s;
-            position: relative; /* 为了 Onboarding 高亮 */
         }
+        .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
-        .t2i-hint { margin-top: 20px; font-size: 13px; color: var(--text-secondary); background: #f0f0f5; padding: 8px 16px; border-radius: 8px; }
+        .hint-text { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 
-        /* 图片容器 */
+        /* ✨ Create 模式：创意引导 */
+        .create-placeholder {
+            text-align: center; max-width: 450px;
+        }
+        .create-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .create-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        .create-desc { font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 30px; }
+        .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .s-chip { 
+            background: white; border: 1px solid rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 99px; 
+            font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: 0.2s; 
+        }
+        .s-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
+
+        /* 通用图片容器 */
         .image-container {
             position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); 
             box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
@@ -65,15 +117,12 @@
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* --- 🆕 修复版 Loading Overlay (全屏 Fixed) --- */
+        /* Loading Overlay (Fixed) */
         .loading-overlay {
-            /* 改为 fixed 覆盖全屏，解决移动端横图遮挡问题 */
             position: fixed; inset: 0;
-            background: rgba(255, 255, 255, 0.8); /* 稍微不透明一点，遮住背景 */
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 999; /* 必须极高 */
-            opacity: 0; transition: opacity 0.3s;
+            z-index: 999; opacity: 0; transition: opacity 0.3s;
             padding: 20px; box-sizing: border-box; overflow-y: auto;
         }
         .loading-overlay.visible { opacity: 1; }
@@ -88,7 +137,6 @@
         .fact-text { font-size: 14px; font-weight: 500; color: var(--text-main); min-height: 40px; transition: opacity 0.3s; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 广告位 (4:3) */
         .ad-container-box {
             width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0;
             background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
@@ -108,7 +156,6 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(18px); }
 
-        /* --- 其他组件 --- */
         .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
         
@@ -129,7 +176,7 @@
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
 
-        /* Verify Modal */
+        /* Modal & Gallery */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -137,7 +184,6 @@
         .modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; min-height: 65px; }
 
-        /* Gallery */
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -151,42 +197,29 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* --- 🆕 Onboarding (聚光灯风格) --- */
+        /* Onboarding */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
-        
-        /* 高亮元素样式 */
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
-        
-        /* 气泡提示框 */
         .ob-tooltip {
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             animation: floatUp 0.3s ease-out; display: none;
         }
-        .ob-tooltip::after { /* 小三角 */
-            content: ""; position: absolute; width: 12px; height: 12px; background: white;
-            transform: rotate(45deg);
-        }
-        /* 三角位置类 */
+        .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); }
         .ob-tooltip.top::after { bottom: -6px; left: 50%; margin-left: -6px; }
         .ob-tooltip.bottom::after { top: -6px; left: 50%; margin-left: -6px; }
-
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px; }
         .ob-step-btn { background: var(--primary-color); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
-        
         @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
         @media (max-width: 600px) {
-            .navbar { padding: 15px 20px; }
+            .navbar { padding: 10px 15px; }
             .stage { padding: 15px; padding-bottom: 160px; }
-            .upload-placeholder { padding: 30px 20px; }
             .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
-            .gallery-img { height: 220px; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
-            /* Loading 全屏居中 */
             .loading-overlay { padding: 20px; justify-content: center; } 
         }
     </style>
@@ -202,35 +235,49 @@
 
     <nav class="navbar">
         <div class="logo">Nano Banana 🍌</div>
+        
+        <div class="mode-switcher" id="modeSwitcher">
+            <div class="mode-slider" id="modeSlider"></div>
+            <button class="mode-btn active" data-mode="create" onclick="switchMode('create')">✨ 创意</button>
+            <button class="mode-btn" data-mode="edit" onclick="switchMode('edit')">🛠️ 修复</button>
+        </div>
+
         <div class="nav-right">
-            <button class="nav-btn" id="langToggle">CN</button>
-            <button class="nav-btn" id="galleryToggle">
-                <span data-i18n="galleryBtn">✨ 灵感广场</span>
-            </button>
+            <button class="nav-icon-btn" id="langToggle">🌐</button>
+            <button class="nav-icon-btn" id="galleryToggle">💡</button>
         </div>
     </nav>
 
     <main class="stage">
-        <div id="uploadArea" class="upload-placeholder" onclick="document.getElementById('photoFile').click()">
-            <span class="icon-upload">📷</span>
-            <h3 data-i18n="uploadTitle">上传图片 / 开始创作</h3>
-            <p style="color:var(--text-secondary); margin-top:5px; font-size:14px;" data-i18n="uploadDesc">支持 JPG, PNG, WebP (Max 10MB)</p>
-            <div class="t2i-hint" data-i18n="uploadHint">💡 提示：不想上传？直接在底部输入描述，即可生成新图片！</div>
+        <div id="createContent" class="mode-content active">
+            <div class="create-placeholder" id="createPlaceholder">
+                <div class="create-icon">✨</div>
+                <h3 class="create-title" data-i18n="createTitle">输入文字，创造世界</h3>
+                <p class="create-desc" data-i18n="createDesc">只需输入描述，AI 即可为您生成独一无二的图像。</p>
+                <div class="suggestion-chips" id="createChips">
+                    </div>
+            </div>
         </div>
+
+        <div id="editContent" class="mode-content">
+            <div id="uploadArea" class="upload-placeholder" onclick="document.getElementById('photoFile').click()">
+                <span class="icon-upload">📷</span>
+                <h3 data-i18n="uploadTitle">上传图片修复</h3>
+                <p class="hint-text" data-i18n="uploadDesc">支持 JPG, PNG (Max 10MB)</p>
+            </div>
+        </div>
+
         <input type="file" id="photoFile" accept="image/*">
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
-            
             <div class="snake-border"></div>
-
             <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="Close">✕</button>
-
             <div id="actionBar" class="action-bar">
                 <button class="action-btn" onclick="downloadImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
                 <button class="action-btn" onclick="shareImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
             </div>
-
+            
             <div id="loadingOverlay" class="loading-overlay">
                 <div class="fun-fact-card">
                     <div class="fact-title">DID YOU KNOW?</div>
@@ -248,10 +295,10 @@
         </div>
     </main>
 
-    <div class="magic-bar-wrapper">
+    <div class="magic-bar-wrapper" id="magicBar">
         <div class="chips-container" id="chipsContainer"></div>
         <form id="commandForm" class="input-box">
-            <input type="text" id="promptInput" placeholder="描述你想怎么改..." autocomplete="off" inputmode="search">
+            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
             <button type="submit" id="submitBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
         </form>
     </div>
@@ -277,77 +324,172 @@
         const WORKER_ENDPOINT = '/api/repair'; 
         const STATUS_ENDPOINT = '/api/status';
 
-        // --- I18n ---
+        // --- 全局状态 ---
+        let currentMode = 'create'; // 'create' or 'edit'
+        let currentFile = null;
+        let curLang = localStorage.getItem('lang') || 'cn';
+
+        // --- I18n Data (区分模式) ---
         const i18nData = {
             cn: {
-                galleryBtn: "✨ 灵感广场", uploadTitle: "上传图片 / 开始创作", uploadDesc: "支持 JPG, PNG, WebP (Max 10MB)", uploadHint: "💡 提示：不想上传？直接在底部输入描述，即可生成新图片！", unlimitedToggle: "⚡️ 开启无限生成 (自动补充)", verifyTitle: "安全验证", verifyDesc: "为了确保服务稳定，请完成一次验证。验证成功后 1 小时内无需再次验证。", galleryTitle: "✨ 灵感广场", promptPlaceholder: "描述你想怎么改，或者想生成什么...", alertLimit: "今日免费额度已用完！\n\n开启【无限模式】(含广告) 可继续使用，是否开启？",
-                facts: ["世界上第一张彩色照片拍摄于 1861 年。", "Nano Banana 使用了最先进的 Gemini 3.0 视觉模型。", "AI 正在重构每一个像素的光影细节...", "人脑处理图像的速度比文字快 60,000 倍。", "最早的数码相机重达 3.6 公斤。", "如果网络较慢，请耐心等待 AI 绘制..."],
-                chips: [ { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点，并进行自然、逼真的色彩修复。" }, { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复和去模糊处理。" }, { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画，笔触粗犷，色彩鲜艳。" }, { text: "❄️ 换成雪景", prompt: "把背景换成下雪的巴黎街道，保持人物不变。" }, { text: "🐱 生成图片", prompt: "一只在太空喝咖啡的猫，写实风格，高分辨率。" } ],
+                createTitle: "输入文字，创造世界",
+                createDesc: "无需画笔，只需文字。输入你的想象，AI 为你实现。",
+                uploadTitle: "上传图片修复",
+                uploadDesc: "支持 JPG, PNG (Max 10MB)",
+                unlimitedToggle: "⚡️ 开启无限生成 (自动补充)",
+                verifyTitle: "安全验证", verifyDesc: "验证一次，畅玩一小时。",
+                galleryTitle: "✨ 灵感广场",
+                alertLimit: "今日额度已尽！开启无限模式继续？",
+                promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." },
+                facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
+                // 区分模式的 Chips
+                chips: {
+                    create: [
+                        { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." },
+                        { text: "3D 渲染", prompt: "Cute 3D rendered character, pixar style, soft lighting." },
+                        { text: "水彩风景", prompt: "Watercolor landscape painting, mountains, misty, serene." },
+                        { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." }
+                    ],
+                    edit: [
+                        { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点。" },
+                        { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复。" },
+                        { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画。" },
+                        { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道。" }
+                    ]
+                },
                 ob: {
-                    s1: { t: "上传或创作", d: "点击这里上传照片，或者直接在下方输入描述。" },
-                    s2: { t: "输入指令", d: "告诉 AI 你想怎么改，比如“换个背景”或“修复划痕”。" },
-                    s3: { t: "灵感广场", d: "不知道怎么写？点这里查看 50+ 种创意玩法。" }
+                    s1: { t: "选择模式", d: "左边是「文生图」，右边是「修图」。" },
+                    s2: { t: "输入/上传", d: "在这里输入描述，或在修图模式下上传照片。" },
+                    s3: { t: "寻找灵感", d: "点击这里查看更多高手的提示词。" }
                 }
             },
             en: {
-                galleryBtn: "✨ Gallery", uploadTitle: "Upload / Create", uploadDesc: "JPG, PNG, WebP (Max 10MB)", uploadHint: "💡 Tip: Type a description below to generate a new image!", unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)", verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.", galleryTitle: "✨ Inspiration Gallery", promptPlaceholder: "Describe what you want...", alertLimit: "Daily limit reached! Enable Unlimited Mode to continue?",
-                facts: ["The first color photograph was taken in 1861.", "Powered by Gemini 3.0 Vision.", "Reconstructing pixels with AI magic...", "The first digital camera weighed 8 pounds.", "AI is analyzing the lighting...", "Please wait while AI paints your image..."],
-                chips: [ { text: "🪄 Fix Photo", prompt: "Restore old photo, remove scratches, realistic colorization." }, { text: "👤 Face Enhance", prompt: "Enhance face details, deblur, keep texture." }, { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style oil painting." }, { text: "❄️ Snow Scene", prompt: "Change background to snowy street." }, { text: "🐱 Gen Image", prompt: "A cat drinking coffee in space, photorealistic." } ],
+                createTitle: "Imagine & Create",
+                createDesc: "Just type your imagination, AI will paint it.",
+                uploadTitle: "Upload to Fix",
+                uploadDesc: "JPG, PNG (Max 10MB)",
+                unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)",
+                verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.",
+                galleryTitle: "✨ Gallery",
+                alertLimit: "Limit reached! Enable Unlimited Mode?",
+                promptPlaceholder: { create: "A cat in space...", edit: "Fix scratches..." },
+                facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."],
+                chips: {
+                    create: [
+                        { text: "Cyberpunk", prompt: "Cyberpunk city street, neon lights." },
+                        { text: "3D Render", prompt: "Cute 3D character, pixar style." },
+                        { text: "Watercolor", prompt: "Watercolor landscape painting." },
+                        { text: "Sci-Fi", prompt: "Futuristic spaceship interior." }
+                    ],
+                    edit: [
+                        { text: "🪄 Fix", prompt: "Restore old photo, remove scratches." },
+                        { text: "👤 Face", prompt: "Enhance face details." },
+                        { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style." },
+                        { text: "❄️ Snow", prompt: "Change background to snow." }
+                    ]
+                },
                 ob: {
-                    s1: { t: "Upload or Create", d: "Click here to upload, or just type below." },
-                    s2: { t: "Type Command", d: "Tell AI what to do, e.g. 'Fix scratches' or 'Change background'." },
-                    s3: { t: "Get Inspired", d: "Stuck? Click here to explore 50+ creative styles." }
+                    s1: { t: "Choose Mode", d: "Create from scratch OR Edit photos." },
+                    s2: { t: "Input / Upload", d: "Type here, or upload in Edit mode." },
+                    s3: { t: "Gallery", d: "Find inspiration here." }
                 }
             }
         };
 
-        let curLang = localStorage.getItem('lang') || 'cn';
-        const langBtn = document.getElementById('langToggle');
+        // --- 核心模式切换逻辑 ---
+        window.switchMode = function(mode) {
+            currentMode = mode;
+            
+            // 1. UI 状态切换
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
+            
+            // 滑块动画
+            const slider = document.getElementById('modeSlider');
+            slider.style.transform = mode === 'create' ? 'translateX(0)' : 'translateX(100%)';
+
+            // 2. 内容区域切换 (如果未生成图片)
+            if (document.getElementById('imageContainer').style.display === 'none') {
+                document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+                document.getElementById(`${mode}Content`).classList.add('active');
+            }
+
+            // 3. 刷新 Chips 和 Placeholder
+            updateLanguage();
+            
+            // 4. 重置状态 (可选)
+            // if (mode === 'create') currentFile = null; 
+        }
+
+        // --- I18N Update ---
         function updateLanguage() {
             const t = i18nData[curLang];
+            // Static Text
             document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t[el.getAttribute('data-i18n')]; });
-            document.getElementById('promptInput').placeholder = t.promptPlaceholder;
-            langBtn.innerText = curLang.toUpperCase();
-            renderChips();
+            // Dynamic Inputs
+            document.getElementById('promptInput').placeholder = t.promptPlaceholder[currentMode];
+            // Chips (Contextual)
+            const chips = t.chips[currentMode];
+            const chipsHTML = chips.map(c => `<div class="chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`).join('');
+            
+            document.getElementById('chipsContainer').innerHTML = chipsHTML;
+            
+            // Populate Create Placeholder Chips too
+            if(document.getElementById('createChips')) {
+                document.getElementById('createChips').innerHTML = t.chips['create'].map(c => 
+                    `<div class="s-chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`
+                ).join('');
+            }
         }
+        
+        window.setInput = function(prompt, text) {
+            const input = document.getElementById('promptInput');
+            input.value = prompt; input.focus();
+        }
+
+        const langBtn = document.getElementById('langToggle');
         langBtn.addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
 
-        const chipsContainer = document.getElementById('chipsContainer');
-        function renderChips() {
-            const t = i18nData[curLang];
-            chipsContainer.innerHTML = t.chips.map(c => `<div class="chip" data-prompt="${c.prompt}">${c.text}</div>`).join('');
-        }
-        chipsContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('chip')) {
-                document.getElementById('promptInput').value = e.target.getAttribute('data-prompt');
-                document.getElementById('promptInput').focus();
-            }
-        });
-        updateLanguage(); 
+        // --- Init ---
+        updateLanguage();
+        // 绑定模式切换点击
+        // HTML onClick handles it.
 
-        window.applyPrompt = function(text) {
-            const input = document.getElementById('promptInput'); input.value = text;
-            document.getElementById('galleryModal').classList.remove('open'); input.focus();
+        // --- 模拟 T2I 占位图 ---
+        function simulateT2IPlaceholder() {
+            document.getElementById('displayImage').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
+            document.getElementById('displayImage').classList.add('pixelating');
+            document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('imageContainer').style.display = 'flex';
+            document.getElementById('imageContainer').classList.add('loaded');
         }
 
-        const adToggle = document.getElementById('adToggle');
-        const adBox = document.getElementById('adBox');
-        if (localStorage.getItem('isUnlimitedMode') === 'true') { adToggle.checked = true; adBox.style.display = 'flex'; }
-        adToggle.addEventListener('change', (e) => {
-            localStorage.setItem('isUnlimitedMode', e.target.checked);
-            adBox.style.display = e.target.checked ? 'flex' : 'none';
-        });
+        // --- Reset Canvas ---
+        window.resetCanvas = function() {
+            currentFile = null; 
+            document.getElementById('photoFile').value = ''; 
+            document.getElementById('displayImage').src = '';
+            document.getElementById('displayImage').classList.remove('pixelating');
+            document.getElementById('imageContainer').style.display = 'none';
+            document.getElementById('imageContainer').classList.remove('loaded');
+            
+            // Show correct mode content
+            switchMode(currentMode);
+            
+            document.getElementById('actionBar').style.display = 'none';
+            document.getElementById('promptInput').value = '';
+        }
 
-        // --- 🆕 Onboarding System (Spotlight) ---
+        // --- Onboarding (Updated Steps) ---
         const obSteps = [
-            { id: 'uploadArea', key: 's1', pos: 'bottom' },
-            { id: 'commandForm', key: 's2', pos: 'top' },
+            { id: 'modeSwitcher', key: 's1', pos: 'bottom' },
+            { id: 'magicBar', key: 's2', pos: 'top' }, // Target container ID
             { id: 'galleryToggle', key: 's3', pos: 'bottom' }
         ];
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb')) {
+            if (!localStorage.getItem('hasSeenOb_v2')) { // Use v2 key to show again for new design
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -355,56 +497,82 @@
         }
 
         function showStep(idx) {
-            // Cleanup previous
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip');
             tooltip.style.display = 'none';
 
             if (idx >= obSteps.length) {
-                // Finish
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb', 'true');
+                localStorage.setItem('hasSeenOb_v2', 'true');
                 return;
             }
 
             curStepIdx = idx;
             const step = obSteps[idx];
-            const el = document.getElementById(step.id);
+            // Use fallback if ID missing (e.g. dynamic elements)
+            const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); 
             const content = i18nData[curLang].ob[step.key];
 
-            // Highlight element
             el.classList.add('ob-highlight');
-
-            // Position Tooltip
             const rect = el.getBoundingClientRect();
+            
             tooltip.style.display = 'block';
             document.getElementById('obTitle').innerText = content.t;
             document.getElementById('obDesc').innerText = content.d;
             document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? 'Start' : 'Next';
 
-            // Simple positioning logic
+            let left = rect.left + rect.width/2 - 140;
+            if (left < 10) left = 10;
+            if (left + 280 > window.innerWidth) left = window.innerWidth - 290;
+
             if (step.pos === 'bottom') {
                 tooltip.style.top = (rect.bottom + 15) + 'px';
-                tooltip.style.left = (rect.left + rect.width/2 - 140) + 'px'; // Center width 280
-                tooltip.className = 'ob-tooltip top'; // Arrow points up
+                tooltip.className = 'ob-tooltip top';
             } else {
-                tooltip.style.top = (rect.top - 160) + 'px'; // Height approx
-                tooltip.style.left = (rect.left + rect.width/2 - 140) + 'px';
-                tooltip.className = 'ob-tooltip bottom'; // Arrow points down
+                tooltip.style.top = (rect.top - 160) + 'px';
+                tooltip.className = 'ob-tooltip bottom';
             }
-            
-            // Boundary check (mobile)
-            if (parseInt(tooltip.style.left) < 10) tooltip.style.left = '10px';
+            tooltip.style.left = left + 'px';
         }
-
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
-        
-        // Start Onboarding after language init
         setTimeout(initOnboarding, 500);
 
+        // --- Standard Logic (Upload, Submit, etc) ---
+        const photoFile = document.getElementById('photoFile');
+        photoFile.addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            currentFile = file;
+            // Auto switch to edit mode if user uploads
+            if (currentMode !== 'edit') switchMode('edit');
+            
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('displayImage').src = ev.target.result;
+                document.getElementById('displayImage').classList.remove('pixelating');
+                document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('imageContainer').style.display = 'flex';
+                document.getElementById('imageContainer').classList.add('loaded');
+                document.getElementById('actionBar').style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        });
 
-        // --- Turnstile & Logic ---
+        // 提交逻辑
+        const commandForm = document.getElementById('commandForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const submitBtn = document.getElementById('submitBtn');
+        const adToggle = document.getElementById('adToggle');
+        const adBox = document.getElementById('adBox');
+        
+        // Ad State
+        if (localStorage.getItem('isUnlimitedMode') === 'true') { adToggle.checked = true; adBox.style.display = 'flex'; }
+        adToggle.addEventListener('change', (e) => {
+            localStorage.setItem('isUnlimitedMode', e.target.checked);
+            adBox.style.display = e.target.checked ? 'flex' : 'none';
+        });
+
+        // Turnstile
         let turnstileWidgetId = null;
         let currentTurnstileToken = null;
         function renderTurnstile() {
@@ -420,10 +588,8 @@
                 'expired-callback': function() { currentTurnstileToken = null; }
             });
         }
-        function removeTurnstile() {
-            if (turnstileWidgetId !== null) { turnstile.remove(turnstileWidgetId); turnstileWidgetId = null; currentTurnstileToken = null; }
-        }
-
+        function removeTurnstile() { if (turnstileWidgetId !== null) { turnstile.remove(turnstileWidgetId); turnstileWidgetId = null; currentTurnstileToken = null; } }
+        
         const verifyModal = document.getElementById('verifyModal');
         let pendingSubmit = false;
         function showVerifyModal() {
@@ -432,6 +598,7 @@
             setTimeout(renderTurnstile, 100);
         }
 
+        // 创意动画
         const factText = document.getElementById('factText');
         let factInterval;
         function startCreativeLoading() {
@@ -448,122 +615,26 @@
             clearInterval(factInterval);
         }
 
-        const photoFile = document.getElementById('photoFile');
-        const uploadArea = document.getElementById('uploadArea');
-        const imageContainer = document.getElementById('imageContainer');
-        const displayImage = document.getElementById('displayImage');
-        const actionBar = document.getElementById('actionBar');
-        const clearBtn = document.getElementById('clearBtn');
-        const promptInput = document.getElementById('promptInput');
-        const commandForm = document.getElementById('commandForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        
-        const galleryToggle = document.getElementById('galleryToggle');
-        const galleryModal = document.getElementById('galleryModal');
-        const closeGallery = document.getElementById('closeGallery');
-        const galleryGrid = document.getElementById('galleryGrid');
-        const galleryTabs = document.getElementById('galleryTabs');
-
-        let allGalleryItems = [];
-        let currentCategory = '全部';
-        async function fetchAndRenderGallery() {
-            try { const response = await fetch('/api/gallery'); const data = await response.json();
-                if (data && data.length > 0) { allGalleryItems = data; renderTabs(); renderGrid(); }
-            } catch (error) { console.error(error); }
-        }
-        function renderTabs() {
-            const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
-            galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
-        }
-        window.switchCategory = function(category) { currentCategory = category; renderTabs(); renderGrid(); }
-        function renderGrid() {
-            let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
-            galleryGrid.innerHTML = items.map(item => `
-                <div class="gallery-item" onclick="applyPrompt('${item.prompt.replace(/'/g, "\\'")}')">
-                    <img src="${item.img_url}" class="gallery-img" loading="lazy">
-                    <div class="gallery-content">
-                        <div class="gallery-title">${item.title}</div>
-                        <div class="gallery-prompt">${item.prompt}</div>
-                    </div>
-                </div>`).join('');
-        }
-        galleryToggle.addEventListener('click', () => galleryModal.classList.add('open'));
-        closeGallery.addEventListener('click', () => galleryModal.classList.remove('open'));
-        fetchAndRenderGallery();
-
-        let currentFile = null;
-        photoFile.addEventListener('change', (e) => {
-            const file = e.target.files[0]; if (!file) return;
-            handleFileSelect(file);
-        });
-
-        // 🆕 统一处理逻辑 + T2I 占位
-        function handleFileSelect(file) {
-            currentFile = file;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                displayImage.src = ev.target.result;
-                displayImage.classList.remove('pixelating'); 
-                uploadArea.style.display = 'none'; 
-                imageContainer.style.display = 'flex';
-                imageContainer.classList.add('loaded'); 
-                actionBar.style.display = 'none';
-            }
-            reader.readAsDataURL(file);
-        }
-
-        // 🆕 T2I 占位逻辑 (Latent Noise Style)
-        function simulateT2IPlaceholder() {
-            // 灰底+模糊
-            displayImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
-            displayImage.classList.add('pixelating');
-            uploadArea.style.display = 'none';
-            imageContainer.style.display = 'flex';
-            imageContainer.classList.add('loaded');
-        }
-
-        window.resetCanvas = function() {
-            currentFile = null; photoFile.value = ''; displayImage.src = '';
-            displayImage.classList.remove('pixelating');
-            imageContainer.style.display = 'none'; imageContainer.classList.remove('loaded');
-            uploadArea.style.display = 'flex'; actionBar.style.display = 'none'; promptInput.value = '';
-        }
-
         async function compressImage(file, maxWidth = 1280) {
             return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
+                const reader = new FileReader(); reader.readAsDataURL(file);
                 reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
+                    const img = new Image(); img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width; let height = img.height;
-                        if (width > height) { if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; } } 
-                        else { if (height > maxWidth) { width *= maxWidth / height; height = maxWidth; } }
-                        canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.8);
+                        let w = img.width, h = img.height;
+                        if (w > h) { if (w > maxWidth) { h *= maxWidth / w; w = maxWidth; } } 
+                        else { if (h > maxWidth) { w *= maxWidth / h; h = maxWidth; } }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        canvas.toBlob((blob) => resolve(new File([blob], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.8);
                     };
                 };
             });
         }
 
-        window.downloadImage = function() {
-            if(!currentFile) return;
-            const link = document.createElement('a'); link.href = URL.createObjectURL(currentFile);
-            link.download = 'nano_banana.png'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-        window.shareImage = async function() {
-            if(!currentFile) return;
-            if (navigator.share && navigator.canShare({files:[currentFile]})) { navigator.share({files:[currentFile]}); } 
-            else { try { await navigator.clipboard.write([new ClipboardItem({[currentFile.type]:currentFile})]); alert('Copied!'); } catch(e){ alert('Share not supported'); } }
-        }
-
         async function pollTask(taskId) {
-            const maxAttempts = 100; // 5 mins
-            let attempts = 0;
+            const maxAttempts = 100; let attempts = 0;
             while (attempts < maxAttempts) {
                 try {
                     const res = await fetch(`${STATUS_ENDPOINT}?taskId=${taskId}`);
@@ -575,51 +646,43 @@
                     attempts++;
                 } catch (e) { throw e; }
             }
-            throw new Error('Timeout waiting for result');
+            throw new Error('Timeout');
         }
 
         commandForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const prompt = promptInput.value.trim();
+            const prompt = document.getElementById('promptInput').value.trim();
             if (!currentFile && !prompt) return;
 
-            let turnstileToken = null;
-            const input = document.querySelector('#verifyModal [name="cf-turnstile-response"]');
-            if (input && input.value) turnstileToken = input.value;
+            // 如果当前在 Create 模式且没有文件，先展示 T2I 占位
+            if (currentMode === 'create' && !currentFile) {
+                simulateT2IPlaceholder();
+            }
 
-            // 1. T2I 占位
-            if (!currentFile && prompt) simulateT2IPlaceholder();
-
+            // UI
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
-            actionBar.style.display = 'none';
-            clearBtn.style.opacity = '0';
+            document.getElementById('actionBar').style.display = 'none';
+            document.getElementById('clearBtn').style.opacity = '0';
             startCreativeLoading();
 
             const isUnlimited = adToggle.checked;
             const formData = new FormData();
             
             if (currentFile) {
-                const compressedFile = await compressImage(currentFile);
-                formData.append('photo', compressedFile);
+                const compressed = await compressImage(currentFile);
+                formData.append('photo', compressed);
             }
-            
             formData.append('prompt', prompt);
             if(isUnlimited) formData.append('isUnlimited', 'true');
-            if(turnstileToken) formData.append('turnstileToken', turnstileToken);
+            if(currentTurnstileToken) formData.append('turnstileToken', currentTurnstileToken);
 
             const tasks = [ fetch(WORKER_ENDPOINT, { method: 'POST', body: formData }) ];
-            if (isUnlimited) tasks.push(new Promise(r => setTimeout(r, 4000))); 
+            if (isUnlimited) tasks.push(new Promise(r => setTimeout(r, 4000)));
 
             try {
                 const [response] = await Promise.all(tasks);
-                
-                if (!response.ok && response.status !== 401 && response.status !== 429) {
-                    if (response.status === 524) throw new Error("Timeout: AI is busy");
-                    throw new Error(`Server Error: ${response.status}`);
-                }
-
                 const result = await response.json();
 
                 if (response.status === 401) {
@@ -641,38 +704,84 @@
 
                 if (response.ok) {
                     let finalImage = null;
-                    if (result.status === 'queued' && result.taskId) {
-                        finalImage = await pollTask(result.taskId);
-                    } else if (result.image) {
-                        finalImage = result.image;
-                    }
+                    if (result.status === 'queued' && result.taskId) finalImage = await pollTask(result.taskId);
+                    else if (result.image) finalImage = result.image;
 
                     if (finalImage) {
-                        displayImage.src = finalImage;
-                        displayImage.classList.remove('pixelating');
+                        const img = document.getElementById('displayImage');
+                        img.src = finalImage;
+                        img.classList.remove('pixelating');
                         const res = await fetch(finalImage);
                         const blob = await res.blob();
                         currentFile = new File([blob], "edited.png", { type: "image/png" });
-                        promptInput.value = '';
-                        actionBar.style.display = 'flex';
+                        document.getElementById('promptInput').value = '';
+                        document.getElementById('actionBar').style.display = 'flex';
                     }
-                } else {
-                    alert(result.message || 'Error');
-                }
+                } else { alert(result.message || 'Error'); }
             } catch (err) { 
                 console.error(err); 
-                if(err.message.includes("Timeout")) { alert("AI is busy."); } else { alert('Network Error'); }
+                alert(err.message.includes("Timeout") ? "AI is busy." : "Network Error"); 
             } finally {
                 if (!pendingSubmit) {
                     stopCreativeLoading();
                     loadingOverlay.classList.remove('visible');
                     setTimeout(() => loadingOverlay.style.display = 'none', 300);
                     submitBtn.disabled = false;
-                    clearBtn.style.opacity = '';
+                    document.getElementById('clearBtn').style.opacity = '';
                     currentTurnstileToken = null;
                 }
             }
         });
+
+        // Gallery & Download helpers (Keep existing logic)
+        const galleryToggle = document.getElementById('galleryToggle');
+        const galleryModal = document.getElementById('galleryModal');
+        const closeGallery = document.getElementById('closeGallery');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const galleryTabs = document.getElementById('galleryTabs');
+        let allGalleryItems = []; let currentCategory = '全部';
+
+        async function fetchAndRenderGallery() {
+            try { const response = await fetch('/api/gallery'); const data = await response.json();
+                if (data && data.length > 0) { allGalleryItems = data; renderGalleryTabs(); renderGalleryGrid(); }
+            } catch (error) { console.error(error); }
+        }
+        function renderGalleryTabs() {
+            const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
+            galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
+        }
+        window.switchCategory = function(cat) { currentCategory = cat; renderGalleryTabs(); renderGalleryGrid(); }
+        function renderGalleryGrid() {
+            let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
+            // Filter by Mode if needed, or show all for inspiration
+            galleryGrid.innerHTML = items.map(item => `
+                <div class="gallery-item" onclick="applyGallery('${item.prompt.replace(/'/g, "\\'")}')">
+                    <img src="${item.img_url}" class="gallery-img" loading="lazy">
+                    <div class="gallery-content">
+                        <div class="gallery-title">${item.title}</div>
+                        <div class="gallery-prompt">${item.prompt}</div>
+                    </div>
+                </div>`).join('');
+        }
+        window.applyGallery = function(text) {
+            document.getElementById('promptInput').value = text;
+            galleryModal.classList.remove('open');
+            document.getElementById('promptInput').focus();
+        }
+        galleryToggle.addEventListener('click', () => galleryModal.classList.add('open'));
+        closeGallery.addEventListener('click', () => galleryModal.classList.remove('open'));
+        fetchAndRenderGallery();
+
+        window.downloadImage = function() {
+            if(!currentFile) return;
+            const link = document.createElement('a'); link.href = URL.createObjectURL(currentFile);
+            link.download = 'nano_banana.png'; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+        window.shareImage = async function() {
+            if(!currentFile) return;
+            if (navigator.share && navigator.canShare({files:[currentFile]})) { navigator.share({files:[currentFile]}); } 
+            else { try { await navigator.clipboard.write([new ClipboardItem({[currentFile.type]:currentFile})]); alert('Copied!'); } catch(e){} }
+        }
     </script>
 </body>
 </html>
