@@ -17,7 +17,6 @@
             --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
-            /* 动态箭头位置 */
             --arrow-pos: 50%;
         }
 
@@ -28,7 +27,7 @@
         }
 
         /* --- 导航栏 --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
         .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; }
         
         .mode-switcher { background: rgba(118, 118, 128, 0.12); padding: 2px; border-radius: 8px; display: flex; position: relative; margin: 0 auto; }
@@ -41,20 +40,29 @@
         .nav-icon-btn:hover { background: rgba(0,0,0,0.05); }
 
         /* --- 舞台区域 --- */
-        .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; }
+        .stage { 
+            flex: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; /* 垂直居中 */
+            position: relative; 
+            padding: 20px; 
+            padding-bottom: 180px; /* 留出底部空间 */
+            width: 100%; 
+            box-sizing: border-box; 
+            overflow-y: auto; /* 允许舞台内部滚动，防止小屏遮挡 */
+        }
         
-        /* 模式容器 */
         .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
         .mode-content.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 上传框 (Edit模式) */
+        /* Upload & Placeholder */
         .upload-placeholder { text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg); cursor: pointer; background: white; max-width: 400px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
         .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
         .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
         .hint-text { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 
-        /* 创意引导 (Create模式) */
         .create-placeholder { text-align: center; max-width: 450px; }
         .create-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -64,42 +72,95 @@
         .s-chip { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 99px; font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
         .s-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
 
-        /* 图片容器 */
-        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; }
-        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
+        /* --- 图片容器 (画布) --- */
+        .image-container {
+            position: relative; 
+            /* 适配移动端：最大宽度铺满，最大高度适中 */
+            width: 100%; max-width: 600px; 
+            max-height: 65vh;
+            border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-lg); 
+            display: none; /* 初始隐藏 */
+            justify-content: center; align-items: center; 
+            background: #fff; 
+            /* 关键：给一个最小高度，确保 Loading 时广告能放下 */
+            min-height: 400px; 
+            overflow: hidden; 
+        }
+        .image-display { display: block; max-width: 100%; max-height: 65vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
         /* 贪吃蛇边框 */
-        .snake-border { position: absolute; inset: 0; pointer-events: none; z-index: 55; border-radius: var(--radius-md); padding: 3px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color)); animation: rotateSnake 3s linear infinite; display: none; }
+        .snake-border {
+            position: absolute; inset: 0; pointer-events: none; z-index: 55;
+            border-radius: var(--radius-md); padding: 3px; 
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            background: conic-gradient(from var(--angle, 0deg), transparent 70%, var(--primary-color));
+            animation: rotateSnake 3s linear infinite; display: none;
+        }
         .image-container.is-loading .snake-border { display: block; }
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* Loading (Fixed Fullscreen) */
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; opacity: 0; transition: opacity 0.3s; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* --- 🆕 修复版 Loading Overlay (Absolute inside container) --- */
+        .loading-overlay {
+            /* 关键修改：改为 absolute，只遮挡 image-container */
+            position: absolute; 
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: none; 
+            flex-direction: column; 
+            justify-content: center; /* 垂直居中 */
+            align-items: center;
+            z-index: 60; /* 高于图片(5)和蛇(55) */
+            opacity: 0; transition: opacity 0.3s;
+            padding: 10px; box-sizing: border-box; 
+            overflow-y: auto; /* 内容过多可滚动 */
+        }
         .loading-overlay.visible { opacity: 1; }
-        .fun-fact-card { text-align: center; margin-bottom: 20px; max-width: 320px; flex-shrink: 0; animation: fadeUp 0.5s ease-out; background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .fact-title { font-size: 12px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; text-transform: uppercase; }
-        .fact-text { font-size: 14px; font-weight: 500; color: var(--text-main); min-height: 40px; transition: opacity 0.3s; }
+
+        .fun-fact-card {
+            text-align: center; margin-bottom: 15px; max-width: 280px; flex-shrink: 0;
+            animation: fadeUp 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.9); padding: 12px 15px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
+        }
+        .fact-title { font-size: 11px; font-weight: 700; color: var(--primary-color); margin-bottom: 4px; text-transform: uppercase; }
+        .fact-text { font-size: 13px; font-weight: 500; color: var(--text-main); min-height: 36px; transition: opacity 0.3s; line-height: 1.4; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .ad-container-box { width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 20px; }
-        .unlimited-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 300px; background: rgba(255, 255, 255, 0.9); padding: 10px 16px; border-radius: 16px; transition: all 0.3s; box-shadow: var(--shadow-sm); flex-shrink: 0; }
+
+        /* 广告位 */
+        .ad-container-box {
+            width: 100%; max-width: 300px; aspect-ratio: 4/3; max-height: 220px; flex-shrink: 0;
+            background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
+            justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 15px;
+        }
+
+        .unlimited-toggle {
+            display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 280px;
+            background: rgba(255, 255, 255, 0.9); padding: 8px 12px; border-radius: 12px; transition: all 0.3s; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
-        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
         /* Other UI */
-        .clear-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
+        .clear-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
-        .action-bar { position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); padding: 8px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 20; animation: popUp 0.4s; }
+        
+        .action-bar { position: absolute; bottom: 15px; right: 15px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); padding: 6px; border-radius: 99px; display: none; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 20; animation: popUp 0.4s; }
         @keyframes popUp { from { transform: translateY(20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s; }
+        .action-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); transition: background 0.2s; }
         .action-btn:hover { background: rgba(0,0,0,0.05); }
-        .action-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+        .action-btn svg { width: 20px; height: 20px; stroke-width: 2; }
+
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
         .chips-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: center; }
         .chips-container::-webkit-scrollbar { display: none; }
@@ -110,12 +171,14 @@
         .input-box input { flex: 1; border: none; background: transparent; padding: 12px 20px; font-size: 16px; color: var(--text-main); outline: none; min-width: 0; }
         .input-box button { background: var(--primary-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .input-box button:disabled { background: #ccc; }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-overlay.visible { display: flex; }
         .modal-card { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
         .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
         .cf-turnstile { margin: 0 auto; display: flex; justify-content: center; min-height: 65px; }
+
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
         .gallery-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
@@ -129,30 +192,22 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* --- 🆕 修复版 Onboarding (智能定位) --- */
+        /* Onboarding */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
-        
         .ob-tooltip {
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             animation: floatUp 0.3s ease-out; display: none;
-            /* 动态箭头水平偏移 */
             --arrow-left: 50%;
         }
-        
         .ob-tooltip::after { 
             content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); 
-            left: var(--arrow-left); margin-left: -6px; /* 使用变量控制水平位置 */
+            left: var(--arrow-left); margin-left: -6px; 
         }
-        
-        /* ⬇️ 修复箭头方向逻辑 ⬇️ */
-        /* 气泡在元素下方 (arrow-top) -> 箭头朝上，位于气泡顶部 */
-        .ob-tooltip.arrow-top::after { top: -6px; } 
-        
-        /* 气泡在元素上方 (arrow-bottom) -> 箭头朝下，位于气泡底部 */
-        .ob-tooltip.arrow-bottom::after { bottom: -6px; }
+        .ob-tooltip.arrow-top::after { top: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); } 
+        .ob-tooltip.arrow-bottom::after { bottom: -6px; box-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
 
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 15px; }
@@ -165,7 +220,6 @@
             .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
-            .loading-overlay { padding: 20px; justify-content: center; } 
         }
     </style>
 </head>
@@ -180,13 +234,11 @@
 
     <nav class="navbar">
         <div class="logo">Nano Banana 🍌</div>
-        
         <div class="mode-switcher" id="modeSwitcher">
             <div class="mode-slider" id="modeSlider"></div>
             <button class="mode-btn active" data-mode="create" onclick="switchMode('create')">✨ 创意</button>
             <button class="mode-btn" data-mode="edit" onclick="switchMode('edit')">🛠️ 修复</button>
         </div>
-
         <div class="nav-right">
             <button class="nav-icon-btn" id="langToggle">🌐</button>
             <button class="nav-icon-btn" id="galleryToggle">💡</button>
@@ -215,8 +267,10 @@
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview">
+            
             <div class="snake-border"></div>
             <button id="clearBtn" class="clear-btn" onclick="resetCanvas()" title="Close">✕</button>
+
             <div id="actionBar" class="action-bar">
                 <button class="action-btn" onclick="downloadImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
                 <button class="action-btn" onclick="shareImage()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></button>
@@ -268,35 +322,17 @@
         const WORKER_ENDPOINT = '/api/repair'; 
         const STATUS_ENDPOINT = '/api/status';
 
+        // --- 全局状态 ---
         let currentMode = 'create'; 
         let currentFile = null;
         let curLang = localStorage.getItem('lang') || 'cn';
 
         const i18nData = {
             cn: {
-                createTitle: "输入文字，创造世界",
-                createDesc: "无需画笔，只需文字。输入你的想象，AI 为你实现。",
-                uploadTitle: "上传图片修复",
-                uploadDesc: "支持 JPG, PNG (Max 10MB)",
-                unlimitedToggle: "⚡️ 开启无限生成 (自动补充)",
-                verifyTitle: "安全验证", verifyDesc: "验证一次，畅玩一小时。",
-                galleryTitle: "✨ 灵感广场",
-                alertLimit: "今日额度已尽！开启无限模式继续？",
-                promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." },
-                facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
+                createTitle: "输入文字，创造世界", createDesc: "无需画笔，只需文字。输入你的想象，AI 为你实现。", uploadTitle: "上传图片修复", uploadDesc: "支持 JPG, PNG (Max 10MB)", unlimitedToggle: "⚡️ 开启无限生成 (自动补充)", verifyTitle: "安全验证", verifyDesc: "验证一次，畅玩一小时。", galleryTitle: "✨ 灵感广场", alertLimit: "今日额度已尽！开启无限模式继续？", promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." }, facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
                 chips: {
-                    create: [
-                        { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." },
-                        { text: "3D 渲染", prompt: "Cute 3D rendered character, pixar style, soft lighting." },
-                        { text: "水彩风景", prompt: "Watercolor landscape painting, mountains, misty, serene." },
-                        { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." }
-                    ],
-                    edit: [
-                        { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点." },
-                        { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复." },
-                        { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画." },
-                        { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道." }
-                    ]
+                    create: [ { text: "赛博朋克", prompt: "Cyberpunk city street, neon lights, rain, high detail." }, { text: "3D 渲染", prompt: "Cute 3D rendered character, pixar style, soft lighting." }, { text: "水彩风景", prompt: "Watercolor landscape painting, mountains, misty, serene." }, { text: "未来科技", prompt: "Futuristic spaceship interior, sleek design, sci-fi." } ],
+                    edit: [ { text: "🪄 一键修复", prompt: "修复这张老照片，去除划痕、污渍和噪点." }, { text: "👤 面部增强", prompt: "专注于人脸细节，进行高精度修复." }, { text: "🎨 梵高油画", prompt: "把这张照片变成梵高风格的油画." }, { text: "❄️ 换成雪景", prompt: "把背景换成下雪的街道." } ]
                 },
                 ob: {
                     s1: { t: "选择模式", d: "左边是「文生图」，右边是「修图」。" },
@@ -305,29 +341,10 @@
                 }
             },
             en: {
-                createTitle: "Imagine & Create",
-                createDesc: "Just type your imagination, AI will paint it.",
-                uploadTitle: "Upload to Fix",
-                uploadDesc: "JPG, PNG (Max 10MB)",
-                unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)",
-                verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.",
-                galleryTitle: "✨ Gallery",
-                alertLimit: "Limit reached! Enable Unlimited Mode?",
-                promptPlaceholder: { create: "A cat in space...", edit: "Fix scratches..." },
-                facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."],
+                createTitle: "Imagine & Create", createDesc: "Just type your imagination, AI will paint it.", uploadTitle: "Upload to Fix", uploadDesc: "JPG, PNG (Max 10MB)", unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)", verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.", galleryTitle: "✨ Gallery", alertLimit: "Limit reached! Enable Unlimited Mode?", promptPlaceholder: { create: "A cat in space...", edit: "Fix scratches..." }, facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."],
                 chips: {
-                    create: [
-                        { text: "Cyberpunk", prompt: "Cyberpunk city street, neon lights." },
-                        { text: "3D Render", prompt: "Cute 3D character, pixar style." },
-                        { text: "Watercolor", prompt: "Watercolor landscape painting." },
-                        { text: "Sci-Fi", prompt: "Futuristic spaceship interior." }
-                    ],
-                    edit: [
-                        { text: "🪄 Fix", prompt: "Restore old photo, remove scratches." },
-                        { text: "👤 Face", prompt: "Enhance face details." },
-                        { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style." },
-                        { text: "❄️ Snow", prompt: "Change background to snow." }
-                    ]
+                    create: [ { text: "Cyberpunk", prompt: "Cyberpunk city street, neon lights." }, { text: "3D Render", prompt: "Cute 3D character, pixar style." }, { text: "Watercolor", prompt: "Watercolor landscape painting." }, { text: "Sci-Fi", prompt: "Futuristic spaceship interior." } ],
+                    edit: [ { text: "🪄 Fix", prompt: "Restore old photo, remove scratches." }, { text: "👤 Face", prompt: "Enhance face details." }, { text: "🎨 Van Gogh", prompt: "Turn into Van Gogh style." }, { text: "❄️ Snow", prompt: "Change background to snow." } ]
                 },
                 ob: {
                     s1: { t: "Choose Mode", d: "Create from scratch OR Edit photos." },
@@ -339,27 +356,19 @@
 
         window.switchMode = function(mode) {
             currentMode = mode;
-            
-            // 1. UI Switch
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
             const slider = document.getElementById('modeSlider');
             slider.style.transform = mode === 'create' ? 'translateX(0)' : 'translateX(100%)';
 
-            // 2. Content Switch (Only if no image generated yet)
             if (document.getElementById('imageContainer').style.display === 'none') {
                 document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
                 document.getElementById(`${mode}Content`).classList.add('active');
                 
-                // 🛑 修复：确保在 Edit 模式下上传区必须显示
-                // (清除可能残留的 inline display: none)
-                if (mode === 'edit') {
-                    document.getElementById('uploadArea').style.display = ''; // Clear inline style
-                } else {
-                    document.getElementById('createPlaceholder').style.display = ''; // Clear inline style
-                }
+                // 修复：确保上传框在切换回 Edit 时移除 display:none
+                if (mode === 'edit') document.getElementById('uploadArea').style.display = '';
+                else document.getElementById('createPlaceholder').style.display = '';
             }
-
             updateLanguage();
         }
 
@@ -374,14 +383,8 @@
                 document.getElementById('createChips').innerHTML = t.chips['create'].map(c => `<div class="s-chip" onclick="setInput('${c.prompt.replace(/'/g,"\\'")}','${c.text}')">${c.text}</div>`).join('');
             }
         }
-        
-        window.setInput = function(prompt, text) {
-            const input = document.getElementById('promptInput');
-            input.value = prompt; input.focus();
-        }
-
-        const langBtn = document.getElementById('langToggle');
-        langBtn.addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
+        window.setInput = function(prompt, text) { const input = document.getElementById('promptInput'); input.value = prompt; input.focus(); }
+        document.getElementById('langToggle').addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
         updateLanguage();
 
         function simulateT2IPlaceholder() {
@@ -400,14 +403,13 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('imageContainer').classList.remove('loaded');
             
-            // 🛑 修复：重置时强制恢复模式默认视图
+            // 重置后恢复模式视图
             switchMode(currentMode); 
-            
             document.getElementById('actionBar').style.display = 'none';
             document.getElementById('promptInput').value = '';
         }
 
-        // --- Smart Onboarding ---
+        // --- Onboarding Logic ---
         const obSteps = [
             { id: 'modeSwitcher', key: 's1', pos: 'bottom' },
             { id: 'magicBar', key: 's2', pos: 'top' }, 
@@ -416,7 +418,7 @@
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb_v4')) { 
+            if (!localStorage.getItem('hasSeenOb_v5')) { 
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -427,14 +429,12 @@
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip');
             tooltip.style.display = 'none';
-            
-            // Remove directional classes
-            tooltip.classList.remove('arrow-top', 'arrow-bottom');
+            tooltip.className = 'ob-tooltip'; // Reset classes
 
             if (idx >= obSteps.length) {
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb_v4', 'true');
+                localStorage.setItem('hasSeenOb_v5', 'true');
                 return;
             }
 
@@ -455,7 +455,6 @@
             let left = rect.left + rect.width / 2 - (tooltipWidth / 2);
             let arrowPos = '50%';
 
-            // Edge detection
             const padding = 20;
             if (left + tooltipWidth > window.innerWidth - padding) {
                 left = window.innerWidth - tooltipWidth - padding;
@@ -471,13 +470,11 @@
             document.documentElement.style.setProperty('--arrow-pos', arrowPos);
             tooltip.style.left = left + 'px';
 
-            // 🛑 修复：箭头方向逻辑
+            // 修复：箭头逻辑
             if (step.pos === 'bottom') {
-                // 气泡在元素下方 -> 箭头在气泡顶部 (arrow-top)
                 tooltip.style.top = (rect.bottom + 15) + 'px';
                 tooltip.classList.add('arrow-top');
             } else {
-                // 气泡在元素上方 -> 箭头在气泡底部 (arrow-bottom)
                 tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px';
                 tooltip.classList.add('arrow-bottom');
             }
@@ -485,7 +482,7 @@
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
 
-        // --- Standard Logic ---
+        // --- Core Logic ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -673,7 +670,6 @@
             }
         });
 
-        // Gallery & Download helpers
         const galleryToggle = document.getElementById('galleryToggle');
         const galleryModal = document.getElementById('galleryModal');
         const closeGallery = document.getElementById('closeGallery');
