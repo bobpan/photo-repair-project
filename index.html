@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>Nano Banana AI | 魔法影像工作室</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍌</text></svg>">
+    
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -21,7 +23,8 @@
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 100; background: rgba(245,245,247,0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
         .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 5px; color: #000; text-decoration: none; }
         .nav-actions { display: flex; gap: 12px; }
-        .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.05); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); }
+        .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.05); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); font-weight: 600; font-size: 12px; }
+        .icon-btn:hover { transform: scale(1.05); background: #fafafa; }
         .share-btn { background: var(--text); color: white; width: auto; padding: 0 16px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; }
 
         /* --- 舞台 --- */
@@ -38,55 +41,33 @@
         .action-hint { color: var(--primary); font-weight: 600; font-size: 13px; background: rgba(0,122,255,0.1); padding: 6px 14px; border-radius: 99px; }
 
         /* 图片容器 */
-        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--r-md); box-shadow: var(--sh-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; }
-        
-        /* 修复 1: 确保图片在最上层，允许长按 */
+        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--r-md); box-shadow: var(--sh-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; cursor: zoom-in; }
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 修复 2: 流光贪吃蛇 (Active状态下 z-index 高于图片) */
-        .snake-border { 
-            position: absolute; inset: 0; pointer-events: none; z-index: 20; 
-            border-radius: var(--r-md); padding: 4px; 
-            /* 标准 Mask 语法 */
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            
-            background: conic-gradient(from var(--a, 0deg), transparent 70%, var(--primary)); 
-            animation: rot 2s linear infinite; 
-            display: none; /* 默认隐藏 */
-        }
-        .snake-border.active { display: block; }
+        /* 贪吃蛇边框 */
+        .snake-border { position: absolute; inset: 0; pointer-events: none; z-index: 55; border-radius: var(--r-md); padding: 4px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; background: conic-gradient(from var(--a, 0deg), transparent 70%, var(--primary)); animation: rot 2s linear infinite; display: none; }
+        .image-container.is-loading .snake-border { display: block; }
         @property --a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rot { from { --a: 0deg; } to { --a: 360deg; } }
 
-        /* Loading Overlay */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 50; opacity: 0; transition: 0.3s; padding: 10px; }
+        /* Loading / Ad */
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; }
         .loading-overlay.visible { opacity: 1; }
-        
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; }
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
 
-        /* 修复 6: 俏皮 Mock Ad */
-        .mock-ad-box {
-            width: 300px; height: 160px; /* 变矮一点 */
-            background: #fff9c4; border: 2px dashed #f5d94d;
-            border-radius: 16px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            margin-bottom: 15px; color: #8a6d3b;
-            transform: rotate(-1deg); transition: 0.3s;
-        }
+        /* 俏皮 Mock Ad */
+        .mock-ad-box { width: 300px; height: 160px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
         .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
         .mock-sub { font-size: 11px; opacity: 0.7; }
         
-        /* 真实广告容器 (默认隐藏) */
         .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
 
-        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; /* 默认隐藏开关 */ }
+        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; }
         .switch { position: relative; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
@@ -101,33 +82,24 @@
         /* --- Bottom Bar --- */
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 10px; padding-bottom: env(safe-area-inset-bottom); }
         
-        .style-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
+        /* 5. 滤镜栏优化 */
+        .style-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
+        .style-scroll::-webkit-scrollbar { display: none; }
         .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
         .style-card img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); }
-        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; }
+        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; text-align: center; }
         .style-card.active img { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
         .style-card.active span { color: var(--primary); }
         .more-card .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
 
-        /* 修复 3: 输入框 Flex 布局 */
-        .input-box { 
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); 
-            border-radius: var(--r-full); padding: 6px; 
-            display: flex; align-items: center; gap: 6px; /* 间距 */
-            box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); 
-        }
-        .magic-wand { color: #9c27b0; background: rgba(156,39,176,0.1); flex-shrink: 0; }
+        /* 6. 魔法棒优化 */
+        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 6px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
+        /* 加深背景和颜色，确保可见 */
+        .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .input-box input { 
-            flex: 1; border: none; background: transparent; padding: 10px 5px; 
-            font-size: 16px; color: var(--text); outline: none; min-width: 0; 
-        }
-        .send-btn { 
-            background: var(--primary); color: white; border: none; width: 40px; height: 40px; 
-            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            flex-shrink: 0; transition: 0.2s;
-        }
+        .input-box input { flex: 1; border: none; background: transparent; padding: 10px 5px; font-size: 16px; color: var(--text); outline: none; min-width: 0; }
+        .send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
         .send-btn:disabled { background: #ccc; }
 
         /* --- Modals --- */
@@ -142,31 +114,34 @@
         /* Share Card */
         .share-card-wrap { background: white; padding: 20px; border-radius: 20px; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 320px; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #shareCanvas { max-width: 100%; border-radius: 12px; box-shadow: var(--sh-sm); margin-bottom: 15px; }
+        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: var(--sh-sm); margin-bottom: 15px; display: block; }
         .share-hint { font-size: 12px; color: var(--sec); margin-bottom: 15px; }
 
-        /* 修复 5: Gallery Header 布局 */
-        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        /* 7. 灵感广场修复 */
+        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
-        .gallery-header { 
-            padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; 
-            background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
+        .gallery-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .gallery-header h2 { margin: 0; font-size: 18px; }
         .close-btn { background: #e5e5ea; width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center;}
+        
+        /* 修复：分类 Tab */
         .gallery-tabs { display: flex; gap: 10px; padding: 15px 30px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
-        .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
-        .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; height: 100%; min-height: 320px; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
-        .gallery-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
-        .gallery-content { padding: 18px; flex:1; display:flex; flex-direction:column; }
-        .gallery-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
-        .gallery-prompt { font-size: 14px; color: var(--sec); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+        .gallery-tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { background: #f5f5f7; padding: 8px 18px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: #1d1d1f; color: white; }
+
+        .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
+        .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
+        .gallery-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
+        .gallery-content { padding: 12px; flex:1; display:flex; flex-direction:column; }
+        .gallery-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .gallery-prompt { font-size: 12px; color: var(--sec); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         #photoFile { display: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
 
         @media (max-width: 600px) {
-            .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: 1fr; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
         }
     </style>
@@ -230,7 +205,7 @@
         <div class="style-scroll" id="styleScroll"></div>
         
         <form id="commandForm" class="input-box">
-            <button type="button" class="icon-btn magic-wand" id="magicBtn" title="Auto Prompt">✨</button>
+            <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
             <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
             <button type="submit" class="send-btn">→</button>
         </form>
@@ -245,7 +220,8 @@
 
     <div id="shareModal" class="modal">
         <div class="share-card-wrap">
-            <div id="canvasContainer"></div> <p class="share-hint">长按保存图片分享给朋友</p>
+            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">加载中...</div>
+            <p class="share-hint">长按图片保存分享</p>
             <button class="p-btn" style="color:#333; border-color:#ccc;" onclick="closeShareModal()">关闭</button>
         </div>
     </div>
@@ -272,47 +248,71 @@
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
-        // --- Data (去重后的滤镜) ---
-        const filters = [
-            { name: "盲盒公仔", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
-            { name: "粘土世界", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
-            { name: "微缩景观", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
-            { name: "赛博汉服", img: "https://images.unsplash.com/photo-1515634918662-0f6470117b94?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
-            { name: "极简Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" },
-            { name: "吉卜力", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
-            { name: "职业照", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
-            { name: "老照片4K", img: "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" }
+        // --- 5. 滤镜排序优化 (吉卜力/职业/老照片 前移) ---
+        // Pop Mart -> Clay -> Tiny -> Ghibli -> Headshot -> Restoration -> Hanfu -> Vector
+        const filtersData = [
+            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
+            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
+            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
+            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
+            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1620311463068-228d76876d1f?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
+            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
         ];
 
         let currentFile = null;
         let selectedStyle = "";
+        let curLang = localStorage.getItem('lang') || 'cn';
+        const i18nData = {
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多" },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More" }
+        };
 
-        // --- Init ---
-        renderFilters();
+        // --- 2. 语言切换修复 ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
-            let html = filters.map(f => `
-                <div class="style-card" onclick="selectStyle(this, '${f.name}', '${f.prompt.replace(/'/g,"\\'")}')">
-                    <img src="${f.img}"><span>${f.name}</span>
-                </div>
-            `).join('');
+            const t = i18nData[curLang];
+            let html = filtersData.map(f => {
+                const name = curLang === 'cn' ? f.name : f.en;
+                const isActive = selectedStyle === f.name ? 'active' : '';
+                return `<div class="style-card ${isActive}" onclick="selectStyle(this, '${f.name}', '${f.prompt.replace(/'/g,"\\'")}')">
+                    <img src="${f.img}"><span>${name}</span>
+                </div>`;
+            }).join('');
             html += `<div class="style-card more-card" onclick="openGallery()">
-                        <div class="more-circle">+</div><span>更多</span>
+                        <div class="more-circle">+</div><span>${t.galleryMore}</span>
                      </div>`;
             container.innerHTML = html;
         }
+        
+        function updateLanguage() {
+            const t = i18nData[curLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
+            document.getElementById('langToggle').innerText = curLang.toUpperCase();
+            renderFilters(); // Re-render to update names
+        }
+        
+        document.getElementById('langToggle').addEventListener('click', () => { 
+            curLang = curLang === 'cn' ? 'en' : 'cn'; 
+            localStorage.setItem('lang', curLang); 
+            updateLanguage(); 
+        });
 
         window.selectStyle = function(el, name, prompt) {
-            document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
             if (selectedStyle === name) {
                 selectedStyle = "";
                 document.getElementById('promptInput').value = "";
+                renderFilters(); // Refresh to remove active class
             } else {
-                el.classList.add('active');
                 selectedStyle = name;
                 document.getElementById('promptInput').value = prompt;
+                renderFilters(); // Refresh to add active class
             }
         }
+
+        // --- Init ---
+        updateLanguage();
 
         // --- Magic Wand ---
         const magicBtn = document.getElementById('magicBtn');
@@ -324,18 +324,15 @@
                 const compressed = await compressImage(currentFile, 512); 
                 formData.append('photo', compressed);
             }
-
             try {
                 const res = await fetch(PROMPT_ENDPOINT, { method: 'POST', body: formData });
                 const data = await res.json();
-                if (data.status === 'success') {
-                    document.getElementById('promptInput').value = data.prompt;
-                }
+                if (data.status === 'success') document.getElementById('promptInput').value = data.prompt;
             } catch (e) { console.error(e); }
             magicBtn.classList.remove('loading');
         });
 
-        // --- Upload Logic ---
+        // --- Upload ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -357,8 +354,8 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('emptyState').style.display = 'flex';
             document.getElementById('promptInput').value = '';
-            document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
             selectedStyle = "";
+            renderFilters();
         }
 
         // --- Previewer ---
@@ -376,7 +373,7 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- Share Card ---
+        // --- 1. Share Card (Fix PC generation) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://via.placeholder.com/400x400?text=Nano+Banana"; 
@@ -393,30 +390,43 @@
 
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = src;
-            await new Promise(r => img.onload = r);
-            
-            const imgRatio = img.width / img.height;
-            const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
-            ctx.drawImage(img, x, 100, drawW, drawH);
+            try {
+                // Load Image
+                const img = new Image();
+                img.crossOrigin = "Anonymous"; // Important for CORS
+                img.src = src;
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = reject;
+                });
 
-            ctx.fillStyle = '#000'; ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText("Nano Banana AI", w/2, 60);
-            ctx.fillStyle = '#666'; ctx.font = '20px sans-serif';
-            ctx.fillText("一句话PS，创意无限", w/2, 650);
-            ctx.fillText("https://ps.bobot.fun", w/2, 680);
+                // Draw
+                const imgRatio = img.width / img.height;
+                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
+                ctx.drawImage(img, x, 100, drawW, drawH);
 
-            const qrDiv = document.createElement('div');
-            new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 80, height: 80 });
-            const qrImg = qrDiv.querySelector('img');
-            if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w/2 - 40, 700); }
+                ctx.fillStyle = '#000'; ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText("Nano Banana AI", w/2, 60);
+                ctx.fillStyle = '#666'; ctx.font = '20px sans-serif';
+                ctx.fillText("一句话PS，来自", w/2, 650);
+                ctx.fillText("https://ps.bobot.fun", w/2, 680);
 
-            const finalImg = new Image();
-            finalImg.src = canvas.toDataURL();
-            finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
-            canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
+                const qrDiv = document.createElement('div');
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 80, height: 80 });
+                const qrImg = qrDiv.querySelector('img');
+                if(qrImg) { 
+                    await new Promise(r => qrImg.onload = r); 
+                    ctx.drawImage(qrImg, w/2 - 40, 700); 
+                }
+
+                const finalImg = new Image();
+                finalImg.src = canvas.toDataURL(); // This will fail if CORS is blocked
+                finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
+                canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
+            } catch (e) {
+                console.error(e);
+                canvasContainer.innerHTML = '生成失败 (CORS Error)';
+            }
         }
         window.closeShareModal = function() {
             shareModal.classList.remove('visible');
@@ -428,13 +438,12 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
         const adBox = document.getElementById('adBox');
-        const mockAd = document.getElementById('mockAd'); // 俏皮广告
+        const mockAd = document.getElementById('mockAd'); 
         const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
         
-        // Unlimited Logic
         if(localStorage.getItem('isUnlimitedMode')) {
             adToggle.checked = true; unlimitedToggleDiv.style.display = 'flex';
-            mockAd.style.display = 'none'; adBox.style.display = 'flex'; // Show real ad slot if unlimited
+            mockAd.style.display = 'none'; adBox.style.display = 'flex'; 
         }
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
@@ -469,7 +478,6 @@
             throw new Error("Timeout");
         }
 
-        // Turnstile
         let turnstileToken = null;
         window.onTurnstileRender = function() {
              turnstile.render('#turnstile-container', {
@@ -513,7 +521,7 @@
                     return;
                 }
                 if(res.status === 429) {
-                    if(confirm("今日额度已尽！是否允许显示广告以开启无限模式？")) {
+                    if(confirm(i18nData[curLang].alertLimit)) {
                         unlimitedToggleDiv.style.display = 'flex';
                         adToggle.checked = true;
                         mockAd.style.display = 'none'; adBox.style.display = 'flex';
@@ -544,20 +552,34 @@
             }
         });
         
-        window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
-        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
-        
-        // Gallery Fetch (Simple)
+        // --- 7. 灵感广场分类 Tab 修复 ---
+        const galleryToggle = document.getElementById('galleryToggle'); const galleryModal = document.getElementById('galleryModal'); const closeGallery = document.getElementById('closeGallery'); const galleryGrid = document.getElementById('galleryGrid'); const galleryTabs = document.getElementById('galleryTabs');
+        let allGalleryItems = []; let currentCategory = '全部';
+
         async function fetchAndRenderGallery() {
              const res = await fetch('/api/gallery'); const data = await res.json();
-             const grid = document.getElementById('galleryGrid');
-             grid.innerHTML = data.map(i => `<div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url}')"><img src="${i.img_url}" class="gallery-img"><div class="gallery-content"><div class="gallery-title">${i.title}</div></div></div>`).join('');
+             // 确保 data 是数组，且包含 category 字段
+             if(data && Array.isArray(data)) {
+                allGalleryItems = data; 
+                renderGalleryTabs(); renderGalleryGrid();
+             }
+        }
+        function renderGalleryTabs() {
+            // 提取分类，默认为 '其他'
+            const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
+            galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
+        }
+        window.switchCategory = function(cat) { currentCategory = cat; renderGalleryTabs(); renderGalleryGrid(); }
+        function renderGalleryGrid() {
+             let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
+             galleryGrid.innerHTML = items.map(i => `<div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url}')"><img src="${i.img_url}" class="gallery-img"><div class="gallery-content"><div class="gallery-title">${i.title}</div></div></div>`).join('');
         }
         window.applyGallery = function(p, url) {
              document.getElementById('promptInput').value = p;
-             // Simulating upload if needed or just text
              document.getElementById('galleryModal').classList.remove('open');
         }
+        galleryToggle.addEventListener('click', () => { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); });
+        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
     </script>
 </body>
