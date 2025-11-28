@@ -18,7 +18,7 @@
             --r-md: 20px; --r-full: 999px;
             --sh-sm: 0 4px 12px rgba(0,0,0,0.04); --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
         /* --- 导航 --- */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; z-index: 100; background: rgba(245,245,247,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -46,27 +46,49 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
 
-        /* 全息量子呼吸动效 */
-        .holo-glow { position: absolute; inset: -4px; pointer-events: none; z-index: 20; border-radius: 24px; box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0); display: none; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #fff; box-shadow: 0 0 15px 2px rgba(255, 194, 14, 0.9), 0 0 30px 5px rgba(255, 255, 255, 1); z-index: 25; opacity: 0; pointer-events: none; }
+        /* 动效：全息呼吸 + 扫描 */
+        .holo-glow {
+            position: absolute; inset: 0; pointer-events: none; z-index: 20; border-radius: 20px; 
+            box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0); display: none;
+        }
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: #fff; box-shadow: 0 0 15px 2px rgba(255, 194, 14, 0.9), 0 0 30px 5px rgba(255, 255, 255, 1);
+            z-index: 25; opacity: 0; pointer-events: none;
+        }
         .image-container.is-loading .image-display { animation: breathe 2s infinite ease-in-out; filter: brightness(0.9) contrast(1.1); }
         .image-container.is-loading .holo-glow { display: block; animation: intensePulse 1.5s infinite; }
         .image-container.is-loading .scan-line { opacity: 1; animation: scanMove 1.2s linear infinite; }
+
         @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
         @keyframes intensePulse { 0% { box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0.7); border: 2px solid rgba(255, 194, 14, 0); } 50% { box-shadow: inset 0 0 40px 0 rgba(255, 194, 14, 0.6); border: 2px solid rgba(255, 194, 14, 1); } 100% { box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0); border: 2px solid rgba(255, 194, 14, 0); } }
         @keyframes scanMove { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        /* Loading / Ad */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(5px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; }
+        /* Loading Overlay */
+        .loading-overlay { 
+            position: absolute; inset: 0; 
+            background: rgba(255,255,255,0.4); /* 极简透明 */
+            backdrop-filter: blur(5px); 
+            display: none; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; 
+        }
         .loading-overlay.visible { opacity: 1; }
-        
+
+        /* Ads & Toggle (默认全部隐藏) */
         .ad-wrapper { display: none; flex-direction: column; align-items: center; margin-top: auto; margin-bottom: auto; width: 100%; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .ad-slot { width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; background: #FFFBF2; margin-bottom: 15px; box-shadow: var(--sh-lg); }
+        
+        .ad-slot { 
+            width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; 
+            background: #FFFBF2; margin-bottom: 15px; box-shadow: var(--sh-lg);
+            display: none; /* Slot 默认隐藏，开关开启后显示 */
+        }
         .mock-ad { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; border: 2px dashed var(--primary); box-sizing: border-box; border-radius: 16px; background: rgba(255, 251, 240, 0.95); backdrop-filter: blur(10px); }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
+        .mock-sub { font-size: 11px; opacity: 0.7; }
         .real-ad-box { display: none; width: 100%; height: 100%; background: #f9f9f9; z-index: 5; position: relative; }
+        
         .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.95); padding: 10px 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05); align-items: center; box-shadow: var(--sh-sm); }
         .switch { position: relative; width: 36px; height: 20px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9e9ea; transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } input:checked + .slider { background: var(--primary); } input:checked + .slider:before { transform: translateX(16px); }
 
@@ -101,10 +123,10 @@
         .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
         .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 99px; backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; }
         
-        /* Share Card (Magazine Style) */
+        /* Share Card */
         .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #canvasContainer img { max-width: 100%; border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
+        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
         .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
 
         /* Gallery */
@@ -195,6 +217,11 @@
             <button class="clear-btn" onclick="resetCanvas()">✕</button>
 
             <div id="loadingOverlay" class="loading-overlay">
+                <div class="fun-fact">
+                    <div class="fact-title">DID YOU KNOW?</div>
+                    <div class="fact-text" id="factText">AI 正在连接神经元...</div>
+                </div>
+                
                 <div class="ad-wrapper" id="adWrapper">
                     <div class="ad-slot">
                         <div class="mock-ad" id="mockAd">
@@ -220,7 +247,6 @@
 
     <div class="magic-bar-wrapper" id="magicBar">
         <div class="style-scroll" id="styleScroll"></div>
-        
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
             <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
@@ -281,11 +307,10 @@
         let allGalleryItems = []; let currentCategory = '全部';
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
         };
 
-        // --- Render Logic ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -366,7 +391,7 @@
             shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
             const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = '生成海报中...';
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            const w = 1080, h = 1440; canvas.width = w; canvas.height = h;
+            const w = 600, h = 900; canvas.width = w; canvas.height = h;
 
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
@@ -374,32 +399,12 @@
                 const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
                 await new Promise((r, j) => { img.onload = r; img.onerror = j; });
                 const imgRatio = img.width / img.height;
-                
-                // Magazine Style Logic (海马体)
-                // Maximize image in top area, keep padding
-                const maxW = 960; const maxH = 1000;
-                const scale = Math.min(maxW/img.width, maxH/img.height);
-                const dw = img.width * scale; const dh = img.height * scale;
-                const dx = (w - dw) / 2; const dy = 120 + (maxH - dh) / 2;
-
-                // Draw Shadow
-                ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
-                ctx.drawImage(img, dx, dy, dw, dh);
-                ctx.shadowColor = "transparent";
-
-                // Text
-                ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'left';
-                ctx.fillText("一句话 做同款", 80, 1250);
-                ctx.fillStyle = '#86868b'; ctx.font = '32px sans-serif';
-                ctx.fillText("由免费 Nano Banana PRO 生成", 80, 1310);
-                ctx.fillStyle = '#FFC20E'; ctx.font = 'bold 32px sans-serif';
-                ctx.fillText("ps.bobot.fun", 80, 1370);
-
-                const qrDiv = document.createElement('div');
-                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 200, height: 200, colorDark : "#1d1d1f" });
-                const qrImg = qrDiv.querySelector('img');
-                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 280, 1180, 200, 200); }
-
+                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
+                ctx.drawImage(img, x, 100, drawW, drawH);
+                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("NANO BANANA", w/2, 660);
+                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillText("一句话 PS · 创意无限", w/2, 695); ctx.fillText("https://ps.bobot.fun", w/2, 725);
+                const qrDiv = document.createElement('div'); new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
+                const qrImg = qrDiv.querySelector('img'); if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
                 const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px'; finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
@@ -413,10 +418,14 @@
         const mockAd = document.getElementById('mockAd'); 
         const realAd = document.getElementById('adBox');
         
+        // 2. 广告逻辑：检查历史记录
         if(localStorage.getItem('isUnlimitedMode')) {
             adToggle.checked = true; adWrapper.style.display = 'flex';
             mockAd.style.display = 'none'; realAd.style.display = 'flex';
+        } else if(localStorage.getItem('hasHitLimit')) {
+            adWrapper.style.display = 'flex'; // 仅显示，不开启
         }
+
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
              if(e.target.checked) { mockAd.style.display = 'none'; realAd.style.display = 'flex'; }
@@ -471,13 +480,14 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
+            // Check Ad Visibility Logic (触发过才显示)
             if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
                  document.getElementById('adWrapper').style.display = 'flex'; 
             }
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            document.querySelector('.image-container').classList.add('is-loading'); // 触发光效
+            document.querySelector('.image-container').classList.add('is-loading'); // 1. 光效
 
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -501,6 +511,7 @@
                     if(confirm(i18nData[curLang].alertLimit)) {
                         localStorage.setItem('hasHitLimit', 'true');
                         adWrapper.style.display = 'flex';
+                        // 默认开启无限模式
                         adToggle.checked = true;
                         mockAd.style.display = 'none'; realAd.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', 'true');
@@ -563,17 +574,18 @@
              document.getElementById('galleryModal').classList.remove('open');
         }
         
-        // 2. Onboarding Fix (Corrected Steps)
+        // 3. Onboarding Logic (v999)
         const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
         let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_vFinalFix')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v999')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
         function showStep(idx) {
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_vFinalFix', 'true'); return; }
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v999', 'true'); return; }
             curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
             el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
+            // 修复按钮文字
             const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
             document.getElementById('obBtn').innerText = btnText;
             const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
@@ -584,7 +596,7 @@
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 1000);
 
-        // 1. Force Render Init
+        // 1. Init
         renderFilters(); updateLanguage(); 
     </script>
 </body>
