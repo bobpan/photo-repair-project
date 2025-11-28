@@ -16,7 +16,6 @@
             --primary: #007aff; --bg: #f5f5f7; --text: #1d1d1f; --sec: #86868b;
             --r-md: 16px; --r-full: 999px;
             --sh-sm: 0 2px 8px rgba(0,0,0,0.04); --sh-lg: 0 12px 30px rgba(0,0,0,0.12);
-            --arrow-pos: 50%;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -46,27 +45,42 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🐍 流光贪吃蛇 */
+        /* 🐍 终极修复版：流光贪吃蛇 (CSS Mask + Rotating Child) */
         .snake-border {
-            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; z-index: 20; border-radius: 18px;
-            background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-            background-size: 300% 300%; animation: snakeAnim 2s ease alternate infinite; display: none; pointer-events: none;
+            position: absolute; inset: 0; pointer-events: none; z-index: 20;
+            border-radius: var(--r-md); 
+            /* 容器本身不显示颜色，作为一个遮罩容器 */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; 
+            mask-composite: exclude;
+            padding: 4px; /* 边框宽度 */
+            overflow: hidden; /* 必须 hidden */
+            display: none;
         }
-        .snake-border::after { content: ''; position: absolute; inset: 4px; background: #fff; border-radius: 14px; z-index: -1; opacity: 0; }
         .image-container.is-loading .snake-border { display: block; }
-        @keyframes snakeAnim { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 
-        /* Loading / Ad */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
+        /* 旋转的流光层 */
+        .snake-border::before {
+            content: ""; position: absolute; 
+            top: -50%; left: -50%; width: 200%; height: 200%; /* 足够大以覆盖旋转时的四角 */
+            background: conic-gradient(transparent 75%, var(--primary) 100%);
+            animation: spinHuge 2s linear infinite;
+        }
+        @keyframes spinHuge { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Loading / Ad Overlay */
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
+        
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; flex-shrink: 0;}
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
 
         /* Ad Boxes */
-        .mock-ad-box { width: 300px; height: 160px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
+        .mock-ad-box { width: 300px; height: 120px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
         .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
-        .mock-icon { font-size: 32px; margin-bottom: 5px; }
+        .mock-icon { font-size: 28px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
         .mock-sub { font-size: 11px; opacity: 0.7; }
         .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
@@ -113,18 +127,10 @@
         .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
         .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 20px; border-radius: 99px; backdrop-filter: blur(5px); cursor: pointer; font-size: 14px; }
         
-        /* Share Card (Professional / Clean) */
-        .share-card-wrap { 
-            background: #fff; padding: 0; border-radius: 0; 
-            text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%;
-            /*box-shadow: 0 20px 50px rgba(0,0,0,0.2);*/ /* Canvas has shadow */
-            background: transparent; /* Let canvas render bg */
-        }
+        /* Share Card (Professional) */
+        .share-card-wrap { background: #fff; padding: 0; border-radius: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; background: transparent; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #canvasContainer img { 
-            max-width: 100%; display: block; border-radius: 0; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* Real shadow on image */
-        }
+        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: block; }
         .share-hint { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         /* Gallery */
@@ -134,6 +140,9 @@
         .gallery-header h2 { margin: 0; font-size: 18px; }
         .close-btn { background: #e5e5ea; width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center;}
         .gallery-tabs { display: flex; gap: 10px; padding: 15px 30px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
+        .gallery-tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { background: #f5f5f7; padding: 8px 18px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; }
+        .tab-btn.active { background: #1d1d1f; color: white; }
         .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
         .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
         .gallery-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
@@ -141,17 +150,17 @@
         .gallery-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
         .gallery-prompt { font-size: 12px; color: var(--sec); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* 修复 1: 彻底隐藏原生文件输入 */
         #photoFile { display: none !important; opacity: 0; pointer-events: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
-        
+
         /* Onboarding */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: 0.3s; }
         .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px; width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
         .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -6px; }
-        .ob-tooltip.top::after { bottom: -6px; } .ob-tooltip.bottom::after { top: -6px; }
+        .ob-tooltip.top::after { bottom: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); } 
+        .ob-tooltip.bottom::after { top: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); background:white; z-index:2; }
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--sec); line-height: 1.5; margin-bottom: 15px; }
         .ob-step-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
@@ -176,7 +185,7 @@
         <a href="#" class="logo">Nano Banana 🍌</a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
-            <button class="share-btn" onclick="openShareModal()">分享</button>
+            <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享</button>
         </div>
     </nav>
 
@@ -184,7 +193,7 @@
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
             <span class="main-icon">🎨</span>
             <h3 class="main-title" data-i18n="emptyTitle">创意影像工作室</h3>
-            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接在底部输入文字进行创作。</p>
+            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接输入文字创作。</p>
             <div class="divider">OR</div>
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
@@ -227,6 +236,7 @@
 
     <div class="magic-bar-wrapper" id="magicBar">
         <div class="style-scroll" id="styleScroll"></div>
+        
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
             <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
@@ -266,18 +276,18 @@
     </div>
 
     <script>
+        // --- Config ---
         const WORKER_ENDPOINT = '/api/repair';
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
-        // --- Data ---
         const filtersData = [
             { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
             { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
             { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
             { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
             { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1550136513-548af4445338?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
             { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
             { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
         ];
@@ -288,13 +298,11 @@
         let allGalleryItems = []; let currentCategory = '全部';
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多",
-            ob: { s1: { t: "开始创作", d: "点击中间上传图片，或在底部输入。" }, s2: { t: "选择风格", d: "选择一个风格，或点击骰子获取灵感。" }, s3: { t: "灵感广场", d: "查看更多高手的创意。" }, btnNext: "下一步", btnStart: "开始" } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More",
-            ob: { s1: { t: "Start Here", d: "Upload or Type below." }, s2: { t: "Pick Style", d: "Choose style or roll dice." }, s3: { t: "Gallery", d: "Get inspired." }, btnNext: "Next", btnStart: "Start" } }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" }, s3: { t: "分享", d: "生成后点击右上角分享。" }, btnNext: "下一步", btnStart: "开始" } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." }, s3: { t: "Share", d: "Share your work." }, btnNext: "Next", btnStart: "Start" } }
         };
 
-        // --- Logic ---
+        // --- Render ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -335,8 +343,9 @@
                 renderFilters(); 
             }
         }
+        updateLanguage();
 
-        // Magic Wand
+        // --- Magic Wand ---
         const magicBtn = document.getElementById('magicBtn');
         magicBtn.addEventListener('click', async () => {
             magicBtn.classList.add('loading');
@@ -354,6 +363,7 @@
             magicBtn.classList.remove('loading');
         });
 
+        // --- Upload ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -379,7 +389,7 @@
             renderFilters();
         }
 
-        // Previewer
+        // --- Previewer ---
         const previewModal = document.getElementById('previewModal');
         const previewImg = document.getElementById('previewImg');
         window.openPreview = function() {
@@ -394,7 +404,7 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- 2. Share Card (Professional White) ---
+        // --- Share Card (Fix CORS) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
@@ -409,7 +419,7 @@
             const w = 600, h = 900;
             canvas.width = w; canvas.height = h;
 
-            // Background: Clean White
+            // White BG
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
             try {
@@ -418,31 +428,18 @@
                 img.src = src;
                 await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
 
-                // Calculate Aspect Ratio fit
-                const maxWidth = 520; const maxHeight = 650;
-                const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-                const dw = img.width * ratio;
-                const dh = img.height * ratio;
-                const dx = (w - dw) / 2;
-                const dy = 60 + (maxHeight - dh) / 2;
+                const imgRatio = img.width / img.height;
+                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
+                ctx.drawImage(img, x, 100, drawW, drawH);
 
-                // Drop Shadow
-                ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
-                ctx.shadowBlur = 20; ctx.shadowOffsetY = 10;
-                // Draw Image
-                ctx.drawImage(img, dx, dy, dw, dh);
-                ctx.shadowColor = "transparent";
+                ctx.fillStyle = '#000'; ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText("Nano Banana AI", w/2, 60);
+                ctx.fillStyle = '#666'; ctx.font = '20px sans-serif';
+                ctx.fillText("一句话PS，来自", w/2, 650);
+                ctx.fillText("https://ps.bobot.fun", w/2, 680);
 
-                // Text (Bottom)
-                ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 36px sans-serif'; ctx.textAlign = 'left';
-                ctx.fillText("Nano Banana", 40, h - 80);
-                
-                ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif';
-                ctx.fillText("AI Magic Studio", 40, h - 45);
-
-                // QR Code
                 const qrDiv = document.createElement('div');
-                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 100, height: 100, colorDark : "#1d1d1f" });
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 80, height: 80 });
                 const qrImg = qrDiv.querySelector('img');
                 if(qrImg) { 
                     await new Promise(r => qrImg.onload = r); 
@@ -452,7 +449,6 @@
                 const finalImg = new Image();
                 finalImg.src = canvas.toDataURL(); 
                 finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
-                finalImg.style.boxShadow = '0 20px 50px rgba(0,0,0,0.2)'; // CSS shadow for display
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) {
                 console.error(e);
@@ -464,7 +460,7 @@
             setTimeout(() => shareModal.style.display = 'none', 300);
         }
 
-        // --- Submit ---
+        // --- Submit & Logic ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
@@ -606,14 +602,14 @@
              document.getElementById('galleryModal').classList.remove('open');
         }
 
-        // 3. Onboarding Logic (Re-enabled)
-        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'magicBar', key: 's2', pos: 'top' }, { id: 'galleryToggle', key: 's3', pos: 'bottom' } ];
+        // Onboarding
+        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'magicBar', key: 's2', pos: 'top' }, { id: 'shareBtnNav', key: 's3', pos: 'bottom' } ];
         let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_vFinal')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v16')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
         function showStep(idx) {
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_vFinal', 'true'); return; }
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v16', 'true'); return; }
             curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
             el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
@@ -625,8 +621,6 @@
         }
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
-
-        updateLanguage(); // Init
     </script>
 </body>
 </html>
