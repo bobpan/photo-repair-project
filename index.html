@@ -11,203 +11,144 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        /* --- 1. 视觉系统 --- */
+        /* --- 基础变量 (香蕉黄主题) --- */
         :root {
-            --primary: #FFC20E; --on-primary: #000000;
-            --bg: #FAFAFC; --text: #1C1C1E; --sec: #8E8E93; --border: rgba(0,0,0,0.06);
+            --primary: #FFC20E; 
+            --on-primary: #000000;
+            --bg: #FAFAFC; --text: #1C1C1E; --sec: #8E8E93; 
             --r-md: 20px; --r-full: 999px;
-            --sh-sm: 0 4px 12px rgba(0,0,0,0.04); --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
+            --sh-sm: 0 4px 12px rgba(0,0,0,0.04); 
+            --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
+            --arrow-pos: 50%;
         }
+
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- 导航 --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; letter-spacing: -0.5px; }
-        .nav-actions { display: flex; gap: 12px; align-items: center; }
-        .icon-btn { background: white; border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); font-weight: 600; font-size: 12px; }
-        .share-btn { background: var(--text); color: white; width: auto; padding: 0 18px; height: 38px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 6px; }
-        .share-btn.visible { display: flex; animation: popIn 0.4s ease; }
-        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; }
+        .nav-actions { display: flex; gap: 10px; }
+        .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; color: var(--text); font-size: 12px; font-weight: 600; }
+        .share-btn { background: var(--text); color: white; padding: 0 16px; height: 36px; border-radius: 99px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 4px; }
+        .share-btn.visible { display: flex; animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* --- 舞台 --- */
-        .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 200px; width: 100%; box-sizing: border-box; overflow-y: auto; }
+        .stage { flex: 1; position: relative; padding: 20px; padding-bottom: 220px; width: 100%; box-sizing: border-box; overflow-y: auto; display: flex; justify-content: center; align-items: center; }
         
-        /* 空状态 */
-        .empty-state { text-align: center; max-width: 400px; width: 100%; padding: 60px 20px; border: 2px dashed rgba(0,0,0,0.08); border-radius: 32px; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; }
-        .empty-state:hover { border-color: var(--primary); background: #FFFCF0; transform: scale(1.01); }
-        .main-icon { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .main-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
-        .sub-text { font-size: 15px; color: var(--sec); line-height: 1.5; }
-        .action-hint { color: var(--on-primary); font-weight: 700; font-size: 14px; background: var(--primary); padding: 10px 24px; border-radius: 99px; margin-top: 30px; box-shadow: 0 4px 15px rgba(255, 194, 14, 0.3); }
+        /* 空状态 (上传入口) */
+        .empty-state { text-align: center; max-width: 400px; width: 100%; padding: 50px 20px; border: 2px dashed rgba(0,0,0,0.1); border-radius: 32px; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; }
+        .empty-state:hover { border-color: var(--primary); background: #FFFBF0; transform: scale(1.01); }
+        .main-icon { font-size: 60px; margin-bottom: 20px; }
+        .main-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .sub-text { font-size: 14px; color: var(--sec); line-height: 1.5; }
+        .action-hint { background: var(--primary); color: var(--on-primary); font-weight: 700; font-size: 14px; padding: 10px 24px; border-radius: 99px; margin-top: 25px; box-shadow: 0 4px 15px rgba(255, 194, 14, 0.3); }
 
         /* 图片容器 */
-        .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); background: transparent; overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%; }
+        .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); overflow: hidden; max-width: 100%; max-height: 100%; }
         .image-container.loaded { display: inline-flex; box-shadow: var(--sh-lg); }
-        .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
-        .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
+        .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; border-radius: var(--r-md); }
+        .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🚀 1. 动效升级：全息呼吸光晕 + 激光扫描 */
-        .magic-glow {
-            position: absolute; inset: -4px; pointer-events: none; z-index: 20;
-            border-radius: 24px; 
-            /* 强烈的黄色呼吸光晕 */
-            box-shadow: 0 0 0 0 rgba(255, 194, 14, 0);
-            display: none;
+        /* 🐍 贪吃蛇边框 (使用最稳的伪元素旋转法) */
+        .snake-border {
+            position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+            z-index: 5; border-radius: 22px; 
+            background: linear-gradient(60deg, #FFC20E, #FF3B30, #5AC8FA, #4CD964);
+            background-size: 300% 300%;
+            opacity: 0; transition: opacity 0.3s;
         }
-        
-        .scan-beam {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.6), transparent);
-            z-index: 25; opacity: 0; pointer-events: none;
-            transform: translateY(-100%);
+        /* 遮罩层，露出边框 */
+        .snake-border::after {
+            content: ''; position: absolute; inset: 3px; background: #fff; border-radius: 19px; z-index: -1;
         }
-
-        /* 激活状态动画 */
-        .image-container.is-loading .magic-glow {
-            display: block;
-            animation: pulseGlow 1.5s infinite;
-        }
-        .image-container.is-loading .scan-beam {
-            animation: scanMove 2s linear infinite;
-            opacity: 1;
-        }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(255, 194, 14, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 194, 14, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 194, 14, 0); }
-        }
-        @keyframes scanMove {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
+        .image-container.is-loading .snake-border { opacity: 1; animation: snakeAnim 2s ease infinite; }
+        @keyframes snakeAnim { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 
         /* Loading Overlay */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 20px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
 
-        /* Ad Elements */
-        .ad-wrapper { display: none; flex-direction: column; align-items: center; width: 100%; animation: slideUp 0.4s ease; }
+        /* 广告区域 */
+        .ad-wrapper { display: none; flex-direction: column; align-items: center; margin-top: 20px; width: 100%; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .ad-slot { width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; background: #FFFBF2; margin-bottom: 15px; }
-        .mock-ad { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; border: 2px dashed var(--primary); box-sizing: border-box; border-radius: 16px; }
-        .mock-icon { font-size: 32px; margin-bottom: 5px; }
-        .mock-text { font-weight: 700; font-size: 14px; }
-        .mock-sub { font-size: 11px; opacity: 0.7; }
-        .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
-        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 10px 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05); align-items: center; box-shadow: var(--sh-sm); }
-        .switch { position: relative; width: 36px; height: 20px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9e9ea; transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } input:checked + .slider { background: var(--primary); } input:checked + .slider:before { transform: translateX(16px); }
+        .mock-ad-box { width: 280px; height: 120px; background: #FFFBF2; border: 2px dashed #FFC20E; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; }
+        .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; margin-bottom: 10px; }
+        .toggle-wrap { display: flex; justify-content: space-between; width: 260px; background: white; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; margin-top: 10px; }
+        
+        /* Switch */
+        .switch { position: relative; width: 36px; height: 20px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; } input:checked + .slider { background: var(--primary); } input:checked + .slider:before { transform: translateX(16px); }
 
-        /* Close Btn */
-        .clear-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 70; border: 1px solid rgba(255,255,255,0.2); opacity: 0; transition: 0.2s; pointer-events: none; }
+        /* 关闭按钮 */
+        .clear-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 70; opacity: 0; transition: 0.2s; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
 
-        /* --- Bottom Bar --- */
-        .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 10px; padding-bottom: env(safe-area-inset-bottom); }
+        /* --- 底部操作栏 --- */
+        .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 600px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* 风格卡片 */
         .style-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
-        .style-scroll::-webkit-scrollbar { display: none; }
-        .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
-        .style-card img { width: 60px; height: 60px; border-radius: 18px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); transition: 0.2s; }
-        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; text-align: center; letter-spacing: -0.2px; }
-        .style-card.active img { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 6px 16px rgba(255, 194, 14, 0.4); }
-        .style-card.active span { color: var(--text); font-weight: 700; }
-        .more-card .more-circle { width: 60px; height: 60px; border-radius: 18px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 22px; }
+        .style-card { flex-shrink: 0; width: 72px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
+        .style-card img { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); transition: 0.2s; }
+        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; }
+        .style-card.active img { border-color: var(--primary); transform: scale(1.1); box-shadow: 0 4px 12px rgba(255, 194, 14, 0.4); }
+        .style-card.active span { color: #000; font-weight: 700; }
+        .more-card .more-circle { width: 64px; height: 64px; border-radius: 16px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 24px; }
 
-        /* Input Box */
-        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 8px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
-        .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; width: 40px; height: 40px; }
+        /* 输入框 */
+        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: 99px; padding: 6px; display: flex; align-items: center; gap: 8px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
+        .magic-wand { color: #7b1fa2; background: #f3e5f5; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .input-box input { flex: 1; border: none; background: transparent; padding: 10px 5px; font-size: 16px; color: var(--text); outline: none; min-width: 0; }
-        .send-btn { background: var(--primary); color: var(--on-primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; font-weight: bold; }
+        .input-box input { flex: 1; border: none; background: transparent; padding: 10px; font-size: 16px; outline: none; min-width: 0; }
+        .send-btn { background: var(--primary); color: var(--on-primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; flex-shrink: 0; font-weight: bold; transition: 0.2s; }
         .send-btn:hover { transform: scale(1.1); }
-        .send-btn:disabled { background: #eee; color: #ccc; }
 
         /* --- Modals --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); opacity: 0; transition: 0.3s; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: 0.3s; }
         .modal.visible { opacity: 1; }
-        .preview-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.1s; cursor: grab; }
-        .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
-        .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 99px; backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; }
-        
-        /* Share Card */
-        .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
+        .share-card-wrap { text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 340px; width: 90%; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #canvasContainer img { max-width: 100%; border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; }
-        .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
+        #canvasContainer img { max-width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: block; margin: 0 auto; }
+        .share-hint { font-size: 13px; color: white; margin-top: 15px; opacity: 0.8; }
+        .close-share { margin-top: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 24px; border-radius: 99px; cursor: pointer; }
 
-        /* 3. 灵感广场 (Mobile Optimized) */
-        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        /* 灵感广场 */
+        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
-        .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .gallery-header h2 { margin: 0; font-size: 20px; font-weight: 800; }
-        .close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
-        .close-btn:hover { background: #e5e5ea; }
-
-        .gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
-        .tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
-        .tab-btn.active { background: #000; color: #fff; }
-
-        .gallery-grid { 
-            flex: 1; overflow-y: auto; padding: 0 24px 100px; 
-            display: grid; 
-            /* PC 端多列 */
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 20px; box-sizing: border-box; 
-        }
-        .gallery-item { 
-            background: white; border-radius: 20px; overflow: hidden; cursor: pointer; 
-            box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none;
-            aspect-ratio: 3/4; /* 统一比例 */
-        }
-        .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
-        .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
-        .gallery-item:hover .gallery-img { transform: scale(1.05); }
-        .gallery-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end;
-        }
-        .gallery-title { font-size: 15px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-
-        #photoFile { display: none !important; opacity: 0; pointer-events: none; }
-        .cf-turnstile { margin: 0 auto; min-height: 65px; }
+        .gallery-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; }
+        .gallery-grid { flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-bottom: 100px; }
+        .gallery-item { border-radius: 16px; overflow: hidden; cursor: pointer; position: relative; aspect-ratio: 3/4; }
+        .gallery-img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px 12px 12px; color: white; font-weight: 700; font-size: 13px; }
 
         /* Onboarding */
-        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 800; display: none; opacity: 0; transition: 0.3s; }
+        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 4000; display: none; opacity: 0; transition: 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
-        .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.7) !important; border-radius: 16px; transition: 0.3s; }
-        .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 24px; border-radius: 24px; width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
-        .ob-tooltip::after { content: ""; position: absolute; width: 16px; height: 16px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -8px; border-radius: 2px; }
-        .ob-tooltip.top::after { bottom: -8px; } 
-        .ob-tooltip.bottom::after { top: -8px; }
-        .ob-step-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
-        .ob-step-desc { font-size: 15px; color: var(--sec); line-height: 1.5; margin-bottom: 20px; }
-        .ob-step-btn { background: var(--primary); color: var(--on-primary); border: none; padding: 12px 24px; border-radius: 99px; font-size: 15px; font-weight: 700; cursor: pointer; float: right; box-shadow: 0 4px 12px rgba(255,194,14,0.4); transition: 0.2s; }
+        .ob-highlight { z-index: 4001 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.7) !important; border-radius: 16px; transition: 0.3s; pointer-events: none; }
+        .ob-tooltip { position: absolute; z-index: 4002; background: white; padding: 20px; border-radius: 20px; width: 260px; display: none; animation: floatUp 0.3s ease-out; box-shadow: 0 10px 30px rgba(0,0,0,0.2); --arrow-left: 50%; }
+        .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -6px; }
+        .ob-tooltip.top::after { bottom: -6px; } .ob-tooltip.bottom::after { top: -6px; }
+        .ob-btn { background: var(--primary); color: black; border: none; padding: 8px 20px; border-radius: 99px; font-weight: 700; cursor: pointer; float: right; margin-top: 10px; pointer-events: auto; }
         @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
-        @media (max-width: 600px) {
-            /* 移动端优化：双列大卡片 */
-            .gallery-grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 100px; } 
-            .action-bar { display: none !important; }
-        }
+        #photoFile { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="obBackdrop" class="ob-backdrop"></div>
     <div id="obTooltip" class="ob-tooltip">
-        <div class="ob-step-title" id="obTitle">Title</div>
-        <div class="ob-step-desc" id="obDesc">Description</div>
-        <button class="ob-step-btn" id="obBtn">Next</button>
+        <div style="font-size:16px; font-weight:800; margin-bottom:5px;" id="obTitle">Title</div>
+        <div style="font-size:13px; color:#666; line-height:1.4;" id="obDesc">Desc</div>
+        <button class="ob-btn" id="obBtn">Next</button>
     </div>
 
     <nav class="navbar">
         <a href="#" class="logo">Nano Banana <span>🍌</span></a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
-            <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享作品 <span style="font-size:16px">✨</span></button>
+            <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享作品 ✨</button>
         </div>
     </nav>
 
@@ -224,26 +165,29 @@
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview" onclick="openPreview()">
-            
-            <div class="magic-glow"></div>
-            <div class="scan-beam"></div>
-            
+            <div class="snake-border"></div>
             <button class="clear-btn" onclick="resetCanvas()">✕</button>
 
             <div id="loadingOverlay" class="loading-overlay">
+                <div class="fun-fact">
+                    <div style="font-size:10px;color:var(--primary);font-weight:800;margin-bottom:4px;">DID YOU KNOW?</div>
+                    <div id="factText" style="font-size:13px;font-weight:600;">AI 正在连接神经元...</div>
+                </div>
                 <div class="ad-wrapper" id="adWrapper">
                     <div class="ad-slot">
                         <div class="mock-ad" id="mockAd">
-                            <div class="mock-icon">🙈</div>
-                            <div class="mock-text">假装这里有一个广告</div>
+                            <div style="font-size:24px;margin-bottom:5px;">🙈</div>
+                            <div style="font-size:13px;font-weight:700;color:#B8860B;">假装这里有一个广告</div>
                         </div>
-                        <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
-                             data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
-                             data-ad-format="auto" data-full-width-responsive="true"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                        <div class="real-ad-box" id="adBox">
+                            <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
+                                 data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
+                                 data-ad-format="auto" data-full-width-responsive="true"></ins>
+                            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                        </div>
                     </div>
                     <div class="toggle-wrap">
-                        <span style="font-size:12px;font-weight:700;color:var(--text)">允许广告开启无限生成</span>
+                        <span style="font-size:12px;font-weight:700">允许广告开启无限生成</span>
                         <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
                     </div>
                 </div>
@@ -255,30 +199,23 @@
         <div class="style-scroll" id="styleScroll"></div>
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
-            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
+            <input type="text" id="promptInput" placeholder="在这里开始你的天才想法..." autocomplete="off" inputmode="search">
             <button type="submit" class="send-btn">→</button>
         </form>
     </div>
 
-    <div id="previewModal" class="modal">
-        <img id="previewImg" class="preview-img">
-        <div class="preview-actions">
-            <button class="p-btn" onclick="closePreview()">关闭</button>
-        </div>
-    </div>
-
     <div id="shareModal" class="modal">
         <div class="share-card-wrap">
-            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成海报中...</div>
+            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成中...</div>
             <p class="share-hint">长按图片保存分享</p>
-            <button class="p-btn" style="color:white; border-color:rgba(255,255,255,0.4);" onclick="closeShareModal()">关闭</button>
+            <button class="close-share" onclick="closeShareModal()">✕</button>
         </div>
     </div>
 
     <div id="verifyModal" class="modal" style="background:rgba(0,0,0,0.5);">
         <div style="background:white;padding:20px;border-radius:20px;text-align:center;">
             <h3>安全验证</h3>
-            <div id="turnstile-container"></div>
+            <div id="turnstile-container" style="min-height:65px;margin-top:10px;"></div>
         </div>
     </div>
 
@@ -287,36 +224,36 @@
             <h2>✨ 灵感广场</h2>
             <button class="close-btn" id="closeGallery">✕</button>
         </div>
-        <div class="gallery-tabs" id="galleryTabs"></div>
         <div class="gallery-grid" id="galleryGrid"></div>
     </div>
 
     <script>
         const WORKER_ENDPOINT = '/api/repair';
         const PROMPT_ENDPOINT = '/api/prompt';
-        const STATUS_ENDPOINT = '/api/status';
         
+        // 1. 滤镜数据 (合并 Creative 和 Edit，去重)
         const filtersData = [
-            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k", cat:"创意" },
-            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
-            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
-            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
-            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
-            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
-            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
+            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
+            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
+            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
+            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
+            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
+            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
         ];
 
         let currentFile = null;
         let selectedStyle = "";
         let curLang = localStorage.getItem('lang') || 'cn';
-        let allGalleryItems = []; let currentCategory = '全部';
+        let allGalleryItems = []; 
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
         };
 
+        // --- Render Filters ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -337,7 +274,6 @@
             const t = i18nData[curLang];
             document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
             document.getElementById('langToggle').innerText = curLang.toUpperCase();
-            document.getElementById('promptInput').placeholder = "在这里开始你的天才想法...";
             renderFilters();
         }
         document.getElementById('langToggle').addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
@@ -348,20 +284,7 @@
             renderFilters();
         }
 
-        const magicBtn = document.getElementById('magicBtn');
-        magicBtn.addEventListener('click', async () => {
-            magicBtn.classList.add('loading');
-            const formData = new FormData();
-            formData.append('style', selectedStyle || "Creative");
-            if (currentFile) formData.append('photo', await compressImage(currentFile, 512));
-            try {
-                const res = await fetch(PROMPT_ENDPOINT, { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.status === 'success') document.getElementById('promptInput').value = data.prompt;
-            } catch (e) { console.error(e); }
-            magicBtn.classList.remove('loading');
-        });
-
+        // --- Core Logic ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -387,83 +310,46 @@
             selectedStyle = ""; renderFilters();
         }
 
-        const previewModal = document.getElementById('previewModal');
-        const previewImg = document.getElementById('previewImg');
-        window.openPreview = function() { const src = document.getElementById('displayImage').src; if(!src) return; previewImg.src = src; previewModal.style.display = 'flex'; requestAnimationFrame(() => previewModal.classList.add('visible')); }
-        window.closePreview = function() { previewModal.classList.remove('visible'); setTimeout(() => previewModal.style.display = 'none', 300); }
-
-        const shareModal = document.getElementById('shareModal');
-        window.openShareModal = async function() {
-            const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
-            shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
-            const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = '生成海报中...';
-            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            const w = 600, h = 900; canvas.width = w; canvas.height = h;
-
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-
-            try {
-                const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
-                await new Promise((r, j) => { img.onload = r; img.onerror = j; });
-                const imgRatio = img.width / img.height;
-                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
-                ctx.drawImage(img, x, 100, drawW, drawH);
-                
-                ctx.fillStyle = '#000'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText("NANO BANANA", w/2, 660);
-                ctx.fillStyle = '#666'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif';
-                ctx.fillText("一句话 PS · 创意无限", w/2, 695);
-                ctx.fillText("https://ps.bobot.fun", w/2, 725);
-
-                const qrDiv = document.createElement('div');
-                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
-                const qrImg = qrDiv.querySelector('img');
-                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
-
-                const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
-                finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-                canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
-            } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
+        // --- Onboarding (Fix 3: Updated Steps & Text) ---
+        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
+        let curStepIdx = 0;
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v30')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function showStep(idx) {
+            document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
+            const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v30', 'true'); return; }
+            curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
+            el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
+            tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
+            
+            // Correct Variable Names
+            const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
+            document.getElementById('obBtn').innerText = btnText;
+            
+            const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
+            const padding = 20; if (left + tooltipWidth > window.innerWidth - padding) { left = window.innerWidth - tooltipWidth - padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - left}px`; } if (left < padding) { left = padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - padding}px`; }
+            document.documentElement.style.setProperty('--arrow-pos', arrowPos); tooltip.style.left = left + 'px';
+            if (step.pos === 'bottom') { tooltip.style.top = (rect.bottom + 15) + 'px'; tooltip.classList.add('arrow-top'); } else { tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px'; tooltip.classList.add('arrow-bottom'); }
         }
-        window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
+        document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
+        setTimeout(initOnboarding, 1000);
 
+        // --- Submit Logic (With Snake & Ad Logic) ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
         const adWrapper = document.getElementById('adWrapper');
-        const mockAd = document.getElementById('mockAd'); 
-        const realAd = document.getElementById('adBox');
+        const mockAd = document.getElementById('mockAd'); const realAd = document.getElementById('adBox');
         
-        if(localStorage.getItem('isUnlimitedMode')) {
-            adToggle.checked = true; 
-            adWrapper.style.display = 'flex';
-            mockAd.style.display = 'none'; realAd.style.display = 'flex';
-        }
-        adToggle.addEventListener('change', (e) => {
-             localStorage.setItem('isUnlimitedMode', e.target.checked);
-             if(e.target.checked) { mockAd.style.display = 'none'; realAd.style.display = 'flex'; }
-             else { mockAd.style.display = 'flex'; realAd.style.display = 'none'; }
-        });
+        if(localStorage.getItem('isUnlimitedMode')) { adToggle.checked = true; adWrapper.style.display = 'flex'; mockAd.style.display = 'none'; realAd.style.display = 'flex'; }
+        adToggle.addEventListener('change', (e) => { localStorage.setItem('isUnlimitedMode', e.target.checked); if(e.target.checked) { mockAd.style.display = 'none'; realAd.style.display = 'flex'; } else { mockAd.style.display = 'flex'; realAd.style.display = 'none'; } });
 
-        async function compressImage(file, maxWidth = 1280) {
-            return new Promise((resolve) => {
-                const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image(); img.src = e.target.result;
-                    img.onload = () => {
-                        const c = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        if(w>h) { if(w>maxWidth){h*=maxWidth/w;w=maxWidth}} else { if(h>maxWidth){w*=maxWidth/h;h=maxWidth}}
-                        c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
-                        c.toBlob(b=>resolve(new File([b],file.name,{type:'image/jpeg'})),'image/jpeg',0.8);
-                    }
-                }
-            });
-        }
+        async function compressImage(file) { return new Promise((r) => { const reader = new FileReader(); reader.onload = (e) => { const img = new Image(); img.src = e.target.result; img.onload = () => { const c = document.createElement('canvas'); let w = img.width, h = img.height; if(w>1280) { h*=1280/w; w=1280; } c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); c.toBlob(b=>r(new File([b],file.name,{type:'image/jpeg'})),'image/jpeg',0.8); } }; reader.readAsDataURL(file); }); }
 
+        // Polling Logic (Simulated Task ID for now as we haven't updated Worker return yet, assuming sync flow compatible or async)
         async function pollTask(taskId) {
             for(let i=0; i<100; i++) {
-                const res = await fetch(`${STATUS_ENDPOINT}?taskId=${taskId}`);
+                const res = await fetch(`/api/status?taskId=${taskId}`);
                 const data = await res.json();
                 if(data.status === 'completed') return data.image;
                 if(data.status === 'error') throw new Error(data.message);
@@ -473,18 +359,13 @@
         }
 
         let turnstileToken = null;
-        window.onTurnstileRender = function() {
-             turnstile.render('#turnstile-container', {
-                sitekey: '0x4AAAAAACC22XM_s96N5NEw',
-                callback: (t) => { turnstileToken = t; document.getElementById('verifyModal').classList.remove('visible'); setTimeout(()=>{document.getElementById('verifyModal').style.display='none'},300); document.getElementById('commandForm').dispatchEvent(new Event('submit')); }
-             });
-        }
+        window.onTurnstileRender = function() { turnstile.render('#turnstile-container', { sitekey: '0x4AAAAAACC22XM_s96N5NEw', callback: (t) => { turnstileToken = t; document.getElementById('verifyModal').classList.remove('visible'); setTimeout(()=>{document.getElementById('verifyModal').style.display='none'},300); document.getElementById('commandForm').dispatchEvent(new Event('submit')); } }); }
         
         commandForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const prompt = document.getElementById('promptInput').value.trim();
             if(!currentFile && !prompt) return;
-            
+
             if(!currentFile) {
                  document.getElementById('displayImage').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
                  document.getElementById('displayImage').classList.add('pixelating');
@@ -493,13 +374,11 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
-            if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
-                 document.getElementById('adWrapper').style.display = 'flex'; 
-            }
+            if (localStorage.getItem('hasHitLimit') === 'true') document.getElementById('adWrapper').style.display = 'flex';
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            document.querySelector('.image-container').classList.add('is-loading'); // 1. 激活光效
+            document.querySelector('.image-container').classList.add('is-loading');
 
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -509,22 +388,18 @@
 
             try {
                 if(adToggle.checked) await new Promise(r=>setTimeout(r,4000));
-
                 const res = await fetch(WORKER_ENDPOINT, {method:'POST', body:formData});
                 const data = await res.json();
 
                 if(res.status === 401) {
                     document.getElementById('verifyModal').style.display = 'flex';
                     setTimeout(()=>document.getElementById('verifyModal').classList.add('visible'),10);
-                    window.onTurnstileRender(); 
-                    return;
+                    window.onTurnstileRender(); return;
                 }
                 if(res.status === 429) {
                     if(confirm(i18nData[curLang].alertLimit)) {
                         localStorage.setItem('hasHitLimit', 'true');
-                        adWrapper.style.display = 'flex';
-                        adToggle.checked = true;
-                        mockAd.style.display = 'none'; realAd.style.display = 'flex';
+                        adWrapper.style.display = 'flex'; adToggle.checked = true;
                         localStorage.setItem('isUnlimitedMode', 'true');
                     }
                     return;
@@ -540,12 +415,10 @@
                     const blob = await (await fetch(img)).blob();
                     currentFile = new File([blob], "edit.png", {type:'image/png'});
                     document.getElementById('promptInput').value = '';
-                    const shareBtn = document.getElementById('shareBtnNav');
-                    shareBtn.style.display = 'flex';
-                    shareBtn.classList.add('visible');
+                    document.getElementById('shareBtnNav').style.display = 'flex';
+                    document.getElementById('shareBtnNav').classList.add('visible');
                 }
-
-            } catch(e) { console.error(e); alert("AI Busy or Error"); } finally {
+            } catch(e) { console.error(e); alert("AI Busy"); } finally {
                 if(!turnstileToken) { 
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
@@ -555,67 +428,47 @@
             }
         });
         
-        // Gallery
+        // Share & Gallery logic... (Standard implementation)
         window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
-        
         async function fetchAndRenderGallery() {
-             // Fallback logic for demo
-             const res = await fetch('/api/gallery').catch(()=>null); 
-             const data = res ? await res.json() : null;
-             
-             if(data && Array.isArray(data) && data.length > 0) {
-                allGalleryItems = data; 
-             } else {
-                allGalleryItems = filtersData.map(i => ({...i, category: i.cat || '精选', img_url: i.img, title: i.name }));
-             }
-             renderGalleryTabs(); renderGalleryGrid();
+             const res = await fetch('/api/gallery').catch(()=>null); const data = res ? await res.json() : null;
+             if(data && Array.isArray(data) && data.length > 0) { allGalleryItems = data; } else { allGalleryItems = filtersData.map(i => ({...i, category: i.cat || '精选', img_url: i.img, title: i.name })); }
+             const grid = document.getElementById('galleryGrid');
+             grid.innerHTML = allGalleryItems.map(i => `<div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url}')"><img src="${i.img_url}" class="gallery-img"><div class="gallery-overlay"><div class="gallery-title">${i.title || i.name}</div></div></div>`).join('');
         }
-        function renderGalleryTabs() {
-            const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
-            galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
-        }
-        window.switchCategory = function(cat) { currentCategory = cat; renderGalleryTabs(); renderGalleryGrid(); }
-        function renderGalleryGrid() {
-             let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
-             galleryGrid.innerHTML = items.map(i => `
-                 <div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url || i.img}')">
-                     <img src="${i.img_url || i.img}" class="gallery-img">
-                     <div class="gallery-overlay">
-                         <div class="gallery-title">${i.title || i.name}</div>
-                     </div>
-                 </div>`).join('');
-        }
-        window.applyGallery = function(p, url) {
-             document.getElementById('promptInput').value = p;
-             document.getElementById('galleryModal').classList.remove('open');
-        }
+        window.applyGallery = function(p) { document.getElementById('promptInput').value = p; document.getElementById('galleryModal').classList.remove('open'); }
         
-        // Onboarding (Steps)
-        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
-        let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v25')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
-        function showStep(idx) {
-            document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
-            const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v25', 'true'); return; }
-            curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
-            el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
-            tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
-            
-            // 修复：Onboarding 按钮逻辑
-            const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
-            document.getElementById('obBtn').innerText = btnText;
-            
-            const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
-            const padding = 20; if (left + tooltipWidth > window.innerWidth - padding) { left = window.innerWidth - tooltipWidth - padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - left}px`; } if (left < padding) { left = padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - padding}px`; }
-            document.documentElement.style.setProperty('--arrow-pos', arrowPos); tooltip.style.left = left + 'px';
-            if (step.pos === 'bottom') { tooltip.style.top = (rect.bottom + 15) + 'px'; tooltip.classList.add('arrow-top'); } else { tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px'; tooltip.classList.add('arrow-bottom'); }
+        const shareModal = document.getElementById('shareModal');
+        window.openShareModal = async function() {
+            const src = document.getElementById('displayImage').src;
+            shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 600; canvas.height = 850; ctx.fillStyle = '#fff'; ctx.fillRect(0,0,600,850);
+            try {
+                const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
+                await new Promise(r => img.onload = r);
+                const ratio = Math.min(520/img.width, 600/img.height);
+                ctx.drawImage(img, (600-img.width*ratio)/2, 80, img.width*ratio, img.height*ratio);
+                ctx.fillStyle = '#000'; ctx.font = 'bold 30px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText("NANO BANANA", 300, 720);
+                ctx.font = '20px sans-serif'; ctx.fillStyle = '#666';
+                ctx.fillText("https://ps.bobot.fun", 300, 760);
+                document.getElementById('canvasContainer').innerHTML = '';
+                const final = new Image(); final.src = canvas.toDataURL(); final.style.width = '100%';
+                document.getElementById('canvasContainer').appendChild(final);
+            } catch(e) { document.getElementById('canvasContainer').innerText = 'Error'; }
         }
-        document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
-        setTimeout(initOnboarding, 1000);
-
-        renderFilters(); updateLanguage(); 
+        window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
+        const magicBtn = document.getElementById('magicBtn');
+        magicBtn.addEventListener('click', async () => {
+            magicBtn.classList.add('loading');
+            const formData = new FormData(); formData.append('style', selectedStyle || "Creative");
+            if (currentFile) formData.append('photo', await compressImage(currentFile, 512));
+            try { const res = await fetch(PROMPT_ENDPOINT, { method: 'POST', body: formData }); const data = await res.json(); if (data.status === 'success') document.getElementById('promptInput').value = data.prompt; } catch (e) {}
+            magicBtn.classList.remove('loading');
+        });
+        updateLanguage();
     </script>
 </body>
 </html>
