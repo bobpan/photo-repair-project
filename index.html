@@ -11,57 +11,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        /* --- 1. 视觉系统 (Banana Theme) --- */
+        /* --- 1. 视觉系统 --- */
         :root {
-            --primary: #FFC20E; 
-            --on-primary: #000000;
-            --bg: #FAFAFC;
-            --text: #1C1C1E;
-            --sec: #8E8E93;
-            --border: rgba(0,0,0,0.06);
-            
+            --primary: #FFC20E; --on-primary: #000000;
+            --bg: #FAFAFC; --text: #1C1C1E; --sec: #8E8E93; --border: rgba(0,0,0,0.06);
             --r-md: 20px; --r-full: 999px;
-            --sh-sm: 0 4px 12px rgba(0,0,0,0.04);
-            --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
-            
-            --arrow-pos: 50%;
+            --sh-sm: 0 4px 12px rgba(0,0,0,0.04); --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
         }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            background: var(--bg); color: var(--text);
-            margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* 0. 强制隐藏原生控件 (CSS 层再次加固) */
+        #photoFile { display: none !important; width: 0; height: 0; opacity: 0; pointer-events: none; }
 
         /* --- 导航 --- */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; letter-spacing: -0.5px; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
         .icon-btn { background: white; border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); font-weight: 600; font-size: 12px; }
-        .icon-btn:hover { transform: scale(1.05); border-color: var(--primary); }
         .share-btn { background: var(--text); color: white; width: auto; padding: 0 18px; height: 38px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255, 194, 14, 0.3); }
-        .share-btn.visible { display: flex; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .share-btn.visible { display: flex; animation: popIn 0.4s ease; }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* --- 舞台 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 200px; width: 100%; box-sizing: border-box; overflow-y: auto; }
         
         .empty-state { text-align: center; max-width: 400px; width: 100%; padding: 60px 20px; border: 2px dashed rgba(0,0,0,0.08); border-radius: 32px; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; }
-        .empty-state:hover { border-color: var(--primary); background: #FFFCF0; transform: scale(1.01); }
-        .main-icon { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.1)); }
+        .empty-state:hover { border-color: var(--primary); background: #FFFBF0; transform: scale(1.01); }
+        .main-icon { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .main-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .main-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
         .sub-text { font-size: 15px; color: var(--sec); line-height: 1.5; }
         .action-hint { color: var(--on-primary); font-weight: 700; font-size: 14px; background: var(--primary); padding: 10px 24px; border-radius: 99px; margin-top: 30px; box-shadow: 0 4px 15px rgba(255, 194, 14, 0.3); }
 
         /* 图片容器 */
-        .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); background: transparent; overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%; min-width: 300px; min-height: 300px; }
+        .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); background: transparent; overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%; }
         .image-container.loaded { display: inline-flex; box-shadow: var(--sh-lg); }
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
-        .image-display.pixelating { filter: blur(20px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
+        .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
 
-        /* 🐍 贪吃蛇边框 */
+        /* 🐍 流光贪吃蛇 */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 20;
             border-radius: 20px; padding: 4px; 
@@ -78,23 +66,25 @@
         .image-container.is-loading .snake-border { display: block; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Loading */
+        /* Loading Overlay */
         .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
-        .fun-fact { text-align: center; margin-bottom: 15px; background: white; padding: 14px 20px; border-radius: 16px; box-shadow: var(--sh-sm); border: 1px solid var(--border); width: 280px; flex-shrink: 0;}
+        .fun-fact { text-align: center; margin-bottom: 15px; background: white; padding: 12px 20px; border-radius: 16px; box-shadow: var(--sh-sm); border: 1px solid var(--border); width: 280px; flex-shrink: 0;}
         .fact-title { font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 600; line-height: 1.4; }
 
         /* Ads */
         .ad-wrapper { display: none; flex-direction: column; align-items: center; margin-top: 20px; width: 100%; animation: slideUp 0.4s ease; }
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .ad-slot { width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; background: #FFFBF2; margin-bottom: 15px; box-shadow: var(--sh-lg); }
+        .ad-slot { width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; background: #FFFBF2; margin-bottom: 15px; }
         .mock-ad { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; border: 2px dashed var(--primary); box-sizing: border-box; border-radius: 16px; }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
         .real-ad-box { display: none; width: 100%; height: 100%; background: #f9f9f9; z-index: 5; position: relative; }
         .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: white; padding: 10px 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05); align-items: center; box-shadow: var(--sh-sm); }
         .switch { position: relative; width: 36px; height: 20px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9e9ea; transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } input:checked + .slider { background: var(--primary); } input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Close Btn */
         .clear-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 70; transition: 0.2s; pointer-events: none; opacity: 0; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
 
@@ -108,49 +98,17 @@
         .style-card.active img { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 6px 16px rgba(255, 194, 14, 0.4); }
         .style-card.active span { color: var(--on-primary); font-weight: 700; }
         .more-card .more-circle { width: 60px; height: 60px; border-radius: 18px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 22px; }
+
+        /* Input Box */
         .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 8px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
         .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .input-box input { flex: 1; border: none; background: transparent; padding: 10px 5px; font-size: 16px; color: var(--text); outline: none; min-width: 0; }
         .send-btn { background: var(--primary); color: var(--on-primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; font-weight: bold; }
+        .send-btn:hover { transform: scale(1.1); }
 
-        /* --- Gallery (Refined) --- */
-        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
-        .gallery-modal.open { transform: translateY(0); }
-        .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .gallery-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
-        .close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
-        .gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
-        .tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
-        .tab-btn.active { background: var(--on-primary); color: white; }
-        
-        /* 🆕 修复：PC/Mobile 画廊布局 */
-        .gallery-grid { 
-            flex: 1; overflow-y: auto; padding: 0 24px 100px; 
-            display: grid; 
-            /* PC: 最小宽度 200px, 自动填充 */
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 24px; /* 间距加大 */
-            align-content: start; /* 防止内容少时拉伸 */
-        }
-        
-        .gallery-item { 
-            background: white; border-radius: 20px; overflow: hidden; cursor: pointer; 
-            box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none;
-            aspect-ratio: 3/4; /* 统一竖图 */
-        }
-        .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
-        .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
-        .gallery-item:hover .gallery-img { transform: scale(1.05); }
-        .gallery-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end;
-        }
-        .gallery-title { font-size: 15px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-
-        /* Modals */
+        /* --- Modals --- */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); opacity: 0; transition: 0.3s; }
         .modal.visible { opacity: 1; }
         .preview-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.1s; cursor: grab; }
@@ -159,15 +117,35 @@
         
         .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: block; margin: 0 auto; }
+        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
         .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
+
+        /* Gallery */
+        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        .gallery-modal.open { transform: translateY(0); }
+        .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .gallery-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
+        .close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
+
+        .gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
+        .tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
+        .tab-btn.active { background: var(--on-primary); color: white; }
+        
+        .gallery-grid { flex: 1; overflow-y: auto; padding: 0 24px 100px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; box-sizing: border-box; }
+        .gallery-item { background: white; border-radius: 20px; overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none; aspect-ratio: 3/4; }
+        .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
+        .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
+        .gallery-item:hover .gallery-img { transform: scale(1.05); }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end; }
+        .gallery-title { font-size: 15px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
 
         /* Onboarding */
-        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 4000; display: none; opacity: 0; transition: 0.3s; }
+        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 800; display: none; opacity: 0; transition: 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
-        .ob-highlight { z-index: 4001 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.7) !important; border-radius: 16px; transition: 0.3s; }
-        .ob-tooltip { position: absolute; z-index: 4002; background: white; padding: 24px; border-radius: 24px; width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
+        .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.7) !important; border-radius: 16px; transition: 0.3s; }
+        .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 24px; border-radius: 24px; width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
         .ob-tooltip::after { content: ""; position: absolute; width: 16px; height: 16px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -8px; border-radius: 2px; }
         .ob-tooltip.top::after { bottom: -8px; } .ob-tooltip.bottom::after { top: -8px; }
         .ob-step-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -176,14 +154,8 @@
         @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
         @media (max-width: 600px) {
-            /* 🆕 修复：移动端画廊间距优化 */
-            .gallery-grid { 
-                grid-template-columns: 1fr 1fr; /* 双列 */
-                padding: 0 16px 100px; 
-                gap: 12px; /* 列间距 */
-                row-gap: 20px; /* 行间距加大 */
-            }
-            .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
+            .gallery-grid { grid-template-columns: 1fr 1fr; padding: 0 16px 100px; gap: 12px; } 
+            .action-bar { display: none !important; }
         }
     </style>
 </head>
@@ -213,17 +185,21 @@
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
 
-        <input type="file" id="photoFile" accept="image/*">
+        <input type="file" id="photoFile" accept="image/*" style="display:none !important;width:0;height:0;opacity:0;">
 
         <div id="imageContainer" class="image-container">
             <img id="displayImage" class="image-display" src="" alt="Preview" onclick="openPreview()">
+            
             <div class="snake-border"></div>
+            
             <button class="clear-btn" onclick="resetCanvas()">✕</button>
+
             <div id="loadingOverlay" class="loading-overlay">
                 <div class="fun-fact">
                     <div class="fact-title">DID YOU KNOW?</div>
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
+                
                 <div class="ad-wrapper" id="adWrapper">
                     <div class="ad-slot">
                         <div class="mock-ad" id="mockAd">
@@ -394,17 +370,27 @@
             const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = '生成海报中...';
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             const w = 600, h = 900; canvas.width = w; canvas.height = h;
+
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+
             try {
                 const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
                 await new Promise((r, j) => { img.onload = r; img.onerror = j; });
                 const imgRatio = img.width / img.height;
                 const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
                 ctx.drawImage(img, x, 100, drawW, drawH);
-                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("NANO BANANA", w/2, 660);
-                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillText("一句话 PS · 创意无限", w/2, 695); ctx.fillText("https://ps.bobot.fun", w/2, 725);
-                const qrDiv = document.createElement('div'); new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
-                const qrImg = qrDiv.querySelector('img'); if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
+                
+                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText("NANO BANANA", w/2, 660);
+                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText("一句话 PS · 创意无限", w/2, 695);
+                ctx.fillText("https://ps.bobot.fun", w/2, 725);
+
+                const qrDiv = document.createElement('div');
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
+                const qrImg = qrDiv.querySelector('img');
+                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
+
                 const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px'; finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
@@ -482,7 +468,7 @@
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            document.querySelector('.snake-border').style.display = 'block'; // Activate Snake
+            document.querySelector('.snake-border').style.display = 'block';
 
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -538,7 +524,6 @@
             }
         });
         
-        // Gallery
         window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
         
@@ -569,7 +554,7 @@
              document.getElementById('galleryModal').classList.remove('open');
         }
         
-        // Onboarding (Steps)
+        // Onboarding (v999 force reset)
         const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
         let curStepIdx = 0;
         function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v999')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
@@ -582,7 +567,6 @@
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
             const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
             document.getElementById('obBtn').innerText = btnText;
-            
             const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
             const padding = 20; if (left + tooltipWidth > window.innerWidth - padding) { left = window.innerWidth - tooltipWidth - padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - left}px`; } if (left < padding) { left = padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - padding}px`; }
             document.documentElement.style.setProperty('--arrow-pos', arrowPos); tooltip.style.left = left + 'px';
