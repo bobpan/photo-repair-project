@@ -168,7 +168,6 @@
 
         @media (max-width: 600px) {
             .gallery-grid { grid-template-columns: 1fr; }
-            .action-bar { display: none !important; }
         }
     </style>
 </head>
@@ -351,6 +350,7 @@
             magicBtn.classList.add('loading');
             const formData = new FormData();
             formData.append('style', selectedStyle || "Creative");
+            formData.append('lang', curLang);
             if (currentFile) {
                 const compressed = await compressImage(currentFile, 512); 
                 formData.append('photo', compressed);
@@ -585,8 +585,25 @@
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
         
         async function fetchAndRenderGallery() {
-             const res = await fetch('/api/gallery'); const data = await res.json();
-             if(data && Array.isArray(data)) { allGalleryItems = data; renderGalleryTabs(); renderGalleryGrid(); }
+             try {
+                 const res = await fetch('/api/gallery');
+                 const data = await res.json();
+                 if(data && Array.isArray(data) && data.length > 0) {
+                     allGalleryItems = data;
+                     renderGalleryTabs();
+                     renderGalleryGrid();
+                 } else {
+                     throw new Error("Empty");
+                 }
+             } catch(e) {
+                 // Fallback if API fails
+                 console.warn("Gallery API failed, using fallback");
+                 allGalleryItems = filtersData.map((f, i) => ({
+                    id: i, title: f.name, img_url: f.img, prompt: f.prompt, category: '预设'
+                 }));
+                 renderGalleryTabs();
+                 renderGalleryGrid();
+             }
         }
         function renderGalleryTabs() {
             const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
