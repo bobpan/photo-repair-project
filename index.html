@@ -40,67 +40,43 @@
         .divider { margin: 20px 0; font-size: 11px; color: #ccc; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .action-hint { color: var(--primary); font-weight: 600; font-size: 13px; background: rgba(0,122,255,0.1); padding: 6px 14px; border-radius: 99px; }
 
-        /* 🆕 修复 1: 图片容器贴合优化 
-           display: inline-flex 让容器尺寸紧贴图片，消除白边
-           background: transparent 去掉白色背景
-        */
+        /* 图片容器 */
         .image-container { 
-            position: relative; 
-            display: none; /* JS控制 */
-            justify-content: center; align-items: center; 
-            border-radius: var(--r-md); 
-            /* 移除默认背景和阴影，防止图片没加载满时显示丑陋的框 */
-            background: transparent; 
-            box-shadow: var(--sh-lg);
-            overflow: hidden; 
-            cursor: zoom-in; 
-            max-width: 100%; max-height: 100%;
+            position: relative; display: none; justify-content: center; align-items: center; 
+            border-radius: var(--r-md); background: transparent; box-shadow: var(--sh-lg);
+            overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%;
         }
-        /* 只有加载完成有内容时才显示 Flex，且自适应 */
         .image-container.loaded { display: inline-flex; }
-
-        .image-display { 
-            display: block; 
-            width: auto; height: auto; /* 让图片决定大小 */
-            max-width: 100%; max-height: 60vh; /* 限制最大尺寸 */
-            object-fit: contain; 
-            z-index: 10; position: relative; 
-            transition: filter 0.5s; 
-            pointer-events: auto; -webkit-user-select: none; 
-            border-radius: var(--r-md); /* 图片本身也要圆角 */
-        }
+        .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 贪吃蛇边框 */
-        .snake-border { 
-            position: absolute; inset: 0; pointer-events: none; z-index: 55; 
-            border-radius: var(--r-md); padding: 4px; 
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude;
-            background: conic-gradient(from var(--a, 0deg), transparent 70%, var(--primary)); 
-            animation: rot 2s linear infinite; 
-            display: none; 
+        /* 🐍 修复版：兼容性更好的流光贪吃蛇 */
+        .snake-border {
+            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            z-index: 20; border-radius: 18px; /* 比图片圆角稍大 */
+            background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+            background-size: 300% 300%;
+            animation: snakeAnim 2s ease alternate infinite;
+            display: none; pointer-events: none;
+        }
+        /* 用伪元素遮住中间，只露出边框 */
+        .snake-border::after {
+            content: ''; position: absolute; inset: 4px; background: #fff; border-radius: 14px; z-index: -1;
+            /* 这里我们不需要背景遮挡，因为图片在上面。这个层主要是发光效果 */
+            opacity: 0;
         }
         .image-container.is-loading .snake-border { display: block; }
-        @property --a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-        @keyframes rot { from { --a: 0deg; } to { --a: 360deg; } }
+        @keyframes snakeAnim { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 
         /* Loading / Ad */
-        .loading-overlay { 
-            position: absolute; inset: 0; 
-            background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); 
-            display: none; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; 
-            border-radius: var(--r-md); /* 跟随圆角 */
-        }
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
         
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; }
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
 
-        /* 俏皮 Mock Ad */
+        /* Mock Ad */
         .mock-ad-box { width: 300px; height: 160px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
         .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
@@ -167,7 +143,6 @@
         .gallery-tabs::-webkit-scrollbar { display: none; }
         .tab-btn { background: #f5f5f7; padding: 8px 18px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; }
         .tab-btn.active { background: #1d1d1f; color: white; }
-
         .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
         .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
         .gallery-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
@@ -180,10 +155,8 @@
 
         @media (max-width: 600px) {
             .gallery-grid { grid-template-columns: 1fr; }
-            /* 移动端：让操作栏下移一点，防止遮挡 */
-            .action-bar { display: none !important; } /* 移动端直接长按，不显示悬浮按钮避免遮挡 */
-            /* Loading 也不显示操作栏 */
-            .image-container.loaded .clear-btn { top: 15px; right: 15px; }
+            /* 移动端隐藏操作栏（避免遮挡） */
+            .action-bar { display: none !important; } 
         }
     </style>
 </head>
@@ -193,7 +166,7 @@
         <a href="#" class="logo">Nano Banana 🍌</a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
-            <button class="icon-btn share-btn" onclick="openShareModal()">分享</button>
+            <button class="share-btn" onclick="openShareModal()">分享</button>
         </div>
     </nav>
 
@@ -201,7 +174,7 @@
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
             <span class="main-icon">🎨</span>
             <h3 class="main-title" data-i18n="emptyTitle">创意影像工作室</h3>
-            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接在底部输入文字进行创作。</p>
+            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接输入文字创作。</p>
             <div class="divider">OR</div>
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
@@ -268,9 +241,11 @@
     </div>
 
     <div id="verifyModal" class="modal" style="background:rgba(0,0,0,0.5);">
-        <div style="background:white;padding:20px;border-radius:20px;text-align:center;">
+        <div style="background:white;padding:20px;border-radius:20px;text-align:center;width:90%;max-width:320px;">
             <h3>安全验证</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:15px;">完成验证以继续使用</p>
             <div id="turnstile-container"></div>
+            <button class="p-btn" style="margin-top:15px;font-size:12px;" onclick="retryVerification()">刷新验证</button>
         </div>
     </div>
 
@@ -289,28 +264,32 @@
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
-        // --- Data (Fixed Sort & Images) ---
+        // --- 5. 修复滤镜数据与排序 ---
         const filtersData = [
             { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
             { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
             { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
             { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
             { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
-            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1552975109-bc97d5403c7b?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
             { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
         ];
 
         let currentFile = null;
         let selectedStyle = "";
         let curLang = localStorage.getItem('lang') || 'cn';
+        // 修复: 全局变量定义
+        let allGalleryItems = []; 
+        let currentCategory = '全部';
+
         const i18nData = {
             cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多" },
             en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More" }
         };
 
         // --- Render Logic ---
-        // 2. 修复：Global OpenGallery
+        // 2. 修复 Global Gallery Access
         window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
@@ -334,7 +313,7 @@
             const t = i18nData[curLang];
             document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
             document.getElementById('langToggle').innerText = curLang.toUpperCase();
-            renderFilters(); // Re-render
+            renderFilters();
         }
         
         document.getElementById('langToggle').addEventListener('click', () => { 
@@ -389,7 +368,7 @@
                 document.getElementById('displayImage').src = ev.target.result;
                 document.getElementById('displayImage').classList.remove('pixelating');
                 document.getElementById('emptyState').style.display = 'none';
-                document.getElementById('imageContainer').style.display = 'inline-flex'; // 修复: flex fit
+                document.getElementById('imageContainer').style.display = 'inline-flex';
                 document.getElementById('imageContainer').classList.add('loaded');
             }
             reader.readAsDataURL(file);
@@ -420,7 +399,7 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- 1. Share Card (Fix PC generation) ---
+        // --- Share Card ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://via.placeholder.com/400x400?text=Nano+Banana"; 
@@ -438,16 +417,14 @@
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
             try {
-                // Load Image
                 const img = new Image();
-                img.crossOrigin = "Anonymous"; // Important for CORS
+                img.crossOrigin = "Anonymous"; 
                 img.src = src;
                 await new Promise((resolve, reject) => {
                     img.onload = resolve;
                     img.onerror = reject;
                 });
 
-                // Draw
                 const imgRatio = img.width / img.height;
                 const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
                 ctx.drawImage(img, x, 100, drawW, drawH);
@@ -467,7 +444,7 @@
                 }
 
                 const finalImg = new Image();
-                finalImg.src = canvas.toDataURL(); // This will fail if CORS is blocked
+                finalImg.src = canvas.toDataURL(); 
                 finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) {
@@ -525,13 +502,25 @@
             throw new Error("Timeout");
         }
 
-        // Turnstile
         let turnstileToken = null;
+        let turnstileWidgetId = null;
+        
+        // 2. 微信兼容性修复: 手动渲染 Turnstile
         window.onTurnstileRender = function() {
-             turnstile.render('#turnstile-container', {
-                sitekey: '0x4AAAAAACC22XM_s96N5NEw',
-                callback: (t) => { turnstileToken = t; document.getElementById('verifyModal').classList.remove('visible'); setTimeout(()=>{document.getElementById('verifyModal').style.display='none'},300); document.getElementById('commandForm').dispatchEvent(new Event('submit')); }
+             if(turnstileWidgetId) { turnstile.reset(turnstileWidgetId); return; }
+             turnstileWidgetId = turnstile.render('#turnstile-container', {
+                sitekey: '0x4AAAAAACC22XM_s96N5NEw', // 替换为您的 Site Key
+                callback: (t) => { 
+                    turnstileToken = t; 
+                    document.getElementById('verifyModal').classList.remove('visible'); 
+                    setTimeout(()=>{document.getElementById('verifyModal').style.display='none'},300); 
+                    document.getElementById('commandForm').dispatchEvent(new Event('submit')); 
+                },
+                'error-callback': () => { alert("验证加载失败，请尝试刷新页面或在浏览器中打开"); }
              });
+        }
+        window.retryVerification = function() {
+            if(turnstile) turnstile.reset(turnstileWidgetId);
         }
         
         commandForm.addEventListener('submit', async (e) => {
@@ -549,7 +538,7 @@
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            document.querySelector('.snake-border').classList.add('active');
+            document.querySelector('.snake-border').classList.add('active'); // 1. Snake 激活
 
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -601,12 +590,12 @@
             }
         });
         
-        // Gallery Fetch (Simple)
+        // 4. 修复灵感广场 JS 报错
         async function fetchAndRenderGallery() {
              const res = await fetch('/api/gallery'); const data = await res.json();
              if(data && Array.isArray(data)) {
-                 allGalleryItems = data;
-                 renderGalleryTabs(); renderGalleryGrid();
+                allGalleryItems = data; 
+                renderGalleryTabs(); renderGalleryGrid();
              }
         }
         function renderGalleryTabs() {
@@ -622,6 +611,8 @@
              document.getElementById('promptInput').value = p;
              document.getElementById('galleryModal').classList.remove('open');
         }
+        galleryToggle.addEventListener('click', () => { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); });
+        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
     </script>
 </body>
