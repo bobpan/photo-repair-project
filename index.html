@@ -24,6 +24,7 @@
         .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 5px; color: #000; text-decoration: none; }
         .nav-actions { display: flex; gap: 12px; }
         .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.05); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); font-weight: 600; font-size: 12px; }
+        .icon-btn:hover { transform: scale(1.05); background: #fafafa; }
         .share-btn { background: var(--text); color: white; width: auto; padding: 0 16px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; }
 
         /* --- 舞台 --- */
@@ -45,44 +46,36 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🐍 终极修复版：流光贪吃蛇 (CSS Mask + Rotating Child) */
+        /* 🐍 流光贪吃蛇 */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 20;
-            border-radius: var(--r-md); 
-            /* 容器本身不显示颜色，作为一个遮罩容器 */
+            border-radius: var(--r-md); padding: 4px; 
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; 
-            mask-composite: exclude;
-            padding: 4px; /* 边框宽度 */
-            overflow: hidden; /* 必须 hidden */
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            background: conic-gradient(from var(--a, 0deg), transparent 75%, var(--primary));
+            animation: spinSnake 2s linear infinite;
             display: none;
         }
         .image-container.is-loading .snake-border { display: block; }
-
-        /* 旋转的流光层 */
-        .snake-border::before {
-            content: ""; position: absolute; 
-            top: -50%; left: -50%; width: 200%; height: 200%; /* 足够大以覆盖旋转时的四角 */
-            background: conic-gradient(transparent 75%, var(--primary) 100%);
-            animation: spinHuge 2s linear infinite;
-        }
-        @keyframes spinHuge { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spinSnake { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .snake-border { top:-2px; left:-2px; right:-2px; bottom:-2px; border-radius: 18px; }
 
         /* Loading / Ad Overlay */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
         
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; flex-shrink: 0;}
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
 
-        /* Ad Boxes */
-        .mock-ad-box { width: 300px; height: 120px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
+        /* 俏皮 Mock Ad */
+        .mock-ad-box { width: 300px; height: 160px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
         .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
-        .mock-icon { font-size: 28px; margin-bottom: 5px; }
+        .mock-icon { font-size: 32px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
         .mock-sub { font-size: 11px; opacity: 0.7; }
+        
         .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
 
         .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; }
@@ -109,7 +102,7 @@
         .style-card.active span { color: var(--primary); }
         .more-card .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
 
-        /* Input Box */
+        /* Magic Wand & Input */
         .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 6px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
         .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
@@ -160,7 +153,7 @@
         .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px; width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
         .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -6px; }
         .ob-tooltip.top::after { bottom: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); } 
-        .ob-tooltip.bottom::after { top: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); background:white; z-index:2; }
+        .ob-tooltip.bottom::after { top: -6px; box-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
         .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
         .ob-step-desc { font-size: 14px; color: var(--sec); line-height: 1.5; margin-bottom: 15px; }
         .ob-step-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
@@ -185,7 +178,7 @@
         <a href="#" class="logo">Nano Banana 🍌</a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
-            <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享</button>
+            <button class="share-btn" onclick="openShareModal()">分享</button>
         </div>
     </nav>
 
@@ -193,7 +186,7 @@
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
             <span class="main-icon">🎨</span>
             <h3 class="main-title" data-i18n="emptyTitle">创意影像工作室</h3>
-            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接输入文字创作。</p>
+            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接在底部输入文字进行创作。</p>
             <div class="divider">OR</div>
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
@@ -215,7 +208,7 @@
                 
                 <div class="mock-ad-box" id="mockAd">
                     <div class="mock-icon">🙈</div>
-                    <div class="mock-text">假如这里是一个广告</div>
+                    <div class="mock-text">假装这里有一个广告</div>
                     <div class="mock-sub">（广告君正在赶来的路上...）</div>
                 </div>
 
@@ -234,12 +227,12 @@
         </div>
     </main>
 
-    <div class="magic-bar-wrapper" id="magicBar">
+    <div class="magic-bar-wrapper">
         <div class="style-scroll" id="styleScroll"></div>
         
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
-            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
+            <input type="text" id="promptInput" placeholder="在这里开始你的天才想法..." autocomplete="off" inputmode="search">
             <button type="submit" class="send-btn">→</button>
         </form>
     </div>
@@ -276,20 +269,28 @@
     </div>
 
     <script>
-        // --- Config ---
         const WORKER_ENDPOINT = '/api/repair';
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
+        // --- Data ---
         const filtersData = [
             { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
             { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
             { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
             { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
             { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1550136513-548af4445338?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
             { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
             { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
+        ];
+        
+        // 随机广告文案
+        const mockAdTexts = [
+            { icon: "🙈", text: "假装这里有一个广告", sub: "（你被它的美貌吸引并点击了它）" },
+            { icon: "🍌", text: "广告君正在赶路...", sub: "（它可能去买香蕉了）" },
+            { icon: "✨", text: "此处招租", sub: "（假装这里有一个很酷的产品）" },
+            { icon: "🛌", text: "广告位在休息", sub: "（嘘，别吵醒它）" }
         ];
 
         let currentFile = null;
@@ -302,7 +303,10 @@
             en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." }, s3: { t: "Share", d: "Share your work." }, btnNext: "Next", btnStart: "Start" } }
         };
 
-        // --- Render ---
+        // --- Render Logic ---
+        window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
+        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
+
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -323,7 +327,9 @@
             const t = i18nData[curLang];
             document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
             document.getElementById('langToggle').innerText = curLang.toUpperCase();
-            renderFilters();
+            // Update placeholder based on promptPlaceholder.create since we unified
+            document.getElementById('promptInput').placeholder = "在这里开始你的天才想法...";
+            renderFilters(); 
         }
         
         document.getElementById('langToggle').addEventListener('click', () => { 
@@ -343,9 +349,8 @@
                 renderFilters(); 
             }
         }
-        updateLanguage();
 
-        // --- Magic Wand ---
+        // Magic Wand
         const magicBtn = document.getElementById('magicBtn');
         magicBtn.addEventListener('click', async () => {
             magicBtn.classList.add('loading');
@@ -404,7 +409,7 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- Share Card (Fix CORS) ---
+        // --- 3. Share Card (Fix PC generation) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
@@ -460,13 +465,21 @@
             setTimeout(() => shareModal.style.display = 'none', 300);
         }
 
-        // --- Submit & Logic ---
+        // --- Submit Logic ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
         const adBox = document.getElementById('adBox');
         const mockAd = document.getElementById('mockAd'); 
         const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
+        
+        // Mock Ad Text Rotate
+        function updateMockAdText() {
+            const ad = mockAdTexts[Math.floor(Math.random() * mockAdTexts.length)];
+            document.querySelector('#mockAd .mock-icon').innerText = ad.icon;
+            document.querySelector('#mockAd .mock-text').innerText = ad.text;
+            document.querySelector('#mockAd .mock-sub').innerText = ad.sub;
+        }
         
         if(localStorage.getItem('isUnlimitedMode')) {
             adToggle.checked = true; unlimitedToggleDiv.style.display = 'flex';
@@ -475,8 +488,9 @@
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
              if(e.target.checked) { mockAd.style.display = 'none'; adBox.style.display = 'flex'; }
-             else { mockAd.style.display = 'flex'; adBox.style.display = 'none'; }
+             else { mockAd.style.display = 'flex'; adBox.style.display = 'none'; updateMockAdText(); }
         });
+        updateMockAdText(); // Init
 
         async function compressImage(file, maxWidth = 1280) {
             return new Promise((resolve) => {
@@ -526,6 +540,11 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
+            // Check Ad Visibility Logic
+            if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
+                // Show Ad Area logic implied by CSS/JS above
+            }
+
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
             document.querySelector('.snake-border').classList.add('active');
@@ -550,6 +569,7 @@
                 }
                 if(res.status === 429) {
                     if(confirm(i18nData[curLang].alertLimit)) {
+                        localStorage.setItem('hasHitLimit', 'true');
                         unlimitedToggleDiv.style.display = 'flex';
                         adToggle.checked = true;
                         mockAd.style.display = 'none'; adBox.style.display = 'flex';
@@ -580,10 +600,6 @@
             }
         });
         
-        // Gallery
-        window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
-        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
-        
         async function fetchAndRenderGallery() {
              const res = await fetch('/api/gallery'); const data = await res.json();
              if(data && Array.isArray(data)) { allGalleryItems = data; renderGalleryTabs(); renderGalleryGrid(); }
@@ -601,15 +617,17 @@
              document.getElementById('promptInput').value = p;
              document.getElementById('galleryModal').classList.remove('open');
         }
+        galleryToggle.addEventListener('click', () => { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); });
+        document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
         // Onboarding
-        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'magicBar', key: 's2', pos: 'top' }, { id: 'shareBtnNav', key: 's3', pos: 'bottom' } ];
+        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' }, { id: 'shareBtnNav', key: 's3', pos: 'bottom' } ];
         let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v16')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v17')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
         function showStep(idx) {
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v16', 'true'); return; }
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v17', 'true'); return; }
             curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
             el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
@@ -621,6 +639,8 @@
         }
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
+
+        updateLanguage(); // Init
     </script>
 </body>
 </html>
