@@ -11,85 +11,187 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        /* --- 基础变量 --- */
+        /* --- 1. 视觉系统 (Lively Theme) --- */
         :root {
-            --primary: #007aff; --bg: #f5f5f7; --text: #1d1d1f; --sec: #86868b;
-            --r-md: 16px; --r-full: 999px;
-            --sh-sm: 0 2px 8px rgba(0,0,0,0.04); --sh-lg: 0 12px 30px rgba(0,0,0,0.12);
+            /* 🍌 活力橙主色 */
+            --primary: #FF9F0A; 
+            --primary-hover: #FFB340;
+            --bg: #FAFAFC;
+            --text: #1C1C1E;
+            --sec: #8E8E93;
+            --border: rgba(0,0,0,0.06);
+            
+            --r-md: 20px; --r-full: 999px;
+            --sh-sm: 0 4px 12px rgba(0,0,0,0.04);
+            --sh-lg: 0 20px 40px rgba(0,0,0,0.1);
+            
+            --arrow-pos: 50%;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: var(--bg); color: var(--text);
+            margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         /* --- 导航 --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 100; background: rgba(245,245,247,0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
-        .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 5px; color: #000; text-decoration: none; }
-        .nav-actions { display: flex; gap: 12px; }
-        .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.05); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); font-weight: 600; font-size: 12px; }
-        .share-btn { background: var(--text); color: white; width: auto; padding: 0 16px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 24px; z-index: 100;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; letter-spacing: -0.5px; }
+        .logo span { color: var(--primary); }
+        
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
+        .icon-btn {
+            background: white; border: 1px solid var(--border); width: 38px; height: 38px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm);
+            color: var(--text); font-weight: 600; font-size: 12px;
+        }
+        .icon-btn:hover { transform: scale(1.05); border-color: var(--primary); color: var(--primary); }
+
+        /* 4. 分享按钮 (初始隐藏，动画引导) */
+        .share-btn {
+            background: var(--text); color: white; width: auto; padding: 0 18px; height: 38px;
+            border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+            display: none; /* 初始隐藏 */
+            align-items: center; gap: 6px;
+        }
+        .share-btn.visible { display: flex; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .share-btn.pulse { animation: pulse 2s infinite; }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 10, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 159, 10, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 10, 0); } }
 
         /* --- 舞台 --- */
-        .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 180px; width: 100%; box-sizing: border-box; overflow-y: auto; }
+        .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 200px; width: 100%; box-sizing: border-box; overflow-y: auto; }
         
         /* 空状态 */
-        .empty-state { text-align: center; max-width: 420px; width: 100%; padding: 40px 20px; border: 2px dashed rgba(0,0,0,0.1); border-radius: 24px; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; }
-        .empty-state:hover { border-color: var(--primary); background: #f0f8ff; transform: scale(1.01); }
-        .main-icon { font-size: 56px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .main-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-        .sub-text { font-size: 14px; color: var(--sec); line-height: 1.5; }
-        .divider { margin: 20px 0; font-size: 11px; color: #ccc; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-        .action-hint { color: var(--primary); font-weight: 600; font-size: 13px; background: rgba(0,122,255,0.1); padding: 6px 14px; border-radius: 99px; }
+        .empty-state {
+            text-align: center; max-width: 400px; width: 100%; padding: 60px 20px;
+            border: 2px dashed rgba(0,0,0,0.08); border-radius: 32px;
+            transition: 0.3s; cursor: pointer; background: white;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .empty-state:hover { border-color: var(--primary); background: #FFFBF2; transform: scale(1.01); }
+        .main-icon { font-size: 64px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.1)); }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .main-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .sub-text { font-size: 15px; color: var(--sec); line-height: 1.5; }
+        .action-hint { 
+            color: white; font-weight: 600; font-size: 14px; 
+            background: var(--primary); padding: 10px 24px; border-radius: 99px; 
+            margin-top: 30px; box-shadow: 0 4px 15px rgba(255, 159, 10, 0.3);
+            transition: 0.2s;
+        }
+        .empty-state:hover .action-hint { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 159, 10, 0.4); }
 
         /* 图片容器 */
-        .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); background: transparent; box-shadow: var(--sh-lg); overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%; }
-        .image-container.loaded { display: inline-flex; }
-        .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
-        .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
-
-        /* 🐍 终极修复版：流光贪吃蛇 (CSS Mask + Rotating Child) */
-        .snake-border {
-            position: absolute; inset: 0; pointer-events: none; z-index: 20;
+        .image-container { 
+            position: relative; display: none; justify-content: center; align-items: center; 
+            border-radius: var(--r-md); background: transparent; 
+            /* 移除默认阴影，由 content 撑开 */
+            overflow: hidden; cursor: zoom-in; 
+            max-width: 100%; max-height: 100%; 
+        }
+        .image-container.loaded { display: inline-flex; box-shadow: var(--sh-lg); }
+        
+        .image-display { 
+            display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; 
+            object-fit: contain; z-index: 10; position: relative; 
+            transition: filter 0.5s; pointer-events: auto; 
             border-radius: var(--r-md); 
-            /* 容器本身不显示颜色，作为一个遮罩容器 */
+        }
+        .image-display.pixelating { filter: blur(20px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
+
+        /* 🌈 1. 优化：彩虹流光贪吃蛇 (Rainbow Snake) */
+        .snake-border {
+            position: absolute; inset: -3px; pointer-events: none; z-index: 20;
+            border-radius: 22px; /* r-md + padding */
+            padding: 3px;
+            
+            /* Mask */
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; 
-            mask-composite: exclude;
-            padding: 4px; /* 边框宽度 */
-            overflow: hidden; /* 必须 hidden */
-            display: none;
-        }
-        .image-container.is-loading .snake-border { display: block; }
+            -webkit-mask-composite: xor; mask-composite: exclude;
 
-        /* 旋转的流光层 */
+            /* Rainbow Gradient (Conic) */
+            background: conic-gradient(
+                from 0deg, 
+                transparent 70%, 
+                #ff3b30, #ff9500, #ffcc00, #4cd964, #5ac8fa, #007aff, #5856d6, #ff2d55, #ff3b30
+            );
+            
+            animation: spinRainbow 1.5s linear infinite;
+            display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        /* 旋转整个背景 */
+        @keyframes spinRainbow { from { --angle: 0deg; transform: rotate(0deg); } to { --angle: 360deg; transform: rotate(360deg); } }
+        
+        /* 使用伪元素旋转来兼容 */
         .snake-border::before {
-            content: ""; position: absolute; 
-            top: -50%; left: -50%; width: 200%; height: 200%; /* 足够大以覆盖旋转时的四角 */
-            background: conic-gradient(transparent 75%, var(--primary) 100%);
-            animation: spinHuge 2s linear infinite;
+             content:""; position: absolute; top:-50%; left:-50%; width:200%; height:200%;
+             background: inherit; animation: inherit;
         }
-        @keyframes spinHuge { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .snake-border.active { display: block; opacity: 1; }
 
-        /* Loading / Ad Overlay */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
+        /* Loading & Ad Overlay */
+        .loading-overlay { 
+            position: absolute; inset: 0; 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); 
+            display: none; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 60; opacity: 0; transition: 0.3s; padding: 20px; border-radius: var(--r-md); 
+        }
         .loading-overlay.visible { opacity: 1; }
         
-        .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; flex-shrink: 0;}
-        .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
-        .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
+        .fun-fact { 
+            text-align: center; margin-bottom: 0; 
+            background: white; padding: 12px 20px; border-radius: 16px; 
+            box-shadow: var(--sh-sm); border: 1px solid var(--border); 
+            max-width: 280px; flex-shrink: 0; position: relative; z-index: 5;
+        }
+        .fact-title { font-size: 10px; font-weight: 800; color: var(--primary); margin-bottom: 4px; letter-spacing: 1px; }
+        .fact-text { font-size: 13px; font-weight: 600; line-height: 1.4; }
 
-        /* Ad Boxes */
-        .mock-ad-box { width: 300px; height: 120px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
-        .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
-        .mock-icon { font-size: 28px; margin-bottom: 5px; }
-        .mock-text { font-weight: 700; font-size: 14px; }
-        .mock-sub { font-size: 11px; opacity: 0.7; }
-        .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
+        /* 2. 广告容器 (默认隐藏) */
+        .ad-wrapper {
+            display: none; /* ⚠️ 默认隐藏，触发限制后由 JS 显示 */
+            flex-direction: column; align-items: center; margin-top: 20px;
+            width: 100%; animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
-        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; }
+        .ad-slot {
+            width: 300px; height: 150px; position: relative;
+            border-radius: 16px; overflow: hidden; background: #f0f0f5;
+            margin-bottom: 15px;
+        }
+        
+        /* 俏皮 Mock Ad (底层) */
+        .mock-ad {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            color: #999; background: #fff9c4; border: 2px dashed #f5d94d; box-sizing: border-box; border-radius: 16px;
+        }
+        .mock-icon { font-size: 32px; margin-bottom: 5px; }
+        .mock-text { font-weight: 700; font-size: 14px; color: #b58900; }
+        
+        /* Real Ad (顶层) */
+        .adsbygoogle { z-index: 2; position: relative; }
+
+        .toggle-wrap { 
+            display: flex; justify-content: space-between; width: 280px; 
+            background: white; padding: 10px 16px; border-radius: 12px; 
+            border: 1px solid var(--border); align-items: center; box-shadow: var(--sh-sm);
+        }
         .switch { position: relative; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9e9ea; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input:checked + .slider { background: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
@@ -98,57 +200,73 @@
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
 
         /* --- Bottom Bar --- */
-        .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 10px; padding-bottom: env(safe-area-inset-bottom); }
+        .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 12px; padding-bottom: env(safe-area-inset-bottom); }
         
-        .style-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
-        .style-scroll::-webkit-scrollbar { display: none; }
-        .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
-        .style-card img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); }
+        .style-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
+        .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
+        .style-card img { width: 60px; height: 60px; border-radius: 18px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); transition: 0.2s; }
         .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; text-align: center; }
-        .style-card.active img { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
+        .style-card.active img { border-color: var(--primary); transform: scale(1.1); box-shadow: 0 8px 16px rgba(255, 159, 10, 0.3); }
         .style-card.active span { color: var(--primary); }
-        .more-card .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
+        .more-card .more-circle { width: 60px; height: 60px; border-radius: 18px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 22px; }
 
-        /* Input Box */
-        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 6px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
-        .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; }
+        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 8px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
+        .magic-wand { color: #9c27b0; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; width: 40px; height: 40px; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .input-box input { flex: 1; border: none; background: transparent; padding: 10px 5px; font-size: 16px; color: var(--text); outline: none; min-width: 0; }
-        .send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
+        .send-btn { background: var(--text); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
+        .send-btn:hover { background: var(--primary); transform: scale(1.05); }
         .send-btn:disabled { background: #ccc; }
 
         /* --- Modals --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px); opacity: 0; transition: 0.3s; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); opacity: 0; transition: 0.3s; }
         .modal.visible { opacity: 1; }
         
         /* Previewer */
         .preview-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.1s; cursor: grab; }
         .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
-        .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 20px; border-radius: 99px; backdrop-filter: blur(5px); cursor: pointer; font-size: 14px; }
+        .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 99px; backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; }
         
-        /* Share Card (Professional) */
-        .share-card-wrap { background: #fff; padding: 0; border-radius: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; background: transparent; }
+        /* Share Card */
+        .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); display: block; }
-        .share-hint { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #canvasContainer img { max-width: 100%; border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; }
+        .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.3); margin-top: 15px; }
 
-        /* Gallery */
-        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        /* 5. 灵感广场重设计 (大气版) */
+        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
         .gallery-modal.open { transform: translateY(0); }
-        .gallery-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .gallery-header h2 { margin: 0; font-size: 18px; }
-        .close-btn { background: #e5e5ea; width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center;}
-        .gallery-tabs { display: flex; gap: 10px; padding: 15px 30px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
-        .gallery-tabs::-webkit-scrollbar { display: none; }
-        .tab-btn { background: #f5f5f7; padding: 8px 18px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; }
-        .tab-btn.active { background: #1d1d1f; color: white; }
-        .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
-        .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
-        .gallery-img { width: 100%; height: 140px; object-fit: cover; background: #eee; }
-        .gallery-content { padding: 12px; flex:1; display:flex; flex-direction:column; }
-        .gallery-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-        .gallery-prompt { font-size: 12px; color: var(--sec); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: transparent; flex-shrink: 0; }
+        .gallery-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
+        .close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
+        .close-btn:hover { background: #e5e5ea; }
+
+        .gallery-tabs { display: flex; gap: 8px; padding: 0 24px 20px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+        .tab-btn { background: white; padding: 8px 20px; border-radius: 99px; font-size: 14px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; box-shadow: var(--sh-sm); }
+        .tab-btn.active { background: var(--text); color: white; box-shadow: var(--sh-lg); }
+
+        .gallery-grid { 
+            flex: 1; overflow-y: auto; padding: 0 24px 100px; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: 16px; box-sizing: border-box; 
+        }
+        .gallery-item { 
+            background: white; border-radius: 20px; overflow: hidden; cursor: pointer; 
+            box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none;
+            aspect-ratio: 3/4; /* 竖图更有冲击力 */
+        }
+        .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
+        .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
+        .gallery-item:hover .gallery-img { transform: scale(1.05); }
+        
+        /* 悬浮文字 */
+        .gallery-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            padding: 20px 15px 15px; color: white;
+        }
+        .gallery-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
         #photoFile { display: none !important; opacity: 0; pointer-events: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
@@ -157,18 +275,17 @@
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: 0.3s; }
-        .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px; width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
-        .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -6px; }
-        .ob-tooltip.top::after { bottom: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); } 
-        .ob-tooltip.bottom::after { top: -6px; box-shadow: -1px -1px 2px rgba(0,0,0,0.05); background:white; z-index:2; }
-        .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-        .ob-step-desc { font-size: 14px; color: var(--sec); line-height: 1.5; margin-bottom: 15px; }
-        .ob-step-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
+        .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 24px; border-radius: 24px; width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
+        .ob-tooltip::after { content: ""; position: absolute; width: 16px; height: 16px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -8px; border-radius: 2px; }
+        .ob-tooltip.top::after { bottom: -8px; } .ob-tooltip.bottom::after { top: -8px; }
+        .ob-step-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .ob-step-desc { font-size: 15px; color: var(--sec); line-height: 1.5; margin-bottom: 20px; }
+        .ob-step-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 99px; font-size: 15px; font-weight: 600; cursor: pointer; float: right; box-shadow: 0 4px 12px rgba(255,159,10,0.3); transition: 0.2s; }
         @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
         @media (max-width: 600px) {
-            .gallery-grid { grid-template-columns: 1fr; }
-            .action-bar { display: none !important; }
+            .gallery-grid { grid-template-columns: 1fr; padding: 0 20px 100px; } /* 移动端单列大图 */
+            .gallery-item { aspect-ratio: 16/10; } /* 移动端横向一点 */
         }
     </style>
 </head>
@@ -182,10 +299,10 @@
     </div>
 
     <nav class="navbar">
-        <a href="#" class="logo">Nano Banana 🍌</a>
+        <a href="#" class="logo">Nano Banana <span>🍌</span></a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
-            <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享</button>
+            <button class="share-btn" id="shareBtn" onclick="openShareModal()">分享作品 <span style="font-size:16px">✨</span></button>
         </div>
     </nav>
 
@@ -193,7 +310,7 @@
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
             <span class="main-icon">🎨</span>
             <h3 class="main-title" data-i18n="emptyTitle">创意影像工作室</h3>
-            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接输入文字创作。</p>
+            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接在底部输入文字进行创作。</p>
             <div class="divider">OR</div>
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
@@ -213,22 +330,21 @@
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
                 
-                <div class="mock-ad-box" id="mockAd">
-                    <div class="mock-icon">🙈</div>
-                    <div class="mock-text">假装这里有一个广告</div>
-                    <div class="mock-sub">（广告君正在赶来的路上...）</div>
-                </div>
-
-                <div class="real-ad-box" id="adBox">
-                    <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
-                         data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
-                         data-ad-format="auto" data-full-width-responsive="true"></ins>
-                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                </div>
-
-                <div class="toggle-wrap" id="unlimitedToggle">
-                    <span style="font-size:12px;font-weight:600;color:#007aff">允许广告开启无限生成</span>
-                    <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
+                <div class="ad-wrapper" id="adWrapper">
+                    <div class="ad-slot">
+                        <div class="mock-ad" id="mockAd">
+                            <div class="mock-icon">🙈</div>
+                            <div class="mock-text">假装这里有一个广告</div>
+                        </div>
+                        <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
+                             data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
+                             data-ad-format="auto" data-full-width-responsive="true"></ins>
+                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                    </div>
+                    <div class="toggle-wrap">
+                        <span style="font-size:12px;font-weight:600;color:var(--primary)">允许广告开启无限生成</span>
+                        <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -236,10 +352,9 @@
 
     <div class="magic-bar-wrapper" id="magicBar">
         <div class="style-scroll" id="styleScroll"></div>
-        
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
-            <input type="text" id="promptInput" placeholder="在这里开始你的天才想法..." autocomplete="off" inputmode="search">
+            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
             <button type="submit" class="send-btn">→</button>
         </form>
     </div>
@@ -253,9 +368,9 @@
 
     <div id="shareModal" class="modal">
         <div class="share-card-wrap">
-            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成海报中...</div>
-            <p class="share-hint">长按图片保存分享</p>
-            <button class="p-btn" style="color:#fff; border:1px solid rgba(255,255,255,0.5); background:transparent;" onclick="closeShareModal()">关闭</button>
+            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成中...</div>
+            <p class="share-hint">长按图片保存</p>
+            <button class="p-btn" style="color:white; border-color:rgba(255,255,255,0.4);" onclick="closeShareModal()">关闭</button>
         </div>
     </div>
 
@@ -276,33 +391,32 @@
     </div>
 
     <script>
-        // --- Config ---
         const WORKER_ENDPOINT = '/api/repair';
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
         const filtersData = [
-            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
-            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
-            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
-            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
-            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1550136513-548af4445338?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
-            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
-            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
+            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k", cat:"创意" },
+            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
+            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
+            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
+            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
+            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
         ];
 
         let currentFile = null;
         let selectedStyle = "";
         let curLang = localStorage.getItem('lang') || 'cn';
-        let allGalleryItems = []; let currentCategory = '全部';
+        let allGalleryItems = []; 
+        let currentCategory = '全部';
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" }, s3: { t: "分享", d: "生成后点击右上角分享。" }, btnNext: "下一步", btnStart: "开始" } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." }, s3: { t: "Share", d: "Share your work." }, btnNext: "Next", btnStart: "Start" } }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" }, s3: { t: "灵感画廊", d: "发现更多创意玩法。" }, btnNext: "下一步", btnStart: "开始" } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." }, s3: { t: "Gallery", d: "Find inspiration here." }, btnNext: "Next", btnStart: "Start" } }
         };
 
-        // --- Render ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -323,6 +437,7 @@
             const t = i18nData[curLang];
             document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
             document.getElementById('langToggle').innerText = curLang.toUpperCase();
+            document.getElementById('promptInput').placeholder = "在这里开始你的天才想法...";
             renderFilters();
         }
         
@@ -333,28 +448,17 @@
         });
 
         window.selectStyle = function(el, name, prompt) {
-            if (selectedStyle === name) {
-                selectedStyle = "";
-                document.getElementById('promptInput').value = "";
-                renderFilters(); 
-            } else {
-                selectedStyle = name;
-                document.getElementById('promptInput').value = prompt;
-                renderFilters(); 
-            }
+            if (selectedStyle === name) { selectedStyle = ""; document.getElementById('promptInput').value = ""; } 
+            else { selectedStyle = name; document.getElementById('promptInput').value = prompt; }
+            renderFilters();
         }
-        updateLanguage();
 
-        // --- Magic Wand ---
         const magicBtn = document.getElementById('magicBtn');
         magicBtn.addEventListener('click', async () => {
             magicBtn.classList.add('loading');
             const formData = new FormData();
             formData.append('style', selectedStyle || "Creative");
-            if (currentFile) {
-                const compressed = await compressImage(currentFile, 512); 
-                formData.append('photo', compressed);
-            }
+            if (currentFile) formData.append('photo', await compressImage(currentFile, 512));
             try {
                 const res = await fetch(PROMPT_ENDPOINT, { method: 'POST', body: formData });
                 const data = await res.json();
@@ -363,7 +467,6 @@
             magicBtn.classList.remove('loading');
         });
 
-        // --- Upload ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -385,98 +488,71 @@
             document.getElementById('imageContainer').style.display = 'none';
             document.getElementById('emptyState').style.display = 'flex';
             document.getElementById('promptInput').value = '';
-            selectedStyle = "";
-            renderFilters();
+            document.getElementById('shareBtn').classList.remove('visible');
+            selectedStyle = ""; renderFilters();
         }
 
-        // --- Previewer ---
         const previewModal = document.getElementById('previewModal');
-        const previewImg = document.getElementById('previewImg');
-        window.openPreview = function() {
-            const src = document.getElementById('displayImage').src;
-            if(!src) return;
-            previewImg.src = src;
-            previewModal.style.display = 'flex';
-            requestAnimationFrame(() => previewModal.classList.add('visible'));
-        }
-        window.closePreview = function() {
-            previewModal.classList.remove('visible');
-            setTimeout(() => previewModal.style.display = 'none', 300);
-        }
+        window.openPreview = function() { document.getElementById('previewImg').src = document.getElementById('displayImage').src; previewModal.style.display = 'flex'; requestAnimationFrame(() => previewModal.classList.add('visible')); }
+        window.closePreview = function() { previewModal.classList.remove('visible'); setTimeout(() => previewModal.style.display = 'none', 300); }
 
-        // --- Share Card (Fix CORS) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
-            shareModal.style.display = 'flex';
-            setTimeout(() => shareModal.classList.add('visible'), 10);
-            
-            const canvasContainer = document.getElementById('canvasContainer');
-            canvasContainer.innerHTML = '生成海报中...';
+            shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
+            const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = 'Generating...';
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            const w = 600, h = 850; canvas.width = w; canvas.height = h;
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const w = 600, h = 900;
-            canvas.width = w; canvas.height = h;
-
-            // White BG
+            // 海马体风格：纯白相框 + 阴影
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
             try {
-                const img = new Image();
-                img.crossOrigin = "Anonymous"; 
-                img.src = src;
-                await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+                const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
+                await new Promise((r, j) => { img.onload = r; img.onerror = j; });
+                
+                // Draw Image
+                const margin = 40;
+                const drawW = w - margin*2;
+                const scale = drawW / img.width;
+                const drawH = img.height * scale;
+                // Crop if too tall
+                const maxH = 600;
+                
+                // Shadow
+                ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 15;
+                
+                // Draw
+                ctx.drawImage(img, margin, margin, drawW, Math.min(drawH, maxH));
+                ctx.shadowColor = "transparent";
 
-                const imgRatio = img.width / img.height;
-                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
-                ctx.drawImage(img, x, 100, drawW, drawH);
-
-                ctx.fillStyle = '#000'; ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText("Nano Banana AI", w/2, 60);
-                ctx.fillStyle = '#666'; ctx.font = '20px sans-serif';
-                ctx.fillText("一句话PS，来自", w/2, 650);
-                ctx.fillText("https://ps.bobot.fun", w/2, 680);
+                // Text
+                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, sans-serif'; ctx.textAlign = 'left';
+                ctx.fillText("NANO BANANA", margin, h - 100);
+                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, sans-serif';
+                ctx.fillText("AI Magic Studio", margin, h - 65);
 
                 const qrDiv = document.createElement('div');
-                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 80, height: 80 });
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
                 const qrImg = qrDiv.querySelector('img');
-                if(qrImg) { 
-                    await new Promise(r => qrImg.onload = r); 
-                    ctx.drawImage(qrImg, w - 130, h - 130, 90, 90);
-                }
+                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 130, h - 140, 90, 90); }
 
-                const finalImg = new Image();
-                finalImg.src = canvas.toDataURL(); 
-                finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
+                const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '2px';
+                finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
-            } catch (e) {
-                console.error(e);
-                canvasContainer.innerHTML = '生成失败 (CORS Error)';
-            }
+            } catch (e) { console.error(e); canvasContainer.innerHTML = 'Error'; }
         }
-        window.closeShareModal = function() {
-            shareModal.classList.remove('visible');
-            setTimeout(() => shareModal.style.display = 'none', 300);
-        }
+        window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
 
-        // --- Submit & Logic ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
-        const adBox = document.getElementById('adBox');
-        const mockAd = document.getElementById('mockAd'); 
-        const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
+        const adWrapper = document.getElementById('adWrapper');
         
         if(localStorage.getItem('isUnlimitedMode')) {
-            adToggle.checked = true; unlimitedToggleDiv.style.display = 'flex';
-            mockAd.style.display = 'none'; adBox.style.display = 'flex'; 
+            adToggle.checked = true; document.getElementById('adWrapper').style.display = 'flex';
         }
-        adToggle.addEventListener('change', (e) => {
-             localStorage.setItem('isUnlimitedMode', e.target.checked);
-             if(e.target.checked) { mockAd.style.display = 'none'; adBox.style.display = 'flex'; }
-             else { mockAd.style.display = 'flex'; adBox.style.display = 'none'; }
-        });
+        adToggle.addEventListener('change', (e) => { localStorage.setItem('isUnlimitedMode', e.target.checked); });
 
         async function compressImage(file, maxWidth = 1280) {
             return new Promise((resolve) => {
@@ -526,6 +602,10 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
+            if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
+                 document.getElementById('adWrapper').style.display = 'flex'; 
+            }
+
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
             document.querySelector('.snake-border').classList.add('active');
@@ -550,9 +630,9 @@
                 }
                 if(res.status === 429) {
                     if(confirm(i18nData[curLang].alertLimit)) {
-                        unlimitedToggleDiv.style.display = 'flex';
+                        localStorage.setItem('hasHitLimit', 'true');
+                        adWrapper.style.display = 'flex';
                         adToggle.checked = true;
-                        mockAd.style.display = 'none'; adBox.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', 'true');
                     }
                     return;
@@ -568,6 +648,11 @@
                     const blob = await (await fetch(img)).blob();
                     currentFile = new File([blob], "edit.png", {type:'image/png'});
                     document.getElementById('promptInput').value = '';
+                    
+                    // 4. Show Share Button with Animation
+                    const shareBtn = document.getElementById('shareBtn');
+                    shareBtn.style.display = 'flex';
+                    shareBtn.classList.add('pulse');
                 }
 
             } catch(e) { console.error(e); alert("AI Busy or Error"); } finally {
@@ -580,13 +665,14 @@
             }
         });
         
-        // Gallery
         window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
         
         async function fetchAndRenderGallery() {
-             const res = await fetch('/api/gallery'); const data = await res.json();
-             if(data && Array.isArray(data)) { allGalleryItems = data; renderGalleryTabs(); renderGalleryGrid(); }
+             // Mock Data for Demo if API not set, normally: const res = await fetch('/api/gallery');
+             // Here using filtersData + mock expansion for tabs demo
+             allGalleryItems = filtersData.map(i => ({...i, category: i.cat || '精选'}));
+             renderGalleryTabs(); renderGalleryGrid();
         }
         function renderGalleryTabs() {
             const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
@@ -594,22 +680,28 @@
         }
         window.switchCategory = function(cat) { currentCategory = cat; renderGalleryTabs(); renderGalleryGrid(); }
         function renderGalleryGrid() {
-             let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
-             galleryGrid.innerHTML = items.map(i => `<div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url}')"><img src="${i.img_url}" class="gallery-img"><div class="gallery-content"><div class="gallery-title">${i.title}</div></div></div>`).join('');
+             let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => item.category === currentCategory);
+             galleryGrid.innerHTML = items.map(i => `
+                 <div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img}')">
+                     <img src="${i.img}" class="gallery-img">
+                     <div class="gallery-overlay">
+                         <div class="gallery-title">${i.name}</div>
+                     </div>
+                 </div>`).join('');
         }
         window.applyGallery = function(p, url) {
              document.getElementById('promptInput').value = p;
              document.getElementById('galleryModal').classList.remove('open');
         }
-
-        // Onboarding
-        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'magicBar', key: 's2', pos: 'top' }, { id: 'shareBtnNav', key: 's3', pos: 'bottom' } ];
+        
+        // 3. Onboarding Logic
+        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' }, { id: 'galleryToggle', key: 's3', pos: 'bottom' } ];
         let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v16')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v20')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
         function showStep(idx) {
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v16', 'true'); return; }
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v20', 'true'); return; }
             curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
             el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
@@ -620,7 +712,10 @@
             if (step.pos === 'bottom') { tooltip.style.top = (rect.bottom + 15) + 'px'; tooltip.classList.add('arrow-top'); } else { tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px'; tooltip.classList.add('arrow-bottom'); }
         }
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
-        setTimeout(initOnboarding, 500);
+        setTimeout(initOnboarding, 1000);
+
+        renderFilters(); // Ensure filters render on load
+        updateLanguage(); // Init language
     </script>
 </body>
 </html>
