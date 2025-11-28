@@ -15,14 +15,13 @@
             --r-md: 16px; --r-full: 999px;
             --sh-sm: 0 2px 8px rgba(0,0,0,0.04); --sh-lg: 0 12px 30px rgba(0,0,0,0.12);
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* --- 导航 --- */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; z-index: 100; background: rgba(245,245,247,0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
         .logo { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 5px; color: #000; text-decoration: none; }
         .nav-actions { display: flex; gap: 12px; }
         .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.05); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); color: var(--text); }
-        .icon-btn:hover { transform: scale(1.05); }
         .share-btn { background: var(--text); color: white; width: auto; padding: 0 16px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; }
 
         /* --- 舞台 --- */
@@ -39,24 +38,55 @@
         .action-hint { color: var(--primary); font-weight: 600; font-size: 13px; background: rgba(0,122,255,0.1); padding: 6px 14px; border-radius: 99px; }
 
         /* 图片容器 */
-        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--r-md); box-shadow: var(--sh-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; cursor: zoom-in; }
-        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; transition: filter 0.5s; }
+        .image-container { position: relative; max-width: 100%; max-height: 100%; border-radius: var(--r-md); box-shadow: var(--sh-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px; overflow: hidden; }
+        
+        /* 修复 1: 确保图片在最上层，允许长按 */
+        .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 贪吃蛇边框 */
-        .snake-border { position: absolute; inset: 0; pointer-events: none; z-index: 55; border-radius: var(--r-md); padding: 4px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; background: conic-gradient(from var(--a, 0deg), transparent 70%, var(--primary)); animation: rot 2s linear infinite; display: none; }
-        .image-container.is-loading .snake-border { display: block; }
+        /* 修复 2: 流光贪吃蛇 (Active状态下 z-index 高于图片) */
+        .snake-border { 
+            position: absolute; inset: 0; pointer-events: none; z-index: 20; 
+            border-radius: var(--r-md); padding: 4px; 
+            /* 标准 Mask 语法 */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            
+            background: conic-gradient(from var(--a, 0deg), transparent 70%, var(--primary)); 
+            animation: rot 2s linear infinite; 
+            display: none; /* 默认隐藏 */
+        }
+        .snake-border.active { display: block; }
         @property --a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rot { from { --a: 0deg; } to { --a: 360deg; } }
 
-        /* Loading / Ad */
-        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; }
+        /* Loading Overlay */
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 50; opacity: 0; transition: 0.3s; padding: 10px; }
         .loading-overlay.visible { opacity: 1; }
+        
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; }
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
-        .ad-box { width: 300px; height: 250px; background: #f9f9f9; border-radius: 12px; display: none; justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 15px; overflow: hidden; }
-        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; }
+
+        /* 修复 6: 俏皮 Mock Ad */
+        .mock-ad-box {
+            width: 300px; height: 160px; /* 变矮一点 */
+            background: #fff9c4; border: 2px dashed #f5d94d;
+            border-radius: 16px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            margin-bottom: 15px; color: #8a6d3b;
+            transform: rotate(-1deg); transition: 0.3s;
+        }
+        .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
+        .mock-icon { font-size: 32px; margin-bottom: 5px; }
+        .mock-text { font-weight: 700; font-size: 14px; }
+        .mock-sub { font-size: 11px; opacity: 0.7; }
+        
+        /* 真实广告容器 (默认隐藏) */
+        .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
+
+        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; /* 默认隐藏开关 */ }
         .switch { position: relative; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
@@ -74,16 +104,31 @@
         .style-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
         .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
         .style-card img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); }
-        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); }
+        .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; }
         .style-card.active img { border-color: var(--primary); transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
         .style-card.active span { color: var(--primary); }
-        .more-card { justify-content: center; }
-        .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
+        .more-card .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
 
-        .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
-        .magic-wand { color: #9c27b0; background: rgba(156,39,176,0.1); }
+        /* 修复 3: 输入框 Flex 布局 */
+        .input-box { 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); 
+            border-radius: var(--r-full); padding: 6px; 
+            display: flex; align-items: center; gap: 6px; /* 间距 */
+            box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); 
+        }
+        .magic-wand { color: #9c27b0; background: rgba(156,39,176,0.1); flex-shrink: 0; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .input-box input { 
+            flex: 1; border: none; background: transparent; padding: 10px 5px; 
+            font-size: 16px; color: var(--text); outline: none; min-width: 0; 
+        }
+        .send-btn { 
+            background: var(--primary); color: white; border: none; width: 40px; height: 40px; 
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            flex-shrink: 0; transition: 0.2s;
+        }
+        .send-btn:disabled { background: #ccc; }
 
         /* --- Modals --- */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px); opacity: 0; transition: 0.3s; }
@@ -100,8 +145,30 @@
         #shareCanvas { max-width: 100%; border-radius: 12px; box-shadow: var(--sh-sm); margin-bottom: 15px; }
         .share-hint { font-size: 12px; color: var(--sec); margin-bottom: 15px; }
 
+        /* 修复 5: Gallery Header 布局 */
+        .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 300; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        .gallery-modal.open { transform: translateY(0); }
+        .gallery-header { 
+            padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; 
+            background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .gallery-header h2 { margin: 0; font-size: 18px; }
+        .close-btn { background: #e5e5ea; width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center;}
+        .gallery-tabs { display: flex; gap: 10px; padding: 15px 30px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
+        .gallery-grid { flex: 1; overflow-y: auto; padding: 20px 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; padding-bottom: 100px; }
+        .gallery-item { background: white; border-radius: var(--r-md); overflow: hidden; cursor: pointer; height: 100%; min-height: 320px; box-shadow: var(--sh-sm); display:flex; flex-direction:column;}
+        .gallery-img { width: 100%; height: 200px; object-fit: cover; background: #eee; }
+        .gallery-content { padding: 18px; flex:1; display:flex; flex-direction:column; }
+        .gallery-title { font-weight: 600; font-size: 17px; margin-bottom: 8px; }
+        .gallery-prompt { font-size: 14px; color: var(--sec); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+
         #photoFile { display: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
+
+        @media (max-width: 600px) {
+            .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
+            .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
+        }
     </style>
 </head>
 <body>
@@ -129,6 +196,7 @@
             <img id="displayImage" class="image-display" src="" alt="Preview" onclick="openPreview()">
             
             <div class="snake-border"></div>
+            
             <button class="clear-btn" onclick="resetCanvas()">✕</button>
 
             <div id="loadingOverlay" class="loading-overlay">
@@ -136,13 +204,21 @@
                     <div class="fact-title">DID YOU KNOW?</div>
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
-                <div class="ad-box" id="adBox">
+                
+                <div class="mock-ad-box" id="mockAd">
+                    <div class="mock-icon">🙈</div>
+                    <div class="mock-text">假如这里是一个广告</div>
+                    <div class="mock-sub">（广告君正在赶来的路上...）</div>
+                </div>
+
+                <div class="real-ad-box" id="adBox">
                     <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
                          data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
                          data-ad-format="auto" data-full-width-responsive="true"></ins>
                     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
-                <div class="toggle-wrap" id="unlimitedToggle" style="display:none;">
+
+                <div class="toggle-wrap" id="unlimitedToggle">
                     <span style="font-size:12px;font-weight:600;color:#007aff">允许广告开启无限生成</span>
                     <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
                 </div>
@@ -155,8 +231,8 @@
         
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="Auto Prompt">✨</button>
-            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search" style="margin:0 8px;">
-            <button type="submit" class="icon-btn" style="background:var(--primary);color:white;">→</button>
+            <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
+            <button type="submit" class="send-btn">→</button>
         </form>
     </div>
 
@@ -196,14 +272,13 @@
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
-        // --- Data ---
+        // --- Data (去重后的滤镜) ---
         const filters = [
             { name: "盲盒公仔", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
             { name: "粘土世界", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
             { name: "微缩景观", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
             { name: "赛博汉服", img: "https://images.unsplash.com/photo-1515634918662-0f6470117b94?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
             { name: "极简Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" },
-            { name: "粘土滤镜", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "transform into claymation style, cute, plasticine texture" },
             { name: "吉卜力", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
             { name: "职业照", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
             { name: "老照片4K", img: "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" }
@@ -221,7 +296,6 @@
                     <img src="${f.img}"><span>${f.name}</span>
                 </div>
             `).join('');
-            // Add More Button
             html += `<div class="style-card more-card" onclick="openGallery()">
                         <div class="more-circle">+</div><span>更多</span>
                      </div>`;
@@ -236,21 +310,18 @@
             } else {
                 el.classList.add('active');
                 selectedStyle = name;
-                // If manual input is empty, fill it. If user typed, don't overwrite immediately unless magic.
-                // Actually, let's just store the style context for Magic Wand or Append.
-                // Simple behavior: Fill input for visibility
                 document.getElementById('promptInput').value = prompt;
             }
         }
 
-        // --- Magic Wand (Dynamic Prompt) ---
+        // --- Magic Wand ---
         const magicBtn = document.getElementById('magicBtn');
         magicBtn.addEventListener('click', async () => {
             magicBtn.classList.add('loading');
             const formData = new FormData();
             formData.append('style', selectedStyle || "Creative");
             if (currentFile) {
-                const compressed = await compressImage(currentFile, 512); // small for analysis
+                const compressed = await compressImage(currentFile, 512); 
                 formData.append('photo', compressed);
             }
 
@@ -305,10 +376,9 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- Share Card (Canvas) ---
+        // --- Share Card ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
-            // Prepare Data
             const src = document.getElementById('displayImage').src || "https://via.placeholder.com/400x400?text=Nano+Banana"; 
             shareModal.style.display = 'flex';
             setTimeout(() => shareModal.classList.add('visible'), 10);
@@ -316,80 +386,62 @@
             const canvasContainer = document.getElementById('canvasContainer');
             canvasContainer.innerHTML = 'Generating...';
 
-            // Create Canvas
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const w = 600, h = 800;
             canvas.width = w; canvas.height = h;
 
-            // Draw BG
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
-            // Draw Image
             const img = new Image();
             img.crossOrigin = "anonymous";
             img.src = src;
             await new Promise(r => img.onload = r);
             
-            // Center Fit Image
             const imgRatio = img.width / img.height;
-            const drawH = 500; 
-            const drawW = drawH * imgRatio;
-            const x = (w - drawW) / 2;
+            const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
             ctx.drawImage(img, x, 100, drawW, drawH);
 
-            // Draw Text
-            ctx.fillStyle = '#000';
-            ctx.font = 'bold 32px sans-serif';
-            ctx.textAlign = 'center';
+            ctx.fillStyle = '#000'; ctx.font = 'bold 32px sans-serif'; ctx.textAlign = 'center';
             ctx.fillText("Nano Banana AI", w/2, 60);
-            
-            ctx.fillStyle = '#666';
-            ctx.font = '20px sans-serif';
+            ctx.fillStyle = '#666'; ctx.font = '20px sans-serif';
             ctx.fillText("一句话PS，创意无限", w/2, 650);
             ctx.fillText("https://ps.bobot.fun", w/2, 680);
 
-            // Draw QR Code (using library)
             const qrDiv = document.createElement('div');
             new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 80, height: 80 });
             const qrImg = qrDiv.querySelector('img');
-            if(qrImg) {
-                 await new Promise(r => qrImg.onload = r);
-                 ctx.drawImage(qrImg, w/2 - 40, 700);
-            }
+            if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w/2 - 40, 700); }
 
-            // Render
             const finalImg = new Image();
             finalImg.src = canvas.toDataURL();
-            finalImg.style.maxWidth = '100%';
-            finalImg.style.borderRadius = '12px';
-            canvasContainer.innerHTML = '';
-            canvasContainer.appendChild(finalImg);
+            finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
+            canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
         }
         window.closeShareModal = function() {
             shareModal.classList.remove('visible');
             setTimeout(() => shareModal.style.display = 'none', 300);
         }
 
-        // --- Core Submit Logic (Simplified) ---
+        // --- Submit Logic ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
         const adBox = document.getElementById('adBox');
+        const mockAd = document.getElementById('mockAd'); // 俏皮广告
         const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
         
+        // Unlimited Logic
         if(localStorage.getItem('isUnlimitedMode')) {
-            adToggle.checked = true; 
-            adBox.style.display = 'flex'; 
-            unlimitedToggleDiv.style.display = 'flex';
+            adToggle.checked = true; unlimitedToggleDiv.style.display = 'flex';
+            mockAd.style.display = 'none'; adBox.style.display = 'flex'; // Show real ad slot if unlimited
         }
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
-             adBox.style.display = e.target.checked ? 'flex' : 'none';
+             if(e.target.checked) { mockAd.style.display = 'none'; adBox.style.display = 'flex'; }
+             else { mockAd.style.display = 'flex'; adBox.style.display = 'none'; }
         });
 
-        // Helper
         async function compressImage(file, maxWidth = 1280) {
             return new Promise((resolve) => {
                 const reader = new FileReader(); reader.readAsDataURL(file);
@@ -417,7 +469,7 @@
             throw new Error("Timeout");
         }
 
-        // Turnstile logic
+        // Turnstile
         let turnstileToken = null;
         window.onTurnstileRender = function() {
              turnstile.render('#turnstile-container', {
@@ -425,14 +477,12 @@
                 callback: (t) => { turnstileToken = t; document.getElementById('verifyModal').classList.remove('visible'); setTimeout(()=>{document.getElementById('verifyModal').style.display='none'},300); document.getElementById('commandForm').dispatchEvent(new Event('submit')); }
              });
         }
-        // Attach to window for explicit render
         
         commandForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const prompt = document.getElementById('promptInput').value.trim();
             if(!currentFile && !prompt) return;
             
-            // T2I Placeholder
             if(!currentFile) {
                  document.getElementById('displayImage').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
                  document.getElementById('displayImage').classList.add('pixelating');
@@ -451,7 +501,6 @@
             if(turnstileToken) formData.append('turnstileToken', turnstileToken);
 
             try {
-                // Fake Ad Wait
                 if(adToggle.checked) await new Promise(r=>setTimeout(r,4000));
 
                 const res = await fetch(WORKER_ENDPOINT, {method:'POST', body:formData});
@@ -460,14 +509,14 @@
                 if(res.status === 401) {
                     document.getElementById('verifyModal').style.display = 'flex';
                     setTimeout(()=>document.getElementById('verifyModal').classList.add('visible'),10);
-                    window.onTurnstileRender(); // manual trigger
+                    window.onTurnstileRender(); 
                     return;
                 }
                 if(res.status === 429) {
                     if(confirm("今日额度已尽！是否允许显示广告以开启无限模式？")) {
                         unlimitedToggleDiv.style.display = 'flex';
                         adToggle.checked = true;
-                        adBox.style.display = 'flex';
+                        mockAd.style.display = 'none'; adBox.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', 'true');
                     }
                     return;
@@ -485,26 +534,30 @@
                     document.getElementById('promptInput').value = '';
                 }
 
-            } catch(e) {
-                console.error(e);
-                alert("AI Busy or Error");
-            } finally {
-                if(!turnstileToken) { // don't close loading if we are verifying
+            } catch(e) { console.error(e); alert("AI Busy or Error"); } finally {
+                if(!turnstileToken) { 
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
                     document.querySelector('.snake-border').classList.remove('active');
                 }
-                // Consumed token
                 turnstileToken = null; 
             }
         });
         
-        // Gallery Open
-        window.openGallery = function() {
-            document.getElementById('galleryModal').classList.add('open');
-            // Fetch logic same as before...
-        }
+        window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
+        
+        // Gallery Fetch (Simple)
+        async function fetchAndRenderGallery() {
+             const res = await fetch('/api/gallery'); const data = await res.json();
+             const grid = document.getElementById('galleryGrid');
+             grid.innerHTML = data.map(i => `<div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url}')"><img src="${i.img_url}" class="gallery-img"><div class="gallery-content"><div class="gallery-title">${i.title}</div></div></div>`).join('');
+        }
+        window.applyGallery = function(p, url) {
+             document.getElementById('promptInput').value = p;
+             // Simulating upload if needed or just text
+             document.getElementById('galleryModal').classList.remove('open');
+        }
 
     </script>
 </body>
