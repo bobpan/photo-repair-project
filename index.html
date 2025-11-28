@@ -47,7 +47,7 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
 
-        /* 🐍 1. 恢复：流光贪吃蛇动效 */
+        /* 🐍 流光贪吃蛇动效 */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 20;
             border-radius: 20px; padding: 4px; 
@@ -268,14 +268,14 @@
         const STATUS_ENDPOINT = '/api/status';
         
         const filtersData = [
-            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k", cat:"创意" },
-            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
-            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
-            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
-            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
-            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
-            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
+            { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100&q=80", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k", cat:"创意" },
+            { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100&q=80", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
+            { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100&q=80", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
+            { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100&q=80", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1616628178957-316c348f1179?w=100&q=80", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
+            { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
+            { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
         ];
 
         let currentFile = null;
@@ -362,7 +362,7 @@
         window.openPreview = function() { const src = document.getElementById('displayImage').src; if(!src) return; previewImg.src = src; previewModal.style.display = 'flex'; requestAnimationFrame(() => previewModal.classList.add('visible')); }
         window.closePreview = function() { previewModal.classList.remove('visible'); setTimeout(() => previewModal.style.display = 'none', 300); }
 
-        // --- 2. 恢复：海马体级分享卡片 (Magazine Style) ---
+        // --- Share Card (Magazine Style) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
             const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
@@ -416,24 +416,19 @@
         const mockAd = document.getElementById('mockAd'); 
         const realAd = document.getElementById('adBox');
         
-        // --- 广告逻辑核心 (Ad Logic Core) ---
-        // 1. 检查历史：触发过限制 OR 已经是无限模式，则显示容器
+        // --- Ad Logic Core ---
         if(localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
             adWrapper.style.display = 'flex';
         }
-        // 2. 检查开关：如果是无限模式，则显示广告位
         if(localStorage.getItem('isUnlimitedMode') === 'true') {
             adToggle.checked = true; 
             adSlot.style.display = 'block'; 
-            // 默认显示 Mock Ad (AdSense会自动覆盖)
             mockAd.style.display = 'flex'; realAd.style.display = 'none';
         }
 
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
-             // 开关决定广告位是否显示
              adSlot.style.display = e.target.checked ? 'block' : 'none';
-             // 开启时显示 Mock Ad
              if(e.target.checked) { mockAd.style.display = 'flex'; realAd.style.display = 'none'; }
         });
 
@@ -485,14 +480,13 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
-            // 运行时检查：如果已经触发过或开启了无限模式，确保广告容器显示
             if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
                  document.getElementById('adWrapper').style.display = 'flex'; 
             }
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            // 1. 触发流光动效
+            // 🐍 触发流光动效
             document.querySelector('.snake-border').style.display = 'block';
 
             const formData = new FormData();
@@ -515,13 +509,14 @@
                 }
                 if(res.status === 429) {
                     if(confirm(i18nData[curLang].alertLimit)) {
-                        // 触发限制逻辑
                         localStorage.setItem('hasHitLimit', 'true');
-                        adWrapper.style.display = 'flex'; // 显示容器
-                        adToggle.checked = true; // 自动开启开关
-                        adSlot.style.display = 'block'; // 显示广告位
-                        mockAd.style.display = 'flex'; // 显示 Mock Ad
+                        adWrapper.style.display = 'flex';
+                        adToggle.checked = true;
+                        adSlot.style.display = 'block';
+                        mockAd.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', 'true');
+                        // ⚡️ 自动续播
+                        setTimeout(() => { commandForm.dispatchEvent(new Event('submit')); }, 500);
                     }
                     return;
                 }
@@ -545,7 +540,7 @@
                 if(!turnstileToken) { 
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
-                    // 1. 关闭流光动效
+                    // 🐍 关闭流光动效
                     document.querySelector('.snake-border').style.display = 'none';
                 }
                 turnstileToken = null; 
