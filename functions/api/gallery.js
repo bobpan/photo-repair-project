@@ -1,11 +1,7 @@
 // functions/api/gallery.js
 
 export async function onRequest(context) {
-    // 静态返回预设数据，模拟“灵感广场”功能
-    // 这避免了对 D1 数据库或外部 Worker 的强依赖，确保功能可用
-    // 待后续 D1 迁移完成后，可在此处恢复数据库查询逻辑
-
-    const galleryData = [
+    const staticData = [
         {
             id: 1,
             title: "盲盒公仔",
@@ -64,10 +60,24 @@ export async function onRequest(context) {
         }
     ];
 
-    return new Response(JSON.stringify(galleryData), {
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
+    const corsHeaders = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    };
+
+    // 尝试从 D1 数据库获取数据
+    try {
+        const db = context.env.DB;
+        if (db) {
+            const { results } = await db.prepare('SELECT * FROM gallery ORDER BY id DESC').all();
+            if (results && results.length > 0) {
+                return new Response(JSON.stringify(results), { headers: corsHeaders });
+            }
         }
-    });
+    } catch (e) {
+        console.error("D1 Database error (falling back to static data):", e.message);
+    }
+
+    // 降级方案：返回静态数据
+    return new Response(JSON.stringify(staticData), { headers: corsHeaders });
 }
