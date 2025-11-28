@@ -16,6 +16,7 @@
             --primary: #007aff; --bg: #f5f5f7; --text: #1d1d1f; --sec: #86868b;
             --r-md: 16px; --r-full: 999px;
             --sh-sm: 0 2px 8px rgba(0,0,0,0.04); --sh-lg: 0 12px 30px rgba(0,0,0,0.12);
+            --arrow-pos: 50%;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
@@ -31,6 +32,7 @@
         
         /* 空状态 */
         .empty-state { text-align: center; max-width: 420px; width: 100%; padding: 40px 20px; border: 2px dashed rgba(0,0,0,0.1); border-radius: 24px; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; align-items: center; }
+        .empty-state:hover { border-color: var(--primary); background: #f0f8ff; transform: scale(1.01); }
         .main-icon { font-size: 56px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .main-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
@@ -44,49 +46,32 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; pointer-events: auto; -webkit-user-select: none; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🐍 修复版：流光贪吃蛇 (兼容微信内核) */
+        /* 🐍 流光贪吃蛇 */
         .snake-border {
-            position: absolute; inset: 0; pointer-events: none; z-index: 20;
-            border-radius: var(--r-md); 
-            padding: 4px; /* 边框宽度 */
-            
-            /* 核心：利用 Mask 裁剪出边框区域 */
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; 
-            mask-composite: exclude;
-
-            /* 背景：锥形渐变，留出大部分透明，模拟“蛇” */
-            background: conic-gradient(from var(--a, 0deg), transparent 75%, var(--primary));
-            
-            /* 动画：旋转 --a 变量，或者直接旋转背景 */
-            animation: spinSnake 2s linear infinite;
-            display: none;
+            position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; z-index: 20; border-radius: 18px;
+            background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+            background-size: 300% 300%; animation: snakeAnim 2s ease alternate infinite; display: none; pointer-events: none;
         }
+        .snake-border::after { content: ''; position: absolute; inset: 4px; background: #fff; border-radius: 14px; z-index: -1; opacity: 0; }
         .image-container.is-loading .snake-border { display: block; }
-        
-        /* 兼容性动画：直接旋转元素 */
-        @keyframes spinSnake { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        /* 优化：稍微放大一点，防止覆盖图片边缘 */
-        .snake-border { top:-2px; left:-2px; right:-2px; bottom:-2px; border-radius: 18px; }
+        @keyframes snakeAnim { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 
-
-        /* Loading / Ad Overlay */
+        /* Loading / Ad */
         .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; border-radius: var(--r-md); }
         .loading-overlay.visible { opacity: 1; }
-        
         .fun-fact { text-align: center; margin-bottom: 15px; background: rgba(255,255,255,0.9); padding: 12px 16px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); width: 280px; flex-shrink: 0;}
         .fact-title { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; text-transform: uppercase; }
         .fact-text { font-size: 13px; font-weight: 500; min-height: 36px; display: flex; align-items: center; justify-content: center; }
 
-        /* 广告相关 (默认隐藏) */
-        .ad-wrapper { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeUp 0.5s ease; }
-        .mock-ad-box { width: 300px; height: 140px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); }
+        /* Ad Boxes */
+        .mock-ad-box { width: 300px; height: 160px; background: #fff9c4; border: 2px dashed #f5d94d; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin-bottom: 15px; color: #8a6d3b; transform: rotate(-1deg); transition: 0.3s; }
+        .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
+        .mock-text { font-weight: 700; font-size: 14px; }
+        .mock-sub { font-size: 11px; opacity: 0.7; }
         .real-ad-box { display: none; width: 300px; height: 250px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 15px; }
 
-        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; margin-top: 10px; }
+        .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); align-items: center; display: none; }
         .switch { position: relative; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
@@ -102,6 +87,7 @@
         .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 10px; padding-bottom: env(safe-area-inset-bottom); }
         
         .style-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px; scrollbar-width: none; }
+        .style-scroll::-webkit-scrollbar { display: none; }
         .style-card { flex-shrink: 0; width: 70px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
         .style-card img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; border: 2px solid white; box-shadow: var(--sh-sm); }
         .style-card span { font-size: 11px; font-weight: 600; color: var(--sec); white-space: nowrap; text-align: center; }
@@ -109,7 +95,7 @@
         .style-card.active span { color: var(--primary); }
         .more-card .more-circle { width: 60px; height: 60px; border-radius: 14px; background: #fff; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 20px; }
 
-        /* Magic Wand & Input */
+        /* Input Box */
         .input-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-radius: var(--r-full); padding: 6px; display: flex; align-items: center; gap: 6px; box-shadow: var(--sh-lg); border: 1px solid rgba(255,255,255,0.5); }
         .magic-wand { color: #7b1fa2; background: #f3e5f5; border: 1px solid rgba(123, 31, 162, 0.1); flex-shrink: 0; }
         .magic-wand.loading { animation: spin 1s infinite linear; }
@@ -127,14 +113,19 @@
         .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
         .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 20px; border-radius: 99px; backdrop-filter: blur(5px); cursor: pointer; font-size: 14px; }
         
-        /* 🎨 Share Card Design (海报风格) */
-        .share-card-wrap { background: white; padding: 0; border-radius: 24px; overflow:hidden; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 340px; width:90%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        /* Share Card (Professional / Clean) */
+        .share-card-wrap { 
+            background: #fff; padding: 0; border-radius: 0; 
+            text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%;
+            /*box-shadow: 0 20px 50px rgba(0,0,0,0.2);*/ /* Canvas has shadow */
+            background: transparent; /* Let canvas render bg */
+        }
         .modal.visible .share-card-wrap { transform: scale(1); }
-        .share-header { padding: 20px; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: #fff; font-weight: 800; font-size: 18px; letter-spacing: 1px; }
-        .share-body { padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: block; }
-        .share-footer { padding: 15px; background: #f9f9f9; border-top: 1px solid #eee; font-size: 12px; color: #888; display: flex; justify-content: space-between; align-items: center;}
-        .close-share { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; width: 24px; height: 24px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        #canvasContainer img { 
+            max-width: 100%; display: block; border-radius: 0; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); /* Real shadow on image */
+        }
+        .share-hint { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         /* Gallery */
         .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f7; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
@@ -150,12 +141,36 @@
         .gallery-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
         .gallery-prompt { font-size: 12px; color: var(--sec); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
+        /* 修复 1: 彻底隐藏原生文件输入 */
+        #photoFile { display: none !important; opacity: 0; pointer-events: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
-        @media (max-width: 600px) { .gallery-grid { grid-template-columns: 1fr; } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Onboarding */
+        .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: 0.3s; }
+        .ob-backdrop.visible { opacity: 1; }
+        .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: 0.3s; }
+        .ob-tooltip { position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px; width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); animation: floatUp 0.3s ease-out; display: none; --arrow-left: 50%; }
+        .ob-tooltip::after { content: ""; position: absolute; width: 12px; height: 12px; background: white; transform: rotate(45deg); left: var(--arrow-left); margin-left: -6px; }
+        .ob-tooltip.top::after { bottom: -6px; } .ob-tooltip.bottom::after { top: -6px; }
+        .ob-step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .ob-step-desc { font-size: 14px; color: var(--sec); line-height: 1.5; margin-bottom: 15px; }
+        .ob-step-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; float: right; }
+        @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .gallery-grid { grid-template-columns: 1fr; }
+            .action-bar { display: none !important; }
+        }
     </style>
 </head>
 <body>
+
+    <div id="obBackdrop" class="ob-backdrop"></div>
+    <div id="obTooltip" class="ob-tooltip">
+        <div class="ob-step-title" id="obTitle">Title</div>
+        <div class="ob-step-desc" id="obDesc">Description</div>
+        <button class="ob-step-btn" id="obBtn">Next</button>
+    </div>
 
     <nav class="navbar">
         <a href="#" class="logo">Nano Banana 🍌</a>
@@ -169,7 +184,7 @@
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
             <span class="main-icon">🎨</span>
             <h3 class="main-title" data-i18n="emptyTitle">创意影像工作室</h3>
-            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接输入文字创作。</p>
+            <p class="sub-text" data-i18n="emptyDesc">上传照片进行 AI 修复，或者直接在底部输入文字进行创作。</p>
             <div class="divider">OR</div>
             <div class="action-hint" data-i18n="uploadBtn">点击上传图片</div>
         </div>
@@ -189,30 +204,29 @@
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
                 
-                <div class="ad-wrapper" id="adWrapper">
-                    <div class="mock-ad-box" id="mockAd">
-                        <div class="mock-icon">🙈</div>
-                        <div class="mock-text">假如这里是一个广告</div>
-                        <div class="mock-sub">（广告君正在赶来的路上...）</div>
-                    </div>
-                    <div class="real-ad-box" id="adBox">
-                        <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
-                             data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
-                             data-ad-format="auto" data-full-width-responsive="true"></ins>
-                        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                    </div>
-                    <div class="toggle-wrap">
-                        <span style="font-size:12px;font-weight:600;color:#007aff">允许广告开启无限生成</span>
-                        <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
-                    </div>
+                <div class="mock-ad-box" id="mockAd">
+                    <div class="mock-icon">🙈</div>
+                    <div class="mock-text">假如这里是一个广告</div>
+                    <div class="mock-sub">（广告君正在赶来的路上...）</div>
+                </div>
+
+                <div class="real-ad-box" id="adBox">
+                    <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
+                         data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" 
+                         data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                </div>
+
+                <div class="toggle-wrap" id="unlimitedToggle">
+                    <span style="font-size:12px;font-weight:600;color:#007aff">允许广告开启无限生成</span>
+                    <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
                 </div>
             </div>
         </div>
     </main>
 
-    <div class="magic-bar-wrapper">
+    <div class="magic-bar-wrapper" id="magicBar">
         <div class="style-scroll" id="styleScroll"></div>
-        
         <form id="commandForm" class="input-box">
             <button type="button" class="icon-btn magic-wand" id="magicBtn" title="AI Magic">✨</button>
             <input type="text" id="promptInput" placeholder="在此输入..." autocomplete="off" inputmode="search">
@@ -228,16 +242,10 @@
     </div>
 
     <div id="shareModal" class="modal">
-        <div class="share-card-wrap" id="shareCardContent">
-            <div class="share-header">✨ NANO BANANA MAGIC</div>
-            <button class="close-share" onclick="closeShareModal()">✕</button>
-            <div class="share-body">
-                <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成海报中...</div>
-            </div>
-            <div class="share-footer">
-                <span>长按图片保存分享</span>
-                <span>ps.bobot.fun</span>
-            </div>
+        <div class="share-card-wrap">
+            <div id="canvasContainer" style="min-height:200px; display:flex; align-items:center; justify-content:center;">生成海报中...</div>
+            <p class="share-hint">长按图片保存分享</p>
+            <button class="p-btn" style="color:#fff; border:1px solid rgba(255,255,255,0.5); background:transparent;" onclick="closeShareModal()">关闭</button>
         </div>
     </div>
 
@@ -262,14 +270,14 @@
         const PROMPT_ENDPOINT = '/api/prompt';
         const STATUS_ENDPOINT = '/api/status';
         
-        // 5. 滤镜数据 (融合 & 排序)
+        // --- Data ---
         const filtersData = [
             { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
             { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
             { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
             { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background" },
-            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1616651181620-9906d6e43fc3?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
-            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1550136513-548af4445338?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
+            { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
+            { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization" },
             { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background" },
             { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
         ];
@@ -280,14 +288,13 @@
         let allGalleryItems = []; let currentCategory = '全部';
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多" },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More" }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多",
+            ob: { s1: { t: "开始创作", d: "点击中间上传图片，或在底部输入。" }, s2: { t: "选择风格", d: "选择一个风格，或点击骰子获取灵感。" }, s3: { t: "灵感广场", d: "查看更多高手的创意。" }, btnNext: "下一步", btnStart: "开始" } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More",
+            ob: { s1: { t: "Start Here", d: "Upload or Type below." }, s2: { t: "Pick Style", d: "Choose style or roll dice." }, s3: { t: "Gallery", d: "Get inspired." }, btnNext: "Next", btnStart: "Start" } }
         };
 
-        // --- Init ---
-        renderFilters();
-        updateLanguage();
-
+        // --- Logic ---
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -308,9 +315,14 @@
             const t = i18nData[curLang];
             document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
             document.getElementById('langToggle').innerText = curLang.toUpperCase();
-            renderFilters(); 
+            renderFilters();
         }
-        document.getElementById('langToggle').addEventListener('click', () => { curLang = curLang === 'cn' ? 'en' : 'cn'; localStorage.setItem('lang', curLang); updateLanguage(); });
+        
+        document.getElementById('langToggle').addEventListener('click', () => { 
+            curLang = curLang === 'cn' ? 'en' : 'cn'; 
+            localStorage.setItem('lang', curLang); 
+            updateLanguage(); 
+        });
 
         window.selectStyle = function(el, name, prompt) {
             if (selectedStyle === name) {
@@ -324,6 +336,7 @@
             }
         }
 
+        // Magic Wand
         const magicBtn = document.getElementById('magicBtn');
         magicBtn.addEventListener('click', async () => {
             magicBtn.classList.add('loading');
@@ -341,7 +354,6 @@
             magicBtn.classList.remove('loading');
         });
 
-        // --- Upload ---
         const photoFile = document.getElementById('photoFile');
         photoFile.addEventListener('change', (e) => {
             const file = e.target.files[0]; if (!file) return;
@@ -367,7 +379,7 @@
             renderFilters();
         }
 
-        // --- Previewer ---
+        // Previewer
         const previewModal = document.getElementById('previewModal');
         const previewImg = document.getElementById('previewImg');
         window.openPreview = function() {
@@ -382,80 +394,69 @@
             setTimeout(() => previewModal.style.display = 'none', 300);
         }
 
-        // --- 3. Canvas Share Poster ---
+        // --- 2. Share Card (Professional White) ---
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
-            const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; // Fallback
+            const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
             shareModal.style.display = 'flex';
             setTimeout(() => shareModal.classList.add('visible'), 10);
             
             const canvasContainer = document.getElementById('canvasContainer');
-            canvasContainer.innerHTML = '✨ 生成海报中...';
+            canvasContainer.innerHTML = '生成海报中...';
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            // Poster Size
             const w = 600, h = 900;
             canvas.width = w; canvas.height = h;
 
-            // Background: Gradient
-            const grd = ctx.createLinearGradient(0, 0, 0, h);
-            grd.addColorStop(0, "#e0c3fc");
-            grd.addColorStop(1, "#8ec5fc");
-            ctx.fillStyle = grd;
-            ctx.fillRect(0, 0, w, h);
-
-            // White Card
-            const cardX=40, cardY=80, cardW=520, cardH=620;
-            ctx.shadowColor = "rgba(0,0,0,0.2)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 20;
-            ctx.fillStyle = "white";
-            // Draw rounded rect manually for compatibility
-            ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 20); ctx.fill();
-            ctx.shadowColor = "transparent"; // Reset shadow
+            // Background: Clean White
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
             try {
                 const img = new Image();
                 img.crossOrigin = "Anonymous"; 
                 img.src = src;
-                await new Promise((r, j) => { img.onload = r; img.onerror = j; });
+                await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
 
-                // Draw Image Inside Card
-                // Aspect Fit
-                const maxW = 480, maxH = 480;
-                const ratio = Math.min(maxW / img.width, maxH / img.height);
+                // Calculate Aspect Ratio fit
+                const maxWidth = 520; const maxHeight = 650;
+                const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
                 const dw = img.width * ratio;
                 const dh = img.height * ratio;
-                const dx = cardX + (cardW - dw) / 2;
-                const dy = cardY + (cardH - 50 - dh) / 2; // Slight offset up
-                
+                const dx = (w - dw) / 2;
+                const dy = 60 + (maxHeight - dh) / 2;
+
+                // Drop Shadow
+                ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+                ctx.shadowBlur = 20; ctx.shadowOffsetY = 10;
+                // Draw Image
                 ctx.drawImage(img, dx, dy, dw, dh);
+                ctx.shadowColor = "transparent";
+
+                // Text (Bottom)
+                ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 36px sans-serif'; ctx.textAlign = 'left';
+                ctx.fillText("Nano Banana", 40, h - 80);
                 
-                // Text
-                ctx.fillStyle = "#333"; ctx.font = "bold 36px sans-serif"; ctx.textAlign = "center";
-                ctx.fillText("NANO BANANA", w/2, cardY + cardH + 60);
-                ctx.fillStyle = "#666"; ctx.font = "20px sans-serif";
-                ctx.fillText("一句话 PS · 创意无限", w/2, cardY + cardH + 100);
+                ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif';
+                ctx.fillText("AI Magic Studio", 40, h - 45);
 
                 // QR Code
                 const qrDiv = document.createElement('div');
-                // 替换为您真实的网站链接
-                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 100, height: 100, colorDark : "#007aff" });
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 100, height: 100, colorDark : "#1d1d1f" });
                 const qrImg = qrDiv.querySelector('img');
                 if(qrImg) { 
                     await new Promise(r => qrImg.onload = r); 
-                    ctx.drawImage(qrImg, w - 140, h - 140, 100, 100);
-                    // Draw Scan Me
-                    ctx.fillStyle = "#007aff"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center";
-                    ctx.fillText("SCAN ME", w - 90, h - 25);
+                    ctx.drawImage(qrImg, w - 130, h - 130, 90, 90);
                 }
 
                 const finalImg = new Image();
                 finalImg.src = canvas.toDataURL(); 
                 finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
+                finalImg.style.boxShadow = '0 20px 50px rgba(0,0,0,0.2)'; // CSS shadow for display
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) {
                 console.error(e);
-                canvasContainer.innerHTML = '生成失败，请重试';
+                canvasContainer.innerHTML = '生成失败 (CORS Error)';
             }
         }
         window.closeShareModal = function() {
@@ -463,30 +464,22 @@
             setTimeout(() => shareModal.style.display = 'none', 300);
         }
 
-        // --- Submit & Logic ---
+        // --- Submit ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
-        const adWrapper = document.getElementById('adWrapper');
+        const adBox = document.getElementById('adBox');
         const mockAd = document.getElementById('mockAd'); 
-        const realAd = document.getElementById('adBox');
-
-        // 2. 广告逻辑: 初始化
-        // 只有当用户触发过限额 (hasHitLimit) 或开启过无限模式 (isUnlimitedMode) 才显示广告区域
-        function checkAdVisibility() {
-            if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
-                adWrapper.style.display = 'flex';
-                if (localStorage.getItem('isUnlimitedMode') === 'true') {
-                    adToggle.checked = true;
-                    mockAd.style.display = 'none'; realAd.style.display = 'flex';
-                }
-            }
+        const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
+        
+        if(localStorage.getItem('isUnlimitedMode')) {
+            adToggle.checked = true; unlimitedToggleDiv.style.display = 'flex';
+            mockAd.style.display = 'none'; adBox.style.display = 'flex'; 
         }
-
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
-             if(e.target.checked) { mockAd.style.display = 'none'; realAd.style.display = 'flex'; }
-             else { mockAd.style.display = 'flex'; realAd.style.display = 'none'; }
+             if(e.target.checked) { mockAd.style.display = 'none'; adBox.style.display = 'flex'; }
+             else { mockAd.style.display = 'flex'; adBox.style.display = 'none'; }
         });
 
         async function compressImage(file, maxWidth = 1280) {
@@ -529,7 +522,6 @@
             const prompt = document.getElementById('promptInput').value.trim();
             if(!currentFile && !prompt) return;
             
-            // T2I Placeholder
             if(!currentFile) {
                  document.getElementById('displayImage').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNTAwIDMwMCI+PHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNmMmZjZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI0MCIgZmlsbD0iI2RkZCI+QUk8L3RleHQ+PC9zdmc+';
                  document.getElementById('displayImage').classList.add('pixelating');
@@ -537,9 +529,6 @@
                  document.getElementById('imageContainer').style.display = 'inline-flex';
                  document.getElementById('imageContainer').classList.add('loaded');
             }
-
-            // Check Ad Visibility Logic
-            checkAdVisibility();
 
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
@@ -565,10 +554,9 @@
                 }
                 if(res.status === 429) {
                     if(confirm(i18nData[curLang].alertLimit)) {
-                        localStorage.setItem('hasHitLimit', 'true'); // Mark as hit
-                        adWrapper.style.display = 'flex';
+                        unlimitedToggleDiv.style.display = 'flex';
                         adToggle.checked = true;
-                        mockAd.style.display = 'none'; realAd.style.display = 'flex';
+                        mockAd.style.display = 'none'; adBox.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', 'true');
                     }
                     return;
@@ -596,6 +584,7 @@
             }
         });
         
+        // Gallery
         window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
         document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
         
@@ -617,6 +606,27 @@
              document.getElementById('galleryModal').classList.remove('open');
         }
 
+        // 3. Onboarding Logic (Re-enabled)
+        const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'magicBar', key: 's2', pos: 'top' }, { id: 'galleryToggle', key: 's3', pos: 'bottom' } ];
+        let curStepIdx = 0;
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_vFinal')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function showStep(idx) {
+            document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
+            const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_vFinal', 'true'); return; }
+            curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
+            el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
+            tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
+            document.getElementById('obBtn').innerText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
+            const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
+            const padding = 20; if (left + tooltipWidth > window.innerWidth - padding) { left = window.innerWidth - tooltipWidth - padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - left}px`; } if (left < padding) { left = padding; const targetCenter = rect.left + rect.width / 2; arrowPos = `${targetCenter - padding}px`; }
+            document.documentElement.style.setProperty('--arrow-pos', arrowPos); tooltip.style.left = left + 'px';
+            if (step.pos === 'bottom') { tooltip.style.top = (rect.bottom + 15) + 'px'; tooltip.classList.add('arrow-top'); } else { tooltip.style.top = (rect.top - tooltip.offsetHeight - 15) + 'px'; tooltip.classList.add('arrow-bottom'); }
+        }
+        document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
+        setTimeout(initOnboarding, 500);
+
+        updateLanguage(); // Init
     </script>
 </body>
 </html>
