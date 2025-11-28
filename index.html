@@ -17,7 +17,7 @@
             --radius-lg: 24px; --radius-md: 16px; --radius-full: 999px;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
             --shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
-            --arrow-pos: 50%;
+            --arrow-pos: 50%; /* 动态箭头位置 */
         }
 
         body {
@@ -26,38 +26,47 @@
             margin: 0; padding: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- 导航栏 (极简版) --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
-        .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; color: #000; }
+        /* --- 导航栏 --- */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; z-index: 100; background: rgba(245, 245, 247, 0.8); backdrop-filter: blur(10px); flex-shrink: 0; }
+        .logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 5px; }
         
-        .nav-right { display: flex; gap: 10px; }
-        .nav-icon-btn {
-            background: transparent; border: none; font-size: 18px; cursor: pointer;
-            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
-        }
+        .mode-switcher { background: rgba(118, 118, 128, 0.12); padding: 2px; border-radius: 8px; display: flex; position: relative; margin: 0 auto; }
+        .mode-btn { border: none; background: transparent; padding: 6px 12px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-main); border-radius: 6px; z-index: 2; width: 80px; transition: color 0.2s; }
+        .mode-btn.active { font-weight: 600; }
+        .mode-slider { position: absolute; top: 2px; left: 2px; bottom: 2px; width: 80px; background: white; border-radius: 6px; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 1; }
+
+        .nav-right { display: flex; gap: 8px; }
+        .nav-icon-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .nav-icon-btn:hover { background: rgba(0,0,0,0.05); }
 
         /* --- 舞台区域 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 220px; width: 100%; box-sizing: border-box; overflow-y: auto; }
         
-        /* 统一空状态 (Create Mode) */
-        .empty-state {
-            text-align: center; max-width: 420px; width: 100%; padding: 40px 20px;
-            border: 2px dashed rgba(0,0,0,0.1); border-radius: var(--radius-lg);
-            transition: all 0.3s; cursor: pointer; background: white;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .empty-state:hover { border-color: var(--primary-color); background: #f0f8ff; transform: scale(1.01); }
-        
-        .main-icon { font-size: 56px; margin-bottom: 20px; display: block; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .main-title { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
-        .sub-text { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
-        .divider { margin: 20px 0; font-size: 12px; color: #ccc; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .action-hint { color: var(--primary-color); font-weight: 600; font-size: 14px; background: rgba(0,122,255,0.1); padding: 8px 16px; border-radius: 99px; }
+        .mode-content { display: none; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; animation: fadeIn 0.3s ease; }
+        .mode-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 图片容器 */
+        /* Upload & Placeholder */
+        .upload-placeholder {
+            text-align: center; border: 2px dashed #d1d1d6; padding: 40px; border-radius: var(--radius-lg);
+            cursor: pointer; background: white; max-width: 400px; width: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            box-shadow: var(--shadow-sm); transition: 0.3s;
+        }
+        .upload-placeholder:hover { border-color: var(--primary-color); background: #f0f8ff; }
+        .icon-upload { font-size: 48px; margin-bottom: 15px; color: var(--primary-color); }
+        .hint-text { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
+
+        .create-placeholder { text-align: center; max-width: 450px; display: block; }
+        .create-icon { font-size: 60px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .create-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        .create-desc { font-size: 16px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 30px; }
+        .suggestion-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .s-chip { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 99px; font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: 0.2s; }
+        .s-chip:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
+
+        /* Image Container */
         .image-container {
             position: relative; max-width: 100%; max-height: 100%; border-radius: var(--radius-md); 
             box-shadow: var(--shadow-lg); display: none; justify-content: center; align-items: center; background: #fff; min-width: 300px; min-height: 200px;
@@ -66,7 +75,7 @@
         .image-display { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 5; position: relative; transition: filter 1s ease; }
         .image-display.pixelating { filter: blur(20px) contrast(1.2); transform: scale(1.02); }
 
-        /* 🐍 完美圆角流光贪吃蛇 */
+        /* Snake Border */
         .snake-border {
             position: absolute; inset: 0; pointer-events: none; z-index: 55;
             border-radius: var(--radius-md); padding: 4px; 
@@ -79,7 +88,7 @@
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         @keyframes rotateSnake { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-        /* 半透明 Loading */
+        /* Loading Overlay */
         .loading-overlay {
             position: absolute; inset: 0;
             background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -99,15 +108,33 @@
         .fact-text { font-size: 13px; font-weight: 500; color: var(--text-main); min-height: 36px; transition: opacity 0.3s; line-height: 1.4; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 广告位 (4:3) */
-        .ad-container-box {
-            width: 100%; max-width: 320px; aspect-ratio: 4/3; max-height: 240px; flex-shrink: 0;
-            background: #f9f9f9; border-radius: 12px; overflow: hidden; display: none; 
-            justify-content: center; align-items: center; border: 1px solid #eee; margin-bottom: 15px;
+        /* 🆕 俏皮的假广告位 (Mock Ad) */
+        .mock-ad-container {
+            width: 100%; max-width: 280px; flex-shrink: 0;
+            margin-bottom: 15px; display: none; /* 默认隐藏 */
+            animation: fadeUp 0.5s ease-out;
         }
+        /* 真实广告位（暂时隐藏，等通过审核后启用） */
+        .real-ad-container { display: none; } 
 
+        .mock-ad-box {
+            background: #fff9c4; /* 淡黄色背景 */
+            border: 2px dashed #f5d94d;
+            border-radius: 16px; padding: 20px 15px;
+            text-align: center; color: #8a6d3b;
+            position: relative; overflow: hidden;
+            transform: rotate(-1deg); transition: transform 0.3s;
+        }
+        .mock-ad-box:hover { transform: rotate(1deg) scale(1.02); }
+        
+        .mock-icon { font-size: 28px; margin-bottom: 8px; }
+        .mock-text { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+        .mock-sub { font-size: 11px; opacity: 0.7; }
+
+        /* 无限模式开关 (默认隐藏) */
         .unlimited-toggle {
-            display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 280px;
+            display: none; /* 🆕 默认隐藏 */
+            align-items: center; justify-content: space-between; width: 100%; max-width: 280px;
             background: rgba(255, 255, 255, 0.9); padding: 8px 12px; border-radius: 12px; transition: all 0.3s; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.05); flex-shrink: 0;
         }
         .toggle-label { font-size: 12px; font-weight: 600; color: var(--primary-color); }
@@ -118,6 +145,7 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(16px); }
 
+        /* Other UI */
         .clear-btn { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 70; transition: all 0.2s; opacity: 0; pointer-events: none; }
         .image-container:hover .clear-btn, .image-container.loaded .clear-btn { opacity: 1; pointer-events: auto; }
         
@@ -127,29 +155,13 @@
         .action-btn:hover { background: rgba(0,0,0,0.05); }
         .action-btn svg { width: 20px; height: 20px; stroke-width: 2; }
 
-        /* --- 底部指令栏 --- */
-        .magic-bar-wrapper { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            width: 90%; max-width: 700px; z-index: 200; 
-            display: flex; flex-direction: column; gap: 10px; 
-            padding-bottom: env(safe-area-inset-bottom); 
-        }
-        
-        /* 🆕 风格分类标题 */
-        .style-label {
-            font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-left: 5px; opacity: 0.8;
-            display: flex; align-items: center; gap: 5px;
-        }
-        .style-label span { font-size: 14px; }
-
+        /* Bottom Bar */
+        .magic-bar-wrapper { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 700px; z-index: 200; display: flex; flex-direction: column; gap: 10px; padding-bottom: env(safe-area-inset-bottom); }
+        .style-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-left: 5px; opacity: 0.8; display: flex; align-items: center; gap: 5px; }
         .style-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px 4px 10px 4px; scrollbar-width: none; }
         .style-scroll::-webkit-scrollbar { display: none; }
         .style-card { flex-shrink: 0; width: 75px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .style-card img { 
-            width: 64px; height: 64px; border-radius: 16px; object-fit: cover; 
-            border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .style-card img { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .style-card span { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: center; line-height: 1.2; }
         .style-card.active img { border-color: var(--primary-color); transform: scale(1.1); box-shadow: 0 6px 12px rgba(0,122,255,0.25); }
         .style-card.active span { color: var(--primary-color); }
@@ -182,10 +194,11 @@
         .gallery-prompt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         #photoFile { display: none; }
 
-        /* Onboarding */
+        /* --- 🆕 Onboarding (优化定位) --- */
         .ob-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800; display: none; opacity: 0; transition: opacity 0.3s; }
         .ob-backdrop.visible { opacity: 1; }
         .ob-highlight { z-index: 801 !important; position: relative !important; background: white !important; box-shadow: 0 0 0 4px var(--primary-color), 0 0 0 1000px rgba(0,0,0,0.6) !important; border-radius: 16px; transition: all 0.3s; }
+        
         .ob-tooltip {
             position: absolute; z-index: 802; background: white; padding: 20px; border-radius: 20px;
             width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -206,7 +219,7 @@
 
         @media (max-width: 600px) {
             .navbar { padding: 10px 15px; }
-            .stage { padding: 15px; padding-bottom: 220px; } /* 增加底部留白 */
+            .stage { padding: 15px; padding-bottom: 160px; }
             .magic-bar-wrapper { width: 94%; bottom: 15px; }
             .gallery-grid { padding: 20px; grid-template-columns: 1fr; }
             .action-bar { bottom: 20px; right: 50%; transform: translateX(50%); background: rgba(255,255,255,0.95); }
@@ -257,12 +270,22 @@
                     <div class="fact-title">DID YOU KNOW?</div>
                     <div class="fact-text" id="factText">AI 正在连接神经元...</div>
                 </div>
-                <div class="ad-container-box" id="adBox">
+                
+                <div class="mock-ad-container" id="mockAd">
+                    <div class="mock-ad-box">
+                        <div class="mock-icon" id="mockAdIcon">🙈</div>
+                        <div class="mock-text" id="mockAdText">假如这里是一个广告</div>
+                        <div class="mock-sub" id="mockAdSub">（广告君正在赶来的路上...）</div>
+                    </div>
+                </div>
+
+                <div class="ad-container-box real-ad-container" id="adBox">
                     <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" data-ad-client="ca-pub-1920879457200472" data-ad-slot="2938957861" data-ad-format="auto" data-full-width-responsive="true"></ins>
                     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
                 </div>
-                <div class="unlimited-toggle">
-                    <div class="toggle-label" data-i18n="unlimitedToggle">⚡️ 开启无限生成 (自动补充)</div>
+
+                <div class="unlimited-toggle" id="unlimitedToggle">
+                    <div class="toggle-label" data-i18n="unlimitedToggle">允许广告开启无限生成</div>
                     <label class="switch"><input type="checkbox" id="adToggle"><span class="slider"></span></label>
                 </div>
             </div>
@@ -309,10 +332,19 @@
         const STATUS_ENDPOINT = '/api/status';
 
         // --- 全局状态 ---
-        let currentMode = 'create'; // 'create' (No Image) or 'edit' (Has Image)
+        let currentMode = 'create'; 
         let currentFile = null;
         let selectedStylePrompt = ""; 
         let curLang = localStorage.getItem('lang') || 'cn';
+        let currentContext = 'create'; 
+
+        // --- 🆕 假广告文案 ---
+        const mockAdTexts = [
+            { icon: "🙈", text: "假如这里是一个广告", sub: "（你被它的美貌吸引并点击了它）" },
+            { icon: "🍌", text: "广告君正在赶路...", sub: "（它可能去买香蕉了）" },
+            { icon: "✨", text: "此处招租", sub: "（假装这里有一个很酷的产品）" },
+            { icon: "🛌", text: "广告位在休息", sub: "（嘘，别吵醒它）" }
+        ];
 
         // --- I18n Data ---
         const i18nData = {
@@ -323,10 +355,10 @@
                 uploadBtn: "点击上传图片",
                 styleLabelCreate: "创意风格",
                 styleLabelEdit: "修复滤镜",
-                unlimitedToggle: "⚡️ 开启无限生成 (自动补充)",
+                unlimitedToggle: "允许广告开启无限生成",
                 verifyTitle: "安全验证", verifyDesc: "验证一次，畅玩一小时。",
                 galleryTitle: "✨ 灵感广场",
-                alertLimit: "今日额度已尽！开启无限模式继续？",
+                alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？",
                 promptPlaceholder: { create: "一只在太空喝咖啡的猫...", edit: "修复划痕，变为油画风格..." },
                 facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."],
                 obBtnNext: "下一步", obBtnStart: "开始创作",
@@ -336,13 +368,12 @@
                     s2: { t: "选择风格", d: "点击上方卡片选择风格，或点击骰子获取灵感。" },
                     s3: { t: "寻找灵感", d: "点击这里查看更多高手的提示词。" }
                 },
-                // 修复后的图片 URL
                 styles: {
                     create: [
                         { name: "盲盒公仔", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k" },
                         { name: "粘土世界", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute" },
                         { name: "微缩景观", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography" },
-                        { name: "赛博汉服", img: "https://images.unsplash.com/photo-1535295972055-1c762f4483e5?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
+                        { name: "赛博汉服", img: "https://images.unsplash.com/photo-1515634918662-0f6470117b94?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed" },
                         { name: "极简Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background" }
                     ],
                     edit: [
@@ -352,13 +383,7 @@
                         { name: "动漫化", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, cel shaded, vibrant colors" }
                     ]
                 },
-                randomPrompts: [
-                    "一只穿着宇航服的柯基犬",
-                    "未来城市的空中花园",
-                    "水晶制成的巨大龙",
-                    "蒸汽朋克猫头鹰",
-                    "热带雨林中的玻璃屋"
-                ]
+                randomPrompts: ["一只穿着宇航服的柯基犬", "未来城市的空中花园", "水晶制成的巨大龙", "蒸汽朋克猫头鹰", "热带雨林中的玻璃屋"]
             },
             en: {
                 emptyTitle: "Creative Studio",
@@ -367,7 +392,7 @@
                 uploadBtn: "Click to Upload",
                 styleLabelCreate: "Creative Styles",
                 styleLabelEdit: "Repair Filters",
-                unlimitedToggle: "⚡️ Unlimited Mode (Ad Supported)",
+                unlimitedToggle: "Allow Ads for Unlimited",
                 verifyTitle: "Security Check", verifyDesc: "Verify once, valid for 1 hour.",
                 galleryTitle: "✨ Gallery",
                 alertLimit: "Limit reached! Enable Unlimited Mode?",
@@ -401,21 +426,16 @@
 
         // --- Context Logic ---
         function updateContext() {
-            // Determine mode based on file presence
             currentMode = currentFile ? 'edit' : 'create';
-            
             const t = i18nData[curLang];
             
-            // Update Label Icon & Text
             const labelEl = document.getElementById('styleLabel');
             const labelIcon = currentMode === 'create' ? '✨' : '🛠️';
             const labelText = currentMode === 'create' ? t.styleLabelCreate : t.styleLabelEdit;
             labelEl.innerHTML = `<span>${labelIcon}</span> ${labelText}`;
 
-            // Update Placeholder
             document.getElementById('promptInput').placeholder = t.promptPlaceholder[currentMode];
             
-            // Update Cards
             const styles = t.styles[currentMode];
             const styleHTML = styles.map(s => `
                 <div class="style-card" onclick="selectStyle(this, '${s.prompt.replace(/'/g,"\\'")}')">
@@ -467,7 +487,7 @@
                 document.getElementById('imageContainer').classList.add('loaded');
                 document.getElementById('actionBar').style.display = 'none';
                 
-                updateContext(); // Switch to Edit Mode
+                updateContext(); 
             }
             reader.readAsDataURL(file);
         }
@@ -494,10 +514,10 @@
             document.getElementById('promptInput').value = '';
             selectedStylePrompt = "";
             
-            updateContext(); // Switch to Create Mode
+            updateContext(); 
         }
 
-        // --- Onboarding (Steps Updated) ---
+        // --- Onboarding ---
         const obSteps = [
             { id: 'emptyState', key: 's1', pos: 'bottom' },
             { id: 'magicBar', key: 's2', pos: 'top' }, 
@@ -506,7 +526,7 @@
         let curStepIdx = 0;
 
         function initOnboarding() {
-            if (!localStorage.getItem('hasSeenOb_v14')) { 
+            if (!localStorage.getItem('hasSeenOb_v15')) { 
                 document.getElementById('obBackdrop').style.display = 'block';
                 setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10);
                 showStep(0);
@@ -522,7 +542,7 @@
             if (idx >= obSteps.length) {
                 document.getElementById('obBackdrop').classList.remove('visible');
                 setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300);
-                localStorage.setItem('hasSeenOb_v14', 'true');
+                localStorage.setItem('hasSeenOb_v15', 'true');
                 return;
             }
 
@@ -569,17 +589,41 @@
         document.getElementById('obBtn').addEventListener('click', () => showStep(curStepIdx + 1));
         setTimeout(initOnboarding, 500);
 
-        // --- Standard Logic ---
+        // --- Shared Helpers ---
         const commandForm = document.getElementById('commandForm');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const submitBtn = document.getElementById('submitBtn');
         const adToggle = document.getElementById('adToggle');
-        const adBox = document.getElementById('adBox');
+        const mockAd = document.getElementById('mockAd');
+        const unlimitedToggleDiv = document.getElementById('unlimitedToggle');
         
-        if (localStorage.getItem('isUnlimitedMode') === 'true') { adToggle.checked = true; adBox.style.display = 'flex'; }
+        // 🆕 智能显隐逻辑
+        // 默认隐藏：mockAd 和 unlimitedToggleDiv (CSS 已设为 display:none)
+        
+        function checkUnlimitedVisibility() {
+            // 如果开启了无限模式，或者之前触发过限额，就显示
+            if (localStorage.getItem('isUnlimitedMode') === 'true' || localStorage.getItem('hasHitLimit') === 'true') {
+                unlimitedToggleDiv.style.display = 'flex';
+                // 如果开关开启，显示广告
+                if (localStorage.getItem('isUnlimitedMode') === 'true') {
+                    adToggle.checked = true;
+                    mockAd.style.display = 'block';
+                }
+            }
+        }
+
         adToggle.addEventListener('change', (e) => {
             localStorage.setItem('isUnlimitedMode', e.target.checked);
-            adBox.style.display = e.target.checked ? 'flex' : 'none';
+            // 切换广告显示
+            mockAd.style.display = e.target.checked ? 'block' : 'none';
+            
+            // 随机更新假广告文案
+            if (e.target.checked) {
+                const ad = mockAdTexts[Math.floor(Math.random() * mockAdTexts.length)];
+                document.getElementById('mockAdIcon').innerText = ad.icon;
+                document.getElementById('mockAdText').innerText = ad.text;
+                document.getElementById('mockAdSub').innerText = ad.sub;
+            }
         });
 
         let turnstileWidgetId = null;
@@ -670,6 +714,9 @@
                 simulateT2IPlaceholder();
             }
 
+            // 检查是否需要显示广告/开关
+            checkUnlimitedVisibility();
+
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(() => loadingOverlay.classList.add('visible'));
             submitBtn.disabled = true;
@@ -705,9 +752,16 @@
                     stopCreativeLoading();
                     loadingOverlay.classList.remove('visible');
                     setTimeout(() => loadingOverlay.style.display = 'none', 300);
+                    
+                    // 首次触发限额：弹窗提示
                     if(!isUnlimited && confirm(i18nData[curLang].alertLimit)) {
-                        adToggle.checked = true; document.getElementById('adBox').style.display = 'flex';
+                        // 开启无限模式
+                        localStorage.setItem('hasHitLimit', 'true'); // 标记已触发
+                        adToggle.checked = true;
+                        mockAd.style.display = 'block';
+                        unlimitedToggleDiv.style.display = 'flex';
                         localStorage.setItem('isUnlimitedMode', true);
+                        // 重新提交（或让用户重试，这里简单让用户重试）
                     }
                     return;
                 }
