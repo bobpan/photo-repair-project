@@ -17,11 +17,12 @@
             --bg: #FAFAFC; --text: #1C1C1E; --sec: #8E8E93; --border: rgba(0,0,0,0.06);
             --r-md: 20px; --r-full: 999px;
             --sh-sm: 0 4px 12px rgba(0,0,0,0.04); --sh-lg: 0 20px 40px rgba(0,0,0,0.08);
+            --arrow-pos: 50%;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
         /* --- 导航 --- */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; z-index: 100; background: rgba(245,245,247,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; letter-spacing: -0.5px; }
         .nav-actions { display: flex; gap: 12px; align-items: center; }
         .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.06); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); font-size: 12px; font-weight: 700; color: var(--text); }
@@ -46,9 +47,9 @@
         .image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; border-radius: var(--r-md); }
         .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
 
-        /* 动效：全息呼吸 + 扫描 */
+        /* 全息呼吸动效 */
         .holo-glow {
-            position: absolute; inset: 0; pointer-events: none; z-index: 20; border-radius: 20px; 
+            position: absolute; inset: -4px; pointer-events: none; z-index: 20; border-radius: 24px; 
             box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0); display: none;
         }
         .scan-line {
@@ -59,36 +60,30 @@
         .image-container.is-loading .image-display { animation: breathe 2s infinite ease-in-out; filter: brightness(0.9) contrast(1.1); }
         .image-container.is-loading .holo-glow { display: block; animation: intensePulse 1.5s infinite; }
         .image-container.is-loading .scan-line { opacity: 1; animation: scanMove 1.2s linear infinite; }
-
         @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
         @keyframes intensePulse { 0% { box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0.7); border: 2px solid rgba(255, 194, 14, 0); } 50% { box-shadow: inset 0 0 40px 0 rgba(255, 194, 14, 0.6); border: 2px solid rgba(255, 194, 14, 1); } 100% { box-shadow: inset 0 0 0 0 rgba(255, 194, 14, 0); border: 2px solid rgba(255, 194, 14, 0); } }
         @keyframes scanMove { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
         /* Loading Overlay */
-        .loading-overlay { 
-            position: absolute; inset: 0; 
-            background: rgba(255,255,255,0.4); /* 极简透明 */
-            backdrop-filter: blur(5px); 
-            display: none; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; 
-        }
+        .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(5px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; }
         .loading-overlay.visible { opacity: 1; }
-
-        /* Ads & Toggle (默认全部隐藏) */
-        .ad-wrapper { display: none; flex-direction: column; align-items: center; margin-top: auto; margin-bottom: auto; width: 100%; animation: slideUp 0.4s ease; }
+        
+        /* 广告容器 */
+        .ad-wrapper { display: none; flex-direction: column; align-items: center; width: 100%; animation: slideUp 0.4s ease; margin-top: auto; margin-bottom: auto; }
         @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
         
+        /* 2. 广告位：默认隐藏 (display: none)，开启开关后显示 (display: block) */
         .ad-slot { 
             width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; 
             background: #FFFBF2; margin-bottom: 15px; box-shadow: var(--sh-lg);
-            display: none; /* Slot 默认隐藏，开关开启后显示 */
+            display: none; 
         }
-        .mock-ad { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; border: 2px dashed var(--primary); box-sizing: border-box; border-radius: 16px; background: rgba(255, 251, 240, 0.95); backdrop-filter: blur(10px); }
+        
+        .mock-ad { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #B8860B; border: 2px dashed var(--primary); box-sizing: border-box; border-radius: 16px; background: rgba(255, 251, 240, 0.95); }
         .mock-icon { font-size: 32px; margin-bottom: 5px; }
         .mock-text { font-weight: 700; font-size: 14px; }
-        .mock-sub { font-size: 11px; opacity: 0.7; }
-        .real-ad-box { display: none; width: 100%; height: 100%; background: #f9f9f9; z-index: 5; position: relative; }
         
+        .real-ad-box { position: absolute; inset: 0; z-index: 5; }
         .toggle-wrap { display: flex; justify-content: space-between; width: 280px; background: rgba(255,255,255,0.95); padding: 10px 16px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05); align-items: center; box-shadow: var(--sh-sm); }
         .switch { position: relative; width: 36px; height: 20px; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e9e9ea; transition: .4s; border-radius: 24px; } .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); } input:checked + .slider { background: var(--primary); } input:checked + .slider:before { transform: translateX(16px); }
 
@@ -123,7 +118,6 @@
         .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
         .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 99px; backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; }
         
-        /* Share Card */
         .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
         .modal.visible .share-card-wrap { transform: scale(1); }
         #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
@@ -135,29 +129,15 @@
         .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .gallery-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
         .close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
-
         .gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
         .tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
         .tab-btn.active { background: var(--on-primary); color: white; }
-        
-        .gallery-grid { 
-            flex: 1; overflow-y: auto; padding: 0 24px 100px; 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 16px; box-sizing: border-box; 
-        }
-        .gallery-item { 
-            background: white; border-radius: 20px; overflow: hidden; cursor: pointer; 
-            box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none;
-            aspect-ratio: 3/4;
-        }
+        .gallery-grid { flex: 1; overflow-y: auto; padding: 0 24px 100px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; box-sizing: border-box; }
+        .gallery-item { background: white; border-radius: 20px; overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none; aspect-ratio: 3/4; }
         .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
         .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
         .gallery-item:hover .gallery-img { transform: scale(1.05); }
-        .gallery-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end;
-        }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end; }
         .gallery-title { font-size: 15px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
         #photoFile { display: none !important; opacity: 0; pointer-events: none; }
@@ -217,17 +197,11 @@
             <button class="clear-btn" onclick="resetCanvas()">✕</button>
 
             <div id="loadingOverlay" class="loading-overlay">
-                <div class="fun-fact">
-                    <div class="fact-title">DID YOU KNOW?</div>
-                    <div class="fact-text" id="factText">AI 正在连接神经元...</div>
-                </div>
-                
                 <div class="ad-wrapper" id="adWrapper">
-                    <div class="ad-slot">
+                    <div class="ad-slot" id="adSlot" style="display:none;">
                         <div class="mock-ad" id="mockAd">
                             <div class="mock-icon">🙈</div>
                             <div class="mock-text">假装这里有一个广告</div>
-                            <div class="mock-sub">（广告君正在赶来的路上...）</div>
                         </div>
                         <div class="real-ad-box" id="adBox">
                             <ins class="adsbygoogle" style="display:block; width:100%; height:100%;" 
@@ -307,8 +281,8 @@
         let allGalleryItems = []; let currentCategory = '全部';
 
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", facts: ["Nano Banana 3.0 已就绪。", "AI 正在构建像素...", "灵感正在加载中...", "光影渲染进行中..."], galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", facts: ["Nano Banana 3.0 Ready.", "Constructing pixels...", "Loading inspiration...", "Rendering light..."], galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
+            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
+            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
         };
 
         function renderFilters() {
@@ -391,7 +365,7 @@
             shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
             const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = '生成海报中...';
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            const w = 600, h = 900; canvas.width = w; canvas.height = h;
+            const w = 1080, h = 1440; canvas.width = w; canvas.height = h;
 
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
@@ -401,10 +375,18 @@
                 const imgRatio = img.width / img.height;
                 const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
                 ctx.drawImage(img, x, 100, drawW, drawH);
-                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("NANO BANANA", w/2, 660);
-                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillText("一句话 PS · 创意无限", w/2, 695); ctx.fillText("https://ps.bobot.fun", w/2, 725);
-                const qrDiv = document.createElement('div'); new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
-                const qrImg = qrDiv.querySelector('img'); if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
+                
+                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText("NANO BANANA", w/2, 660);
+                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText("一句话 做同款", w/2, 695);
+                ctx.fillText("https://ps.bobot.fun", w/2, 725);
+
+                const qrDiv = document.createElement('div');
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
+                const qrImg = qrDiv.querySelector('img');
+                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
+
                 const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px'; finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
             } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
@@ -415,21 +397,19 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const adToggle = document.getElementById('adToggle');
         const adWrapper = document.getElementById('adWrapper');
-        const mockAd = document.getElementById('mockAd'); 
-        const realAd = document.getElementById('adBox');
+        const adSlot = document.getElementById('adSlot');
         
-        // 2. 广告逻辑：检查历史记录
+        // 2. 广告逻辑: 默认不显示 -> 触发限制后显示 Wrapper -> 开启开关后显示 Slot
+        if(localStorage.getItem('hasHitLimit')) {
+            adWrapper.style.display = 'flex'; // 显示容器（仅含开关）
+        }
         if(localStorage.getItem('isUnlimitedMode')) {
-            adToggle.checked = true; adWrapper.style.display = 'flex';
-            mockAd.style.display = 'none'; realAd.style.display = 'flex';
-        } else if(localStorage.getItem('hasHitLimit')) {
-            adWrapper.style.display = 'flex'; // 仅显示，不开启
+            adToggle.checked = true; adSlot.style.display = 'block'; // 显示广告位
         }
 
         adToggle.addEventListener('change', (e) => {
              localStorage.setItem('isUnlimitedMode', e.target.checked);
-             if(e.target.checked) { mockAd.style.display = 'none'; realAd.style.display = 'flex'; }
-             else { mockAd.style.display = 'flex'; realAd.style.display = 'none'; }
+             adSlot.style.display = e.target.checked ? 'block' : 'none';
         });
 
         async function compressImage(file, maxWidth = 1280) {
@@ -480,14 +460,9 @@
                  document.getElementById('imageContainer').classList.add('loaded');
             }
 
-            // Check Ad Visibility Logic (触发过才显示)
-            if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
-                 document.getElementById('adWrapper').style.display = 'flex'; 
-            }
-
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-            document.querySelector('.image-container').classList.add('is-loading'); // 1. 光效
+            document.querySelector('.image-container').classList.add('is-loading');
 
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -511,9 +486,8 @@
                     if(confirm(i18nData[curLang].alertLimit)) {
                         localStorage.setItem('hasHitLimit', 'true');
                         adWrapper.style.display = 'flex';
-                        // 默认开启无限模式
                         adToggle.checked = true;
-                        mockAd.style.display = 'none'; realAd.style.display = 'flex';
+                        adSlot.style.display = 'block';
                         localStorage.setItem('isUnlimitedMode', 'true');
                     }
                     return;
@@ -574,18 +548,17 @@
              document.getElementById('galleryModal').classList.remove('open');
         }
         
-        // 3. Onboarding Logic (v999)
+        // 3. Force Reset Onboarding (v_reset_now)
         const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
         let curStepIdx = 0;
-        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v999')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+        function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v_reset_now')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
         function showStep(idx) {
             document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
             const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v999', 'true'); return; }
+            if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v_reset_now', 'true'); return; }
             curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
             el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
             tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
-            // 修复按钮文字
             const btnText = idx === obSteps.length - 1 ? i18nData[curLang].obBtnStart : i18nData[curLang].obBtnNext;
             document.getElementById('obBtn').innerText = btnText;
             const tooltipWidth = 280; let left = rect.left + rect.width / 2 - (tooltipWidth / 2); let arrowPos = '50%';
