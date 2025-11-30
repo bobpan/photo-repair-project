@@ -30,7 +30,11 @@
         .share-btn { background: var(--text); color: white; padding: 0 18px; height: 38px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 6px; }
         .share-btn.visible { display: flex; animation: popIn 0.4s ease; }
         @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
+        
+        .share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
+        .modal.visible .share-card-wrap { transform: scale(1); }
+        #canvasContainer img { max-width: 100%; border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: block; margin: 0 auto; }
+        .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
         /* --- 舞台 --- */
         .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 200px; width: 100%; box-sizing: border-box; overflow-y: auto; }
         
@@ -353,27 +357,49 @@
 
         const shareModal = document.getElementById('shareModal');
         window.openShareModal = async function() {
-            const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
+const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
             shareModal.style.display = 'flex'; setTimeout(() => shareModal.classList.add('visible'), 10);
             const canvasContainer = document.getElementById('canvasContainer'); canvasContainer.innerHTML = '生成海报中...';
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             const w = 1080, h = 1440; canvas.width = w; canvas.height = h;
 
+            // 海马体白底风格
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
 
             try {
                 const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
                 await new Promise((r, j) => { img.onload = r; img.onerror = j; });
-                const imgRatio = img.width / img.height;
-                const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
-                ctx.drawImage(img, x, 100, drawW, drawH);
-                ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("NANO BANANA", w/2, 660);
-                ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillText("一句话 PS · 创意无限", w/2, 695); ctx.fillText("https://ps.bobot.fun", w/2, 725);
-                const qrDiv = document.createElement('div'); new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
-                const qrImg = qrDiv.querySelector('img'); if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
-                const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px'; finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                
+                // 顶部留白大，图片居中偏上
+                const margin = 80; const topPad = 140; const maxImgH = 900;
+                let drawW = w - margin*2;
+                let drawH = drawW / (img.width/img.height);
+                if(drawH > maxImgH) { drawH = maxImgH; drawW = drawH * (img.width/img.height); }
+                const dx = (w - drawW)/2; const dy = topPad;
+
+                // 阴影
+                ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
+                ctx.drawImage(img, dx, dy, drawW, drawH);
+                ctx.shadowColor = "transparent";
+
+                // 文字排版
+                ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 72px "Songti SC", "Noto Serif SC", serif'; ctx.textAlign = 'left';
+                ctx.fillText("一句话 做同款", margin, h - 280);
+                
+                ctx.fillStyle = '#86868b'; ctx.font = '500 32px sans-serif';
+                ctx.fillText("由免费 Nano Banana PRO 生成", margin, h - 220);
+                
+                ctx.fillStyle = '#FFC20E'; ctx.font = 'bold 32px sans-serif';
+                ctx.fillText("ps.bobot.fun", margin, h - 160);
+
+                const qrDiv = document.createElement('div');
+                new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 180, height: 180, colorDark : "#000000" });
+                const qrImg = qrDiv.querySelector('img');
+                if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 250, h - 300, 170, 170); }
+
+                const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
-            } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
+            } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败'; }
         }
         window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
 
