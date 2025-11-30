@@ -1,3 +1,4 @@
+// ... (前文配置和数据 filtersData 保持不变) ...
 const WORKER_ENDPOINT = '/api/repair';
 const PROMPT_ENDPOINT = '/api/prompt';
 const STATUS_ENDPOINT = '/api/status';
@@ -7,11 +8,12 @@ const filtersData = [
     { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
     { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
     { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
-    { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1616651181620-9906d6e43fc3?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
+    { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
     { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
     { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
     { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
 ];
+// ... (变量定义 i18nData 等保持不变) ...
 
 let currentFile = null;
 let selectedStyle = "";
@@ -23,6 +25,9 @@ const i18nData = {
     cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
     en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
 };
+
+// ... (renderFilters, updateLanguage, selectStyle, magicBtn, photoFile, resetCanvas, previewModal, shareModal, commandForm 保持不变，直接复制上一版的 JS) ...
+// 注意：由于字数限制，我直接提供修复后的 loadMoreItems 函数，其他部分请保留原样。
 
 function renderFilters() {
     const container = document.getElementById('styleScroll');
@@ -39,7 +44,6 @@ function renderFilters() {
              </div>`;
     container.innerHTML = html;
 }
-
 function updateLanguage() {
     const t = i18nData[curLang];
     document.querySelectorAll('[data-i18n]').forEach(el => { if(t[el.getAttribute('data-i18n')]) el.innerText = t[el.getAttribute('data-i18n')]; });
@@ -269,14 +273,13 @@ async function fetchAndRenderGallery() {
      const data = res ? await res.json() : null;
      if(data && Array.isArray(data) && data.length > 0) { allGalleryItems = data; } 
      else { allGalleryItems = filtersData.map(i => ({...i, category: i.cat || '精选', img_url: i.img, title: i.name })); }
-     
      loadedCount = 0; 
      document.getElementById('galleryGrid').innerHTML = ''; 
      renderGalleryTabs(); 
      loadMoreItems(); 
 }
 
-// 🚀 核心修复：集成文字兜底逻辑
+// 🚀 修复：包含文字兜底的 HTML 模板
 function loadMoreItems() {
      let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
      const nextBatch = items.slice(loadedCount, loadedCount + BATCH_SIZE);
@@ -291,14 +294,15 @@ function loadMoreItems() {
          div.className = 'gallery-item';
          div.onclick = () => applyGallery(i.prompt.replace(/'/g,"\\'"), i.img_url || i.img);
          
-         // 🆕 添加 onerror 和 fallback 结构
+         // 🆕 修复点：添加 onerror 和 .gallery-fallback-prompt
          div.innerHTML = `
              <img src="${i.img_url || i.img}" class="gallery-img" 
                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; this.parentElement.querySelector('.gallery-overlay').style.display='none';">
              
-             <div class="gallery-fallback" style="display:none;">
-                <div class="gallery-fallback-icon">🍌</div>
-                <div class="gallery-fallback-text">${i.title || i.name}</div>
+             <div class="gallery-fallback" style="display:none; position:absolute; inset:0; background:#f0f0f5; padding:20px; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+                <div style="font-size:24px;margin-bottom:10px;">🎨</div>
+                <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">${i.title || i.name}</div>
+                <div class="gallery-fallback-prompt" style="font-size:11px;color:#888;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;">${i.prompt}</div>
              </div>
 
              <div class="gallery-overlay">
@@ -333,11 +337,11 @@ window.applyGallery = function(p, url) {
 
 const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
 let curStepIdx = 0;
-function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v_final_fix')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v_final_fix_v2')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
 function showStep(idx) {
     document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
     const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-    if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v_final_fix', 'true'); return; }
+    if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v_final_fix_v2', 'true'); return; }
     curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
     el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
     tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
