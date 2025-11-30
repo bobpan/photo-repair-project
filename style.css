@@ -1,4 +1,4 @@
-/* Last Modified: 2025-11-30 02:20:00 */
+/* Last Modified: 2025-11-30 02:20:20 */
 
 /* --- 1. 视觉系统 (Banana Theme) --- */
 :root {
@@ -106,7 +106,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 #canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
 .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
 
-/* 🏛️ Gallery: 瀑布流重构 (Waterfall Fix) */
 /* 🏛️ Gallery: 优化后的瀑布流 */
 .gallery-modal { 
     position: fixed; 
@@ -230,11 +229,56 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .gallery-img { 
     width: 100%; 
     height: auto;
+    min-height: 40px;
     display: block; /* 消除底部空隙 */
-    background: #eee; 
+    background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); 
     transition: transform 0.3s; 
     /* 防止图片变形 */
     object-fit: cover;
+    /* 图片加载失败时的处理 */
+    position: relative;
+}
+
+/* 图片加载失败占位符 */
+.gallery-img::before {
+    content: '🖼️';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.gallery-img::after {
+    content: attr(alt);
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #8E8E93;
+    background: rgba(255,255,255,0.9);
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 当图片加载失败时显示占位内容 */
+.gallery-img[src=""],
+.gallery-img:not([src]) {
+    min-height: 120px;
+}
+
+.gallery-img[src=""]::after,
+.gallery-img:not([src])::after {
+    opacity: 1;
 }
 
 .gallery-item:hover .gallery-img { 
