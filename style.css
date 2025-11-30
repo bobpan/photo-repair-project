@@ -13,15 +13,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 6px; color: #000; text-decoration: none; letter-spacing: -0.5px; }
 .nav-actions { display: flex; gap: 12px; align-items: center; }
 .icon-btn { background: white; border: 1px solid rgba(0,0,0,0.06); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; box-shadow: var(--sh-sm); font-size: 12px; font-weight: 700; color: var(--text); }
-/* 分享按钮 (Nav) */
-.share-btn { background: var(--text); color: white; padding: 0 18px; height: 38px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 6px; }
+.share-btn { background: var(--text); color: white; padding: 0 18px; height: 38px; border-radius: var(--r-full); font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: none; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255, 194, 14, 0.3); }
 .share-btn.visible { display: flex; animation: popIn 0.4s ease; }
 @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-.share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
-.modal.visible .share-card-wrap { transform: scale(1); }
-#canvasContainer img { max-width: 100%; border-radius: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: block; margin: 0 auto; }
-.share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
 
 /* --- 舞台 --- */
 .stage { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; padding: 20px; padding-bottom: 200px; width: 100%; box-sizing: border-box; overflow-y: auto; }
@@ -37,10 +31,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 /* 图片容器 */
 .image-container { position: relative; display: none; justify-content: center; align-items: center; border-radius: var(--r-md); background: transparent; overflow: hidden; cursor: zoom-in; max-width: 100%; max-height: 100%; min-width: 300px; min-height: 300px; }
 .image-container.loaded { display: inline-flex; box-shadow: var(--sh-lg); }
-.image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; border-radius: var(--r-md); pointer-events: auto; -webkit-user-select: none; }
+.image-display { display: block; width: auto; height: auto; max-width: 100%; max-height: 60vh; object-fit: contain; z-index: 10; position: relative; transition: filter 0.5s; border-radius: var(--r-md); }
 .image-display.pixelating { filter: blur(15px) contrast(1.2) saturate(1.5); transform: scale(1.02); }
 
-/* 🐍 流光贪吃蛇 (CSS Mask + Conic Gradient) */
+/* 🐍 流光贪吃蛇 */
 .snake-border {
     position: absolute; inset: 0; pointer-events: none; z-index: 20;
     border-radius: 20px; padding: 4px; 
@@ -61,7 +55,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.4); backdrop-filter: blur(5px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 60; opacity: 0; transition: 0.3s; padding: 10px; }
 .loading-overlay.visible { opacity: 1; }
 
-/* Ads */
+/* 广告区域 */
 .ad-wrapper { display: none; flex-direction: column; align-items: center; margin-top: auto; margin-bottom: auto; width: 100%; animation: slideUp 0.4s ease; }
 @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 .ad-slot { width: 300px; height: 150px; position: relative; border-radius: 16px; overflow: hidden; background: #FFFBF2; margin-bottom: 15px; box-shadow: var(--sh-lg); display: none; }
@@ -104,7 +98,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .preview-actions { position: absolute; bottom: 30px; display: flex; gap: 15px; }
 .p-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 24px; border-radius: 99px; backdrop-filter: blur(10px); cursor: pointer; font-size: 15px; font-weight: 500; }
 
-/* Gallery */
+/* Share Card */
+.share-card-wrap { background: transparent; padding: 0; text-align: center; transform: scale(0.9); transition: 0.3s; max-width: 360px; width: 90%; }
+.modal.visible .share-card-wrap { transform: scale(1); }
+#canvasContainer img { max-width: 100%; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; margin: 0 auto; }
+.share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
+
+/* =========================================
+   🚀 画廊布局核心修复 (Gallery Layout Fix)
+   ========================================= */
 .gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
 .gallery-modal.open { transform: translateY(0); }
 .gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
@@ -114,15 +116,40 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
 .tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
 .tab-btn.active { background: var(--on-primary); color: white; }
-.gallery-grid { flex: 1; overflow-y: auto; padding: 0 24px 100px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; box-sizing: border-box; }
-.gallery-item { background: white; border-radius: 20px; overflow: hidden; cursor: pointer; box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none; aspect-ratio: 3/4; }
+
+.gallery-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 24px 100px;
+    /* PC端: 使用 Grid 布局 */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 增加最小宽度，避免过挤 */
+    gap: 24px;
+    align-content: start;
+    box-sizing: border-box;
+}
+.gallery-item {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--sh-sm);
+    position: relative;
+    transition: 0.3s;
+    border: none;
+    aspect-ratio: 3/4; /* PC端统一比例 */
+    /* 防止在多列布局中被截断 */
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+}
 .gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
 .gallery-img { width: 100%; height: 100%; object-fit: cover; background: #eee; transition: 0.3s; }
 .gallery-item:hover .gallery-img { transform: scale(1.05); }
 .gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end; }
 .gallery-title { font-size: 15px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-#photoFile { display: none !important; opacity: 0; pointer-events: none; }
+/* 隐藏原生文件输入框 */
+#photoFile { display: none !important; }
 .cf-turnstile { margin: 0 auto; min-height: 65px; }
 
 /* Onboarding */
@@ -138,5 +165,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
 @media (max-width: 600px) {
-    .gallery-grid { grid-template-columns: 1fr 1fr; padding: 0 16px 100px; gap: 12px; } 
+    /* 🚀 移动端画廊：强制使用多列瀑布流布局 */
+    .gallery-grid {
+        display: block; /* 切换为 Block 以启用 column 属性 */
+        column-count: 2;
+        column-gap: 16px;
+        padding: 0 16px 100px;
+    }
+    .gallery-item {
+        display: inline-block; /* 必须是 inline-block 才能正确分列 */
+        width: 100%;
+        margin-bottom: 16px; /* 手动添加垂直间距 */
+        aspect-ratio: auto; /* 移动端可以让高度自适应，或者保持 3/4 */
+    }
+    /* 如果希望移动端也是固定比例，可以注释掉 aspect-ratio: auto; */
 }
