@@ -54,12 +54,8 @@ window.selectStyle = function(el, name, prompt) {
 
 const magicBtn = document.getElementById('magicBtn');
 magicBtn.addEventListener('click', async () => {
-    for (let i = 0; i < 8; i++) {
-    createParticle();
-    }
     // Optional: add loading effect
     magicBtn.classList.add("loading");
-    //setTimeout(() => magicBtn.classList.remove("loading"), 800);
     
     const formData = new FormData();
     formData.append('style', selectedStyle || "Creative");
@@ -71,22 +67,6 @@ magicBtn.addEventListener('click', async () => {
     } catch (e) { console.error(e); }
     magicBtn.classList.remove('loading');
 });
-
-function createParticle() {
-  const particle = document.createElement("div");
-  particle.className = "particle";
-  
-  // Random direction
-  const angle = Math.random() * 2 * Math.PI;
-  const radius = Math.random() * 20 + 10; // distance
-  particle.style.setProperty('--tx', `${Math.cos(angle) * radius}px`);
-  particle.style.setProperty('--ty', `${Math.sin(angle) * radius}px`);
-
-  magicBtn.appendChild(particle);
-
-  // Remove after animation
-  setTimeout(() => particle.remove(), 600);
-}
 
 const photoFile = document.getElementById('photoFile');
 photoFile.addEventListener('change', (e) => {
