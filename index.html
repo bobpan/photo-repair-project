@@ -252,7 +252,7 @@
         .gallery-img { 
             width: 100%; 
             height: auto;
-            min-height: 40px;
+            min-height: 48px; /* 🔥 更新：从40px改为48px */
             display: block; /* 消除底部空隙 */
             background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); 
             transition: transform 0.3s; 
@@ -347,6 +347,8 @@
             .gallery-img {
                 width: 100%;
                 height: auto;
+                /* 🔥 确保移动端也有最小高度 */
+                min-height: 48px;
             }
             .gallery-overlay {
                 padding: 16px 12px 12px;
@@ -364,6 +366,10 @@
             .gallery-item {
                 flex: 0 0 100%;
                 width: 100%;
+            }
+            .gallery-img {
+                /* 🔥 小屏也保持最小高度 */
+                min-height: 48px;
             }
         }
         
