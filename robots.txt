@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ps.bobot.fun/sitemap.xml
