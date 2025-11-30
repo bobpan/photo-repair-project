@@ -1,16 +1,13 @@
-/* Last Modified: 2025-11-30 08:00:00 */
-
 const WORKER_ENDPOINT = '/api/repair';
 const PROMPT_ENDPOINT = '/api/prompt';
 const STATUS_ENDPOINT = '/api/status';
 
-// 本地兜底数据
 const filtersData = [
     { name: "盲盒公仔", en:"Pop Mart", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=100", prompt: "cute pop mart style blind box toy, 3d render, chibi, detailed, soft lighting, 8k", cat:"创意" },
     { name: "粘土世界", en:"Clay Style", img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=100", prompt: "claymation style, stop motion, plasticine texture, soft focus, cute", cat:"创意" },
     { name: "微缩景观", en:"Tiny World", img: "https://images.unsplash.com/photo-1541661538396-53ba2d051eed?w=100", prompt: "isometric tiny world in a glass bottle, highly detailed, miniature, macro photography", cat:"风景" },
     { name: "吉卜力", en:"Ghibli", img: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=100", prompt: "anime style, studio ghibli, hayao miyazaki, vibrant colors, detailed background", cat:"动漫" },
-    { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1622627228758-1c6b23963237?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
+    { name: "赛博汉服", en:"Cyber Hanfu", img: "https://images.unsplash.com/photo-1616651181620-9906d6e43fc3?w=100", prompt: "chinese hanfu, cyberpunk style, neon lights, futuristic city background, detailed", cat:"人像" },
     { name: "老照片4K", en:"Restoration", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100", prompt: "restore old photo, fix scratches, deblur, high resolution, realistic colorization", cat:"修复" },
     { name: "职业照", en:"Headshot", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", prompt: "professional business headshot, suit, studio lighting, clean background", cat:"人像" },
     { name: "极简Logo", en:"Vector Logo", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100", prompt: "minimalist vector logo design, flat style, clean lines, white background", cat:"设计" }
@@ -19,26 +16,22 @@ const filtersData = [
 let currentFile = null;
 let selectedStyle = "";
 let curLang = localStorage.getItem('lang') || 'cn';
-let allGalleryItems = []; 
-let currentCategory = '全部';
-let loadedCount = 0; 
-const BATCH_SIZE = 10;
+let allGalleryItems = []; let currentCategory = '全部';
+let loadedCount = 0; const BATCH_SIZE = 10;
 
 const i18nData = {
     cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
     en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
 };
 
-// --- 渲染底部滤镜栏 ---
 function renderFilters() {
     const container = document.getElementById('styleScroll');
     const t = i18nData[curLang];
     let html = filtersData.map(f => {
         const name = curLang === 'cn' ? f.name : f.en;
         const isActive = selectedStyle === f.name ? 'active' : '';
-        // 这里的 img onerror 只是为了防止图标挂掉
         return `<div class="style-card ${isActive}" onclick="selectStyle(this, '${f.name}', '${f.prompt.replace(/'/g,"\\'")}')">
-            <img src="${f.img}" onerror="this.src='https://via.placeholder.com/60x60?text=Icon'"><span>${name}</span>
+            <img src="${f.img}" onerror="this.src='https://placehold.co/60x60?text=Icon'"><span>${name}</span>
         </div>`;
     }).join('');
     html += `<div class="style-card more-card" onclick="openGallery()">
@@ -61,7 +54,6 @@ window.selectStyle = function(el, name, prompt) {
     else { selectedStyle = name; document.getElementById('promptInput').value = prompt; renderFilters(); }
 }
 
-// --- 魔法棒逻辑 ---
 const magicBtn = document.getElementById('magicBtn');
 magicBtn.addEventListener('click', async () => {
     magicBtn.classList.add('loading');
@@ -78,7 +70,6 @@ magicBtn.addEventListener('click', async () => {
     magicBtn.classList.remove('loading');
 });
 
-// --- 核心生成流程 ---
 const photoFile = document.getElementById('photoFile');
 photoFile.addEventListener('change', (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -109,7 +100,6 @@ const previewImg = document.getElementById('previewImg');
 window.openPreview = function() { const src = document.getElementById('displayImage').src; if(!src) return; previewImg.src = src; previewModal.style.display = 'flex'; requestAnimationFrame(() => previewModal.classList.add('visible')); }
 window.closePreview = function() { previewModal.classList.remove('visible'); setTimeout(() => previewModal.style.display = 'none', 300); }
 
-// --- 分享卡片生成 ---
 const shareModal = document.getElementById('shareModal');
 window.openShareModal = async function() {
     const src = document.getElementById('displayImage').src || "https://images.unsplash.com/photo-1518105570919-e342af1a2961?w=500&q=80"; 
@@ -123,36 +113,19 @@ window.openShareModal = async function() {
     try {
         const img = new Image(); img.crossOrigin = "Anonymous"; img.src = src;
         await new Promise((r, j) => { img.onload = r; img.onerror = j; });
-        
-        const margin = 80; const topPad = 140; const maxImgH = 900;
-        let drawW = w - margin*2;
-        let drawH = drawW / (img.width/img.height);
-        if(drawH > maxImgH) { drawH = maxImgH; drawW = drawH * (img.width/img.height); }
-        const dx = (w - drawW)/2; const dy = topPad;
-
-        ctx.shadowColor = "rgba(0,0,0,0.15)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
-        ctx.drawImage(img, dx, dy, drawW, drawH);
-        ctx.shadowColor = "transparent";
-
-        ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 72px sans-serif'; ctx.textAlign = 'left';
-        ctx.fillText("一句话 做同款", margin, h - 280);
-        ctx.fillStyle = '#86868b'; ctx.font = '500 32px sans-serif';
-        ctx.fillText("由免费 Nano Banana PRO 生成", margin, h - 220);
-        ctx.fillStyle = '#FFC20E'; ctx.font = 'bold 32px sans-serif';
-        ctx.fillText("ps.bobot.fun", margin, h - 160);
-
-        const qrDiv = document.createElement('div');
-        new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 180, height: 180, colorDark : "#000000" });
-        const qrImg = qrDiv.querySelector('img');
-        if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 250, h - 300, 170, 170); }
-
-        const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
+        const imgRatio = img.width / img.height;
+        const drawH = 500; const drawW = drawH * imgRatio; const x = (w - drawW) / 2;
+        ctx.drawImage(img, x, 100, drawW, drawH);
+        ctx.fillStyle = '#1d1d1f'; ctx.font = '800 36px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.textAlign = 'center'; ctx.fillText("NANO BANANA", w/2, 660);
+        ctx.fillStyle = '#86868b'; ctx.font = '500 20px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillText("一句话 PS · 创意无限", w/2, 695); ctx.fillText("https://ps.bobot.fun", w/2, 725);
+        const qrDiv = document.createElement('div'); new QRCode(qrDiv, { text: "https://ps.bobot.fun", width: 90, height: 90, colorDark : "#1d1d1f" });
+        const qrImg = qrDiv.querySelector('img'); if(qrImg) { await new Promise(r => qrImg.onload = r); ctx.drawImage(qrImg, w - 135, 760, 90, 90); ctx.fillStyle = "#FFC20E"; ctx.font = "bold 14px sans-serif"; ctx.textAlign="center"; ctx.fillText("SCAN ME", w - 90, 870); }
+        const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px'; finalImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
         canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
-    } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败'; }
+    } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败 (CORS Error)'; }
 }
 window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
 
-// --- 提交与广告逻辑 ---
 const commandForm = document.getElementById('commandForm');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const adToggle = document.getElementById('adToggle');
@@ -230,7 +203,7 @@ commandForm.addEventListener('submit', async (e) => {
 
     loadingOverlay.style.display = 'flex';
     requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
-    document.querySelector('.snake-border').style.display = 'block';
+    document.querySelector('.snake-border').classList.add('active');
 
     const formData = new FormData();
     if(currentFile) formData.append('photo', await compressImage(currentFile));
@@ -282,13 +255,12 @@ commandForm.addEventListener('submit', async (e) => {
         if(!turnstileToken) { 
             loadingOverlay.classList.remove('visible');
             setTimeout(()=>loadingOverlay.style.display='none',300);
-            document.querySelector('.snake-border').style.display = 'none';
+            document.querySelector('.snake-border').classList.remove('active');
         }
         turnstileToken = null; 
     }
 });
 
-// --- 灵感广场逻辑 ---
 window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
 document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
@@ -298,40 +270,35 @@ async function fetchAndRenderGallery() {
      if(data && Array.isArray(data) && data.length > 0) { allGalleryItems = data; } 
      else { allGalleryItems = filtersData.map(i => ({...i, category: i.cat || '精选', img_url: i.img, title: i.name })); }
      
-     // 🚀 修复点 1：重置状态并加载第一页
      loadedCount = 0; 
      document.getElementById('galleryGrid').innerHTML = ''; 
      renderGalleryTabs(); 
-     loadMoreItems(); // 必须显式调用加载第一页
+     loadMoreItems(); 
 }
 
-// 无限滚动加载逻辑
+// 🚀 核心修复：集成文字兜底逻辑
 function loadMoreItems() {
      let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
      const nextBatch = items.slice(loadedCount, loadedCount + BATCH_SIZE);
+     if(nextBatch.length === 0) return;
      
      const grid = document.getElementById('galleryGrid');
-     // 移除底部的触发器，以免重复
      const trigger = document.getElementById('loadMoreTrigger');
      if(trigger) trigger.remove();
-
-     // 如果没有更多数据，直接返回
-     if(nextBatch.length === 0) return;
 
      nextBatch.forEach(i => {
          const div = document.createElement('div');
          div.className = 'gallery-item';
          div.onclick = () => applyGallery(i.prompt.replace(/'/g,"\\'"), i.img_url || i.img);
          
-         // 🆕 修复点 3：集成图片挂掉的兜底逻辑
+         // 🆕 添加 onerror 和 fallback 结构
          div.innerHTML = `
              <img src="${i.img_url || i.img}" class="gallery-img" 
                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; this.parentElement.querySelector('.gallery-overlay').style.display='none';">
              
-             <div class="gallery-fallback" style="display:none; position:absolute; inset:0; background:#f5f5f7; padding:20px; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-                <div style="font-size:24px;margin-bottom:10px;">🎨</div>
-                <div style="font-size:14px;font-weight:bold;margin-bottom:6px;">${i.title || i.name}</div>
-                <div style="font-size:12px;color:#888;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;">${i.prompt}</div>
+             <div class="gallery-fallback" style="display:none;">
+                <div class="gallery-fallback-icon">🍌</div>
+                <div class="gallery-fallback-text">${i.title || i.name}</div>
              </div>
 
              <div class="gallery-overlay">
@@ -341,7 +308,6 @@ function loadMoreItems() {
      });
      loadedCount += nextBatch.length;
      
-     // 重新添加触发器以监听滚动
      const newTrigger = document.createElement('div');
      newTrigger.id = 'loadMoreTrigger';
      grid.appendChild(newTrigger);
@@ -356,29 +322,22 @@ function renderGalleryTabs() {
     const categories = ['全部', ...new Set(allGalleryItems.map(item => item.category || '其他'))];
     galleryTabs.innerHTML = categories.map(cat => `<button class="tab-btn ${cat === currentCategory ? 'active' : ''}" onclick="switchCategory('${cat}')">${cat}</button>`).join('');
 }
-
-// 🚀 修复点 2：切换分类时重置并加载
 window.switchCategory = function(cat) { 
-    currentCategory = cat; 
-    renderGalleryTabs(); 
-    loadedCount = 0; 
-    document.getElementById('galleryGrid').innerHTML = ''; 
-    loadMoreItems(); 
+    currentCategory = cat; renderGalleryTabs(); loadedCount = 0; 
+    document.getElementById('galleryGrid').innerHTML = ''; loadMoreItems(); 
 }
-
 window.applyGallery = function(p, url) {
      document.getElementById('promptInput').value = p;
      document.getElementById('galleryModal').classList.remove('open');
 }
 
-// Onboarding
 const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
 let curStepIdx = 0;
-function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v_fix_gallery')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
+function initOnboarding() { if (!localStorage.getItem('hasSeenOb_v_final_fix')) { document.getElementById('obBackdrop').style.display = 'block'; setTimeout(() => document.getElementById('obBackdrop').classList.add('visible'), 10); showStep(0); } }
 function showStep(idx) {
     document.querySelectorAll('.ob-highlight').forEach(el => el.classList.remove('ob-highlight'));
     const tooltip = document.getElementById('obTooltip'); tooltip.style.display = 'none'; tooltip.className = 'ob-tooltip'; 
-    if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v_fix_gallery', 'true'); return; }
+    if (idx >= obSteps.length) { document.getElementById('obBackdrop').classList.remove('visible'); setTimeout(() => document.getElementById('obBackdrop').style.display = 'none', 300); localStorage.setItem('hasSeenOb_v_final_fix', 'true'); return; }
     curStepIdx = idx; const step = obSteps[idx]; const el = document.getElementById(step.id) || document.querySelector('.magic-bar-wrapper'); const content = i18nData[curLang].ob[step.key];
     el.classList.add('ob-highlight'); const rect = el.getBoundingClientRect();
     tooltip.style.display = 'block'; document.getElementById('obTitle').innerText = content.t; document.getElementById('obDesc').innerText = content.d;
