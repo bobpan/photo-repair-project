@@ -276,7 +276,7 @@ function renderGalleryGrid() {
      let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
      galleryGrid.innerHTML = items.map(i => `
          <div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url || i.img}')">
-             <img src="${i.img_url || i.img}" class="gallery-img">
+             <img src="${i.img_url || i.img}" class="gallery-img" alt="${i.title || i.name}" onerror="handleGalleryImageError(this)">
              <div class="gallery-overlay">
                  <div class="gallery-title">${i.title || i.name}</div>
              </div>
@@ -308,3 +308,19 @@ document.getElementById('obBtn').addEventListener('click', () => showStep(curSte
 setTimeout(initOnboarding, 1000);
 
 renderFilters(); updateLanguage();
+
+// 处理图片加载失败
+window.handleGalleryImageError = function(img) {
+    img.classList.add('img-error');
+    img.removeAttribute('src');
+    console.log('图片加载失败:', img.alt || '未命名图片');
+}
+
+// 检查已存在的图片
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.gallery-img').forEach(img => {
+        if (img.complete && img.naturalWidth === 0) {
+            handleGalleryImageError(img);
+        }
+    });
+});
