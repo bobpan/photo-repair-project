@@ -1,4 +1,4 @@
-/* Last Modified: 2025-11-30 01:20:00 */
+/* Last Modified: 2025-11-30 02:20:00 */
 
 /* --- 1. 视觉系统 (Banana Theme) --- */
 :root {
@@ -107,39 +107,214 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .share-hint { font-size: 14px; color: white; margin-bottom: 20px; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 15px; }
 
 /* 🏛️ Gallery: 瀑布流重构 (Waterfall Fix) */
-.gallery-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #FAFAFC; z-index: 3000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
-.gallery-modal.open { transform: translateY(0); }
-.gallery-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: white; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-.gallery-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
-.close-btn { background: #ededf0; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; font-size: 16px; color: #666; display:flex; align-items:center; justify-content:center; transition: 0.2s; }
+/* 🏛️ Gallery: 优化后的瀑布流 */
+.gallery-modal { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: #FAFAFC; 
+    z-index: 3000; 
+    transform: translateY(100%); 
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+    display: flex; 
+    flex-direction: column; 
+}
+.gallery-modal.open { 
+    transform: translateY(0); 
+}
 
-.gallery-tabs { display: flex; gap: 8px; padding: 16px 24px; overflow-x: auto; scrollbar-width: none; background: white; flex-shrink: 0; }
-.tab-btn { background: #f5f5f7; padding: 8px 20px; border-radius: var(--r-full); font-size: 14px; border:none; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--sec); transition: 0.2s; }
-.tab-btn.active { background: var(--on-primary); color: white; }
+.gallery-header { 
+    padding: 20px 24px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background: white; 
+    flex-shrink: 0; 
+    border-bottom: 1px solid rgba(0,0,0,0.05); 
+}
+.gallery-header h2 { 
+    margin: 0; 
+    font-size: 22px; 
+    font-weight: 800; 
+}
+.close-btn { 
+    background: #ededf0; 
+    width: 36px; 
+    height: 36px; 
+    border-radius: 50%; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 16px; 
+    color: #666; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: 0.2s; 
+}
 
-/* 瀑布流容器 */
+.gallery-tabs { 
+    display: flex; 
+    gap: 8px; 
+    padding: 16px 24px; 
+    overflow-x: auto; 
+    scrollbar-width: none; 
+    background: white; 
+    flex-shrink: 0; 
+}
+.gallery-tabs::-webkit-scrollbar { 
+    display: none; 
+}
+.tab-btn { 
+    background: #f5f5f7; 
+    padding: 8px 20px; 
+    border-radius: 99px; 
+    font-size: 14px; 
+    border: none; 
+    cursor: pointer; 
+    white-space: nowrap; 
+    font-weight: 600; 
+    color: #8E8E93; 
+    transition: 0.2s; 
+}
+.tab-btn.active { 
+    background: #1C1C1E; 
+    color: white; 
+}
+
+/* 瀑布流容器 - 修复堆叠问题 */
 .gallery-grid { 
-    flex: 1; overflow-y: auto; padding: 0 24px 100px; 
+    flex: 1; 
+    overflow-y: auto; 
+    overflow-x: hidden;
+    padding: 20px 24px 100px; 
     box-sizing: border-box;
-    /* PC端: 4列 */
-    column-count: 4; column-gap: 20px; 
+    /* PC端: 4列瀑布流 */
+    column-count: 4; 
+    column-gap: 20px;
+    /* 优化列填充算法 */
+    column-fill: balance;
 }
-.gallery-item { 
-    background: white; border-radius: 20px; overflow: hidden; cursor: pointer; 
-    box-shadow: var(--sh-sm); position: relative; transition: 0.3s; border: none;
-    /* 核心：避免断裂 + 底部间距 */
-    break-inside: avoid; -webkit-column-break-inside: avoid; 
-    display: inline-block; width: 100%;
-    margin-bottom: 20px; 
-}
-.gallery-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
-.gallery-img { width: 100%; display: block; background: #eee; transition: 0.3s; } /* display: block 消除底部缝隙 */
-.gallery-item:hover .gallery-img { transform: scale(1.05); }
-.gallery-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 24px 16px 16px; color: white; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
-.gallery-title { font-size: 14px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-/* Load More */
-#loadMoreTrigger { height: 50px; width: 100%; }
+/* 画廊项 - 核心优化 */
+.gallery-item { 
+    background: white; 
+    border-radius: 20px; 
+    overflow: hidden; 
+    cursor: pointer; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+    position: relative; 
+    transition: transform 0.3s, box-shadow 0.3s; 
+    border: none;
+    /* 防止断裂的关键属性 */
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    /* 使用block而非inline-block */
+    display: block;
+    width: 100%;
+    /* 底部间距 */
+    margin-bottom: 20px;
+    /* 强制GPU加速，提升渲染性能 */
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.gallery-item:hover { 
+    transform: translateY(-4px) translateZ(0); 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+}
+
+/* 图片容器 */
+.gallery-img { 
+    width: 100%; 
+    height: auto;
+    display: block; /* 消除底部空隙 */
+    background: #eee; 
+    transition: transform 0.3s; 
+    /* 防止图片变形 */
+    object-fit: cover;
+}
+
+.gallery-item:hover .gallery-img { 
+    transform: scale(1.05); 
+}
+
+/* 渐变遮罩 */
+.gallery-overlay { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); 
+    padding: 24px 16px 16px; 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-end; 
+    pointer-events: none;
+    /* 防止遮罩影响布局 */
+    z-index: 1;
+}
+
+.gallery-title { 
+    font-size: 14px; 
+    font-weight: 700; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.4;
+    /* 防止标题过长 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* 加载更多触发器 */
+#loadMoreTrigger { 
+    height: 50px; 
+    width: 100%; 
+}
+
+/* 平板优化 (3列) */
+@media (max-width: 1024px) and (min-width: 601px) {
+    .gallery-grid { 
+        column-count: 3; 
+        column-gap: 16px; 
+        padding: 16px 20px 100px; 
+    }
+    .gallery-item { 
+        margin-bottom: 16px; 
+    }
+}
+
+/* 移动端优化 (2列) */
+@media (max-width: 600px) {
+    .gallery-grid { 
+        column-count: 2; 
+        column-gap: 12px; 
+        padding: 12px 16px 100px; 
+    } 
+    .gallery-item { 
+        margin-bottom: 12px;
+        border-radius: 16px; 
+    }
+    .gallery-overlay {
+        padding: 16px 12px 12px;
+    }
+    .gallery-title {
+        font-size: 13px;
+    }
+}
+
+/* 小屏手机 (单列) */
+@media (max-width: 375px) {
+    .gallery-grid { 
+        column-count: 1; 
+        padding: 12px 16px 80px; 
+    }
+}
 
 #photoFile { display: none !important; opacity: 0; pointer-events: none; }
 .cf-turnstile { margin: 0 auto; min-height: 65px; }
@@ -155,9 +330,3 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .ob-step-desc { font-size: 15px; color: var(--sec); line-height: 1.5; margin-bottom: 20px; }
 .ob-step-btn { background: var(--primary); color: var(--on-primary); border: none; padding: 12px 24px; border-radius: 99px; font-size: 15px; font-weight: 700; cursor: pointer; float: right; box-shadow: 0 4px 12px rgba(255,194,14,0.4); transition: 0.2s; }
 @keyframes floatUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-
-@media (max-width: 600px) {
-    /* 移动端: 双列瀑布流 */
-    .gallery-grid { column-count: 2; column-gap: 12px; padding: 0 16px 100px; } 
-    .gallery-item { margin-bottom: 12px; }
-}
