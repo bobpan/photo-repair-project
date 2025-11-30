@@ -259,7 +259,48 @@ commandForm.addEventListener('submit', async (e) => {
     }
 });
 
-window.openGallery = function() { document.getElementById('galleryModal').classList.add('open'); fetchAndRenderGallery(); }
+// 4️⃣ 🔥 修改 openGallery：防止iPhone背景滚动
+window.openGallery = function() { 
+    document.getElementById('galleryModal').classList.add('open');
+    // 防止iOS背景滚动
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    fetchAndRenderGallery(); 
+}
+
+// 5️⃣ 🔥 修改 closeGallery：恢复滚动
+document.getElementById('closeGallery').onclick = () => {
+    document.getElementById('galleryModal').classList.remove('open');
+    // 恢复iOS滚动
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+}
+
+// 6️⃣ 监听窗口大小变化，重新计算布局
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 600) {
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const img = item.querySelector('.gallery-img');
+            if (img && img.complete && !img.classList.contains('img-error')) {
+                handleImageLoad(img);
+            }
+        });
+    }
+});
+
+// 7️⃣ 可选：页面加载时检查已存在的图片
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查页面上所有已存在的画廊图片
+    document.querySelectorAll('.gallery-img').forEach(img => {
+        if (img.complete && img.naturalWidth === 0) {
+            handleGalleryImageError(img);
+        } else if (img.complete) {
+            handleImageLoad(img);
+        }
+    });
+});
 document.getElementById('closeGallery').onclick = ()=>document.getElementById('galleryModal').classList.remove('open');
 
 async function fetchAndRenderGallery() {
@@ -278,12 +319,50 @@ function renderGalleryGrid() {
      let items = currentCategory === '全部' ? allGalleryItems : allGalleryItems.filter(item => (item.category || '其他') === currentCategory);
      galleryGrid.innerHTML = items.map(i => `
          <div class="gallery-item" onclick="applyGallery('${i.prompt.replace(/'/g,"\\'")}','${i.img_url || i.img}')">
-             <img src="${i.img_url || i.img}" class="gallery-img" alt="${i.title || i.name}" onerror="handleGalleryImageError(this)">
+             <img src="${i.img_url || i.img}" class="gallery-img" alt="${i.title || i.name}" onerror="handleGalleryImageError(this)" onload="handleImageLoad(this)">
              <div class="gallery-overlay">
                  <div class="gallery-title">${i.title || i.name}</div>
              </div>
          </div>`).join('');
 }
+// 2️⃣ 新增：处理图片加载成功后计算Grid占位
+window.handleImageLoad = function(img) {
+    // 仅在移动端且使用Grid布局时计算
+    if (window.innerWidth <= 600) {
+        const item = img.closest('.gallery-item');
+        if (!item) return;
+        
+        // 等待图片完全渲染
+        setTimeout(() => {
+            const itemHeight = item.offsetHeight;
+            // 基于 grid-auto-rows: 10px 计算需要占据多少行
+            const rowSpan = Math.ceil((itemHeight + 12) / 10); // 12是gap
+            item.style.setProperty('--row-span', rowSpan);
+        }, 50);
+    }
+}
+// 3️⃣ 新增：处理图片加载失败（全局函数）
+window.handleGalleryImageError = function(img) {
+    // 添加错误样式类
+    img.classList.add('img-error');
+    
+    // 移除 src 防止继续显示裂图图标
+    img.removeAttribute('src');
+    
+    // 移动端：为失败的图片也设置Grid占位
+    if (window.innerWidth <= 600) {
+        const item = img.closest('.gallery-item');
+        if (item) {
+            // 失败图片固定高度120px + overlay约60px = 180px总高
+            const rowSpan = Math.ceil((180 + 12) / 10);
+            item.style.setProperty('--row-span', rowSpan);
+        }
+    }
+    
+    // 可选：控制台记录
+    console.log('图片加载失败:', img.alt || '未命名图片');
+}
+
 window.applyGallery = function(p, url) {
      document.getElementById('promptInput').value = p;
      document.getElementById('galleryModal').classList.remove('open');
