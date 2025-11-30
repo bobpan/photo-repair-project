@@ -310,19 +310,3 @@ document.getElementById('obBtn').addEventListener('click', () => showStep(curSte
 setTimeout(initOnboarding, 1000);
 
 renderFilters(); updateLanguage();
-
-// 处理图片加载失败
-window.handleGalleryImageError = function(img) {
-    img.classList.add('img-error');
-    img.removeAttribute('src');
-    console.log('图片加载失败:', img.alt || '未命名图片');
-}
-
-// 检查已存在的图片
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.gallery-img').forEach(img => {
-        if (img.complete && img.naturalWidth === 0) {
-            handleGalleryImageError(img);
-        }
-    });
-});
