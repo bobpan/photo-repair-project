@@ -119,6 +119,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     animation: swing 2s infinite ease-in-out alternate;
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
 /* 魔法棒摆动动画 */
 @keyframes swing {
     0% { transform: rotate(0deg); }
