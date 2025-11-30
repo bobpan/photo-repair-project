@@ -170,6 +170,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     position: fixed; 
     top: 0; 
     left: 0; 
+    right: 0;
+    bottom: 0;
     width: 100%; 
     height: 100%; 
     background: #FAFAFC; 
@@ -193,7 +195,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     align-items: center; 
     background: white; 
     flex-shrink: 0; 
-    border-bottom: 1px solid rgba(0,0,0,0.05); 
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    /* 🔥 防止iOS Safari地址栏影响 */
+    position: relative;
+    z-index: 1;
 }
 .gallery-header h2 { 
     margin: 0; 
@@ -222,7 +227,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     overflow-x: auto; 
     scrollbar-width: none; 
     background: white; 
-    flex-shrink: 0; 
+    flex-shrink: 0;
+    /* 🔥 iOS滚动优化 */
+    -webkit-overflow-scrolling: touch;
 }
 .gallery-tabs::-webkit-scrollbar { 
     display: none; 
@@ -247,7 +254,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 /* 瀑布流容器 - 修复iPhone滚动 */
 .gallery-grid { 
     flex: 1; 
-    overflow-y: auto; 
+    overflow-y: scroll; /* 🔥 改为scroll强制显示滚动能力 */
     overflow-x: hidden;
     padding: 20px 24px 100px; 
     box-sizing: border-box;
@@ -263,6 +270,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     /* 🔥 防止横向溢出 */
     max-width: 100%;
     width: 100%;
+    /* 🔥 强制最小高度确保可滚动 */
+    min-height: 0;
+    /* 🔥 iOS Safari hack */
+    position: relative;
 }
 
 /* 画廊项 - 核心优化 */
@@ -298,7 +309,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .gallery-img { 
     width: 100%; 
     height: auto;
-    min-height: 40px;
+    min-height: 48px;
     display: block; /* 消除底部空隙 */
     background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); 
     transition: transform 0.3s; 
@@ -307,12 +318,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     position: relative;
 }
 
-/* 图片加载失败状态 */
+/* 图片加载失败状态 - 强制最小高度 */
 .gallery-img.img-error {
+    /* 🔥 关键：强制设置高度而不是min-height */
+    min-height: 120px !important;
+    height: 120px;
     background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%);
     /* 隐藏原始裂图 */
     color: transparent;
     font-size: 0;
+    /* 确保display不被覆盖 */
+    display: block !important;
 }
 
 .gallery-item:hover .gallery-img { 
@@ -367,36 +383,77 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     }
 }
 
-/* 移动端优化 (2列) */
+/* 移动端优化 (2列) - iOS完全重写 */
 @media (max-width: 600px) {
+    /* 🔥 关键修复：移动端完全不用column-count */
+    .gallery-modal {
+        /* iOS Safari地址栏处理 */
+        height: 100vh;
+        height: -webkit-fill-available;
+    }
+    
     .gallery-grid { 
-        /* 🔥 关键：移动端不使用column-count，改用Flexbox */
-        column-count: unset;
+        /* 移除所有column相关属性 */
+        column-count: unset !important;
+        columns: unset !important;
+        
+        /* 使用简单的flex布局 */
         display: flex;
         flex-wrap: wrap;
+        justify-content: space-between;
+        align-content: flex-start; /* 🔥 关键：顶部对齐 */
         gap: 12px; 
         padding: 12px 16px 100px;
-        /* 确保没有横向溢出 */
-        max-width: 100%;
+        
+        /* 强制启用滚动 */
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        
+        /* 确保高度正确 */
+        height: auto;
+        min-height: 0;
+        flex: 1 1 auto;
+        
+        /* 防止溢出 */
+        max-width: 100vw;
+        width: 100%;
         box-sizing: border-box;
+        
+        /* iOS hack: 触发硬件加速 */
+        transform: translateZ(0);
+        will-change: scroll-position;
     } 
+    
     .gallery-item { 
-        /* 双列布局：每项占约50%减去gap */
+        /* 双列布局 */
         flex: 0 0 calc(50% - 6px);
+        max-width: calc(50% - 6px);
         width: calc(50% - 6px);
         margin-bottom: 0;
         border-radius: 16px;
-        /* 防止子元素溢出 */
         overflow: hidden;
         box-sizing: border-box;
+        
+        /* 🔥 关键：允许每个item自适应高度 */
+        align-self: flex-start;
+        
+        /* 确保不影响布局 */
+        break-inside: unset;
+        page-break-inside: unset;
     }
+    
     .gallery-img {
         width: 100%;
-        height: auto;
+        height: auto; /* 🔥 关键：保持图片原始比例 */
+        min-height: 48px;
+        display: block;
     }
+    
     .gallery-overlay {
         padding: 16px 12px 12px;
     }
+    
     .gallery-title {
         font-size: 13px;
     }
@@ -409,9 +466,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     }
     .gallery-item {
         flex: 0 0 100%;
+        max-width: 100%;
         width: 100%;
+        align-self: flex-start;
+    }
+    .gallery-img {
+        min-height: 48px;
     }
 }
+
 
 #photoFile { display: none !important; opacity: 0; pointer-events: none; }
 .cf-turnstile { margin: 0 auto; min-height: 65px; }
