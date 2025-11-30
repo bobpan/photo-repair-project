@@ -2,14 +2,48 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>Nano Banana AI | 免费在线老照片修复 & 创意风格生成器</title>
+    <meta name="description" content="Nano Banana AI 是一款极简的免费在线 AI 工具。提供老照片修复、画质增强、4K 上色功能，支持盲盒公仔、粘土风、赛博汉服等多种创意风格生成。一键操作，无需复杂的提示词。">
+    <meta name="keywords" content="AI修图, 老照片修复, 照片变清晰, AI生图, 粘土滤镜, 盲盒风格, 免费AI工具, Nano Banana">
+    <meta name="author" content="Nano Banana Team">
+    <link rel="canonical" href="https://ps.bobot.fun/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ps.bobot.fun/">
+    <meta property="og:title" content="Nano Banana AI - 一句话做同款">
+    <meta property="og:description" content="一键修复老照片，生成盲盒、粘土风大片。免费、极简、高质量。">
+    <meta property="og:image" content="https://ps.bobot.fun/cover-image.jpg"> <link rel="icon" ...>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-    <title>Nano Banana AI | 魔法影像工作室</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍌</text></svg>">
     
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1920879457200472" crossorigin="anonymous"></script>
 
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Nano Banana AI",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free online AI photo restoration and creative image generation tool.",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1024"
+      }
+    }
+    </script>
+            
     <style>
         /* --- 1. 视觉系统 (Banana Theme) --- */
         :root {
@@ -486,7 +520,22 @@
         <div class="gallery-tabs" id="galleryTabs"></div>
         <div class="gallery-grid" id="galleryGrid"></div>
     </div>
-
+    
+    <section style="max-width: 800px; margin: 40px auto; padding: 20px; color: #888; font-size: 14px; line-height: 1.6;">
+        <h2 style="font-size: 18px; color: #333;">关于 Nano Banana AI</h2>
+        <p>
+            Nano Banana AI 是您的个人魔法影像工作室。我们利用最先进的 Gemini AI 模型，为您提供两类核心服务：
+        </p>
+        <h3 style="font-size: 16px;">1. AI 照片修复与增强</h3>
+        <p>
+            不管是模糊的旧照，还是低分辨率的表情包，通过我们的<strong>老照片修复</strong>、<strong>面部增强</strong>和<strong>4K画质提升</strong>功能，都能一键变清晰。我们特别针对人像进行了优化，适合制作职业照、LinkedIn 头像等。
+        </p>
+        <h3 style="font-size: 16px;">2. 创意风格生成</h3>
+        <p>
+            想要制作全网火爆的<strong>粘土风 (Clay Style)</strong>、<strong>盲盒公仔 (Pop Mart)</strong> 或是唯美的<strong>赛博汉服</strong>？在 Nano Banana，您不需要学习复杂的 Prompt，只需上传参考图或输入一句话，即可生成同款大片。
+        </p>
+    </section>
+        
     <script>
         const WORKER_ENDPOINT = '/api/repair';
         const PROMPT_ENDPOINT = '/api/prompt';
