@@ -753,46 +753,60 @@
                  document.getElementById('imageContainer').style.display = 'inline-flex';
                  document.getElementById('imageContainer').classList.add('loaded');
             }
-
+        
             if (localStorage.getItem('hasHitLimit') === 'true' || localStorage.getItem('isUnlimitedMode') === 'true') {
                  document.getElementById('adWrapper').style.display = 'flex'; 
             }
-
+        
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
             document.querySelector('.snake-border').classList.add('active');
-
+        
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
             formData.append('prompt', prompt);
             if(adToggle.checked) formData.append('isUnlimited', 'true');
             if(turnstileToken) formData.append('turnstileToken', turnstileToken);
-
+        
             try {
                 if(adToggle.checked) await new Promise(r=>setTimeout(r,4000));
-
+        
                 const res = await fetch(WORKER_ENDPOINT, {method:'POST', body:formData});
-                const data = await res.json();
-
-                if(res.status === 401) {
-                    document.getElementById('verifyModal').style.display = 'flex';
-                    setTimeout(()=>document.getElementById('verifyModal').classList.add('visible'),10);
-                    window.onTurnstileRender(); 
-                    return;
-                }
-                if(res.status === 429) {
-                    if(confirm(i18nData[curLang].alertLimit)) {
-                        localStorage.setItem('hasHitLimit', 'true');
-                        adWrapper.style.display = 'flex';
-                        adToggle.checked = true;
-                        adSlot.style.display = 'block';
-                        mockAd.style.display = 'flex';
-                        localStorage.setItem('isUnlimitedMode', 'true');
-                        // ⚡️ 429 Auto-Retry Logic
-                        setTimeout(() => { commandForm.dispatchEvent(new Event('submit')); }, 500);
+                
+                // 🔥 修复点：先检查状态码，再解析 JSON，防止 HTML 错误页面导致崩溃
+                if (!res.ok) {
+                    const text = await res.text(); // 获取原始响应文本
+                    console.error("Server Error Raw:", text);
+        
+                    if(res.status === 401) {
+                        // 验证码逻辑
+                        document.getElementById('verifyModal').style.display = 'flex';
+                        setTimeout(()=>document.getElementById('verifyModal').classList.add('visible'),10);
+                        window.onTurnstileRender(); 
+                        return; // 中断
+                    } else if (res.status === 429) {
+                        // 限流逻辑
+                        if(confirm(i18nData[curLang].alertLimit)) {
+                            localStorage.setItem('hasHitLimit', 'true');
+                            adWrapper.style.display = 'flex';
+                            adToggle.checked = true;
+                            adSlot.style.display = 'block';
+                            mockAd.style.display = 'flex';
+                            localStorage.setItem('isUnlimitedMode', 'true');
+                            setTimeout(() => { commandForm.dispatchEvent(new Event('submit')); }, 500);
+                        }
+                        // 停止 Loading
+                        loadingOverlay.classList.remove('visible');
+                        setTimeout(()=>loadingOverlay.style.display='none',300);
+                        document.querySelector('.snake-border').classList.remove('active');
+                        return;
+                    } else {
+                        // 其他错误 (500, 403 WAF Block 等)
+                        throw new Error(`Server Error: ${res.status}`);
                     }
-                    return;
                 }
+        
+                const data = await res.json();
                 
                 let img = null;
                 if(data.taskId) img = await pollTask(data.taskId);
@@ -808,9 +822,13 @@
                     shareBtn.style.display = 'flex';
                     shareBtn.classList.add('visible');
                 }
-
-            } catch(e) { console.error(e); alert("AI Busy or Error"); } finally {
-                if(!turnstileToken) { 
+        
+            } catch(e) { 
+                console.error(e); 
+                alert(`Error: ${e.message || "Network Error"}`); 
+            } finally {
+                // 只有在没有等待 turnstile token 的情况下才关闭 loading
+                if(!turnstileToken && document.getElementById('verifyModal').style.display !== 'flex') { 
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
                     document.querySelector('.snake-border').classList.remove('active');
