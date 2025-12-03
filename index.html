@@ -825,7 +825,21 @@
         
             } catch(e) { 
                 console.error(e); 
-                alert(`Error: ${e.message || "Network Error"}`); 
+                let userMsg = "抱歉，AI 暂时有些繁忙，请稍后再试 🍌"; // 默认文案
+                const errorString = e.message || e.toString();
+        
+                // 针对性翻译错误信息
+                if (errorString.includes('503') || errorString.includes('Overloaded')) {
+                    userMsg = "🔥 AI 算力爆肝中 (503)...\n请等待几秒钟再次点击魔法棒！";
+                } else if (errorString.includes('Timeout')) {
+                    userMsg = "🐢 网络或 AI 响应较慢，建议切换网络或稍后重试。";
+                } else if (errorString.includes('Safety') || errorString.includes('Blocked')) {
+                    userMsg = "🚧 图片或提示词包含敏感内容，被 AI 拦截了，请换个说法试试。";
+                } else if (errorString.includes('VERIFY_REQUIRED')) {
+                    userMsg = "请先完成人机验证 ✅";
+                }
+        
+                alert(userMsg);
             } finally {
                 // 只有在没有等待 turnstile token 的情况下才关闭 loading
                 if(!turnstileToken && document.getElementById('verifyModal').style.display !== 'flex') { 
