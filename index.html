@@ -411,7 +411,7 @@
 
         /* 🔔 Toast 通知系统 (新增) */
         #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
             z-index: 5000; display: flex; flex-direction: column; gap: 10px;
             pointer-events: none; width: 90%; max-width: 300px;
         }
@@ -449,6 +449,8 @@
     </style>
 </head>
 <body>
+    
+    <div id="toast-container"></div>
     <div id="obBackdrop" class="ob-backdrop"></div>
     <div id="obTooltip" class="ob-tooltip">
         <div class="ob-step-title" id="obTitle">Title</div>
@@ -460,11 +462,11 @@
         <a href="#" class="logo">Nano Banana <span>🍌</span></a>
         <div class="nav-actions">
             <button class="icon-btn" id="langToggle">CN</button>
+            <button class="icon-btn" onclick="openHistory()" title="历史记录">🕒</button>
             <button class="share-btn" id="shareBtnNav" onclick="openShareModal()">分享作品 ✨</button>
         </div>
     </nav>
 
-    <div id="toast-container"></div>
     
     <main class="stage">
         <div id="emptyState" class="empty-state" onclick="document.getElementById('photoFile').click()">
