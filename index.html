@@ -355,6 +355,10 @@
             .gallery-item { 
                 margin-bottom: 16px; 
             }
+            
+            .history-item { 
+                margin-bottom: 16px; 
+            }
         }
         
         /* 移动端优化 (2列) */
@@ -386,6 +390,22 @@
                 /* 🔥 确保移动端也有最小高度 */
                 min-height: 48px;
             }
+            .history-item { 
+                /* 双列布局：每项占约50%减去gap */
+                flex: 0 0 calc(50% - 6px);
+                width: calc(50% - 6px);
+                margin-bottom: 0;
+                border-radius: 16px;
+                /* 防止子元素溢出 */
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+            .history-img {
+                width: 100%;
+                height: auto;
+                /* 🔥 确保移动端也有最小高度 */
+                min-height: 48px;
+            }
             .gallery-overlay {
                 padding: 16px 12px 12px;
             }
@@ -404,6 +424,14 @@
                 width: 100%;
             }
             .gallery-img {
+                /* 🔥 小屏也保持最小高度 */
+                min-height: 48px;
+            }
+            .history-item {
+                flex: 0 0 100%;
+                width: 100%;
+            }
+            .history-img {
                 /* 🔥 小屏也保持最小高度 */
                 min-height: 48px;
             }
@@ -1059,7 +1087,7 @@
                 if(!isVerifying) {
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
-                    document.querySelector('.snake-border').style.display = 'none';
+                    document.querySelector('.snake-border').classList.remove('active');
                     document.querySelector('.image-container').classList.remove('is-loading');
                 }
                 turnstileToken = null;
