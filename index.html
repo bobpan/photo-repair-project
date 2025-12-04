@@ -411,7 +411,7 @@
 
         /* 🔔 Toast 通知系统 (新增) */
         #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 36px; left: 50%; transform: translateX(-50%);
             z-index: 5000; display: flex; flex-direction: column; gap: 10px;
             pointer-events: none; width: 90%; max-width: 300px;
         }
@@ -913,13 +913,15 @@
                 if(errStr.includes('Timeout')) errKey = 'errorTimeout';
                 showToast(errKey, 'error'); // 🆕 统一报错
             } finally {
-                // 只有在没有等待 turnstile token 的情况下才关闭 loading
-                if(!turnstileToken && document.getElementById('verifyModal').style.display !== 'flex') { 
+                // 🔥 修复：无论如何都强制清理 Loading，除非是 401 等待验证
+                const isVerifying = document.getElementById('verifyModal').style.display === 'flex';
+                if(!isVerifying) {
                     loadingOverlay.classList.remove('visible');
                     setTimeout(()=>loadingOverlay.style.display='none',300);
-                    document.querySelector('.snake-border').classList.remove('active');
+                    document.querySelector('.snake-border').style.display = 'none';
+                    document.querySelector('.image-container').classList.remove('is-loading');
                 }
-                turnstileToken = null; 
+                turnstileToken = null;
             }
         });
         
