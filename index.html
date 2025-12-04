@@ -408,7 +408,29 @@
                 min-height: 48px;
             }
         }
+
+        /* 🔔 Toast 通知系统 (新增) */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 5000; display: flex; flex-direction: column; gap: 10px;
+            pointer-events: none; width: 90%; max-width: 300px;
+        }
         
+        .toast {
+            background: rgba(28, 28, 30, 0.9); /* 深色毛玻璃 */
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            color: white; padding: 12px 20px; border-radius: 99px;
+            font-size: 14px; font-weight: 600; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0; transform: translateY(-20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: auto; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast.error { background: rgba(255, 59, 48, 0.9); } /* 红色错误 */
+        .toast.success { background: rgba(52, 199, 89, 0.9); } /* 绿色成功 */
+                
         #photoFile { display: none !important; opacity: 0; pointer-events: none; }
         .cf-turnstile { margin: 0 auto; min-height: 65px; }
 
@@ -427,7 +449,7 @@
     </style>
 </head>
 <body>
-
+    <div id="toast-container"></div>
     <div id="obBackdrop" class="ob-backdrop"></div>
     <div id="obTooltip" class="ob-tooltip">
         <div class="ob-step-title" id="obTitle">Title</div>
@@ -559,11 +581,67 @@
         let curLang = localStorage.getItem('lang') || 'cn';
         let allGalleryItems = []; let currentCategory = '全部';
 
+        // 🆕 i18n 数据扩展
         const i18nData = {
-            cn: { emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", alertLimit: "今日额度已尽！是否允许显示广告以开启无限模式？", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } } },
-            en: { emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", alertLimit: "Limit reached! Enable Unlimited Mode?", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start", ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } } }
+            cn: { 
+                emptyTitle: "创意影像工作室", emptyDesc: "上传照片进行 AI 修复，或者直接在底部输入文字进行创作。", uploadBtn: "点击上传图片", galleryMore: "更多", obBtnNext: "下一步", obBtnStart: "开始", 
+                ob: { s1: { t: "开始创作", d: "上传照片或输入文字。" }, s2: { t: "选择风格", d: "点击卡片选择风格。" } },
+                // 新增提示语
+                msg: {
+                    limitAlert: "今日免费额度已尽！\n是否允许显示广告以开启无限模式？",
+                    verifying: "正在进行安全验证...",
+                    error503: "🔥 AI 算力火爆，请稍后重试",
+                    errorTimeout: "🐢 生成超时，请检查网络",
+                    errorNetwork: "网络连接失败",
+                    errorVerify: "请完成人机验证",
+                    copySuccess: "链接已复制！",
+                    genStart: "正在施展魔法...",
+                    saveHint: "请长按图片保存"
+                }
+            },
+            en: { 
+                emptyTitle: "Creative Studio", emptyDesc: "Upload a photo to fix, or type below to create.", uploadBtn: "Click to Upload", galleryMore: "More", obBtnNext: "Next", obBtnStart: "Start",
+                ob: { s1: { t: "Start Here", d: "Upload or type." }, s2: { t: "Pick Style", d: "Choose a style card." } },
+                // New Messages
+                msg: {
+                    limitAlert: "Daily limit reached!\nEnable Ads for Unlimited Mode?",
+                    verifying: "Verifying...",
+                    error503: "🔥 AI Overloaded, try again later",
+                    errorTimeout: "🐢 Request timed out",
+                    errorNetwork: "Network Error",
+                    errorVerify: "Please verify you are human",
+                    copySuccess: "Link Copied!",
+                    genStart: "Magic in progress...",
+                    saveHint: "Long press to save"
+                }
+            }
         };
-
+        
+        // --- 🆕 Toast 函数 ---
+        function showToast(key, type = 'normal') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            const text = i18nData[curLang].msg[key] || key; // 如果找不到key，直接显示key内容
+            
+            el.className = `toast ${type}`;
+            // 添加图标
+            let icon = '✨';
+            if(type === 'error') icon = '⚠️';
+            if(type === 'success') icon = '✅';
+            
+            el.innerHTML = `<span>${icon}</span> ${text}`;
+            container.appendChild(el);
+            
+            // 动画
+            requestAnimationFrame(() => el.classList.add('show'));
+            
+            // 自动销毁
+            setTimeout(() => {
+                el.classList.remove('show');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+        
         function renderFilters() {
             const container = document.getElementById('styleScroll');
             const t = i18nData[curLang];
@@ -679,7 +757,7 @@
 
                 const finalImg = new Image(); finalImg.src = canvas.toDataURL(); finalImg.style.maxWidth = '100%'; finalImg.style.borderRadius = '12px';
                 canvasContainer.innerHTML = ''; canvasContainer.appendChild(finalImg);
-            } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败'; }
+            } catch (e) { console.error(e); canvasContainer.innerHTML = '生成失败'; showToast('errorNetwork', 'error'); }
         }
         window.closeShareModal = function() { shareModal.classList.remove('visible'); setTimeout(() => shareModal.style.display = 'none', 300); }
 
@@ -761,7 +839,8 @@
             loadingOverlay.style.display = 'flex';
             requestAnimationFrame(()=>loadingOverlay.classList.add('visible'));
             document.querySelector('.snake-border').classList.add('active');
-        
+            showToast('genStart', 'normal'); // 🆕 开始提示
+            
             const formData = new FormData();
             if(currentFile) formData.append('photo', await compressImage(currentFile));
             formData.append('prompt', prompt);
@@ -782,11 +861,12 @@
                         // 验证码逻辑
                         document.getElementById('verifyModal').style.display = 'flex';
                         setTimeout(()=>document.getElementById('verifyModal').classList.add('visible'),10);
+                        showToast('errorVerify', 'error'); // 🆕
                         window.onTurnstileRender(); 
                         return; // 中断
                     } else if (res.status === 429) {
                         // 限流逻辑
-                        if(confirm(i18nData[curLang].alertLimit)) {
+                        if(confirm(i18nData[curLang].msg.limitAlert)) {
                             localStorage.setItem('hasHitLimit', 'true');
                             adWrapper.style.display = 'flex';
                             adToggle.checked = true;
@@ -821,25 +901,17 @@
                     const shareBtn = document.getElementById('shareBtnNav');
                     shareBtn.style.display = 'flex';
                     shareBtn.classList.add('visible');
+                    // 🆕 提示长按保存
+                    showToast('saveHint', 'success');
                 }
         
             } catch(e) { 
                 console.error(e); 
-                let userMsg = "抱歉，AI 暂时有些繁忙，请稍后再试 🍌"; // 默认文案
-                const errorString = e.message || e.toString();
-        
-                // 针对性翻译错误信息
-                if (errorString.includes('503') || errorString.includes('Overloaded')) {
-                    userMsg = "🔥 AI 算力爆肝中 (503)...\n请等待几秒钟再次点击魔法棒！";
-                } else if (errorString.includes('Timeout')) {
-                    userMsg = "🐢 网络或 AI 响应较慢，建议切换网络或稍后重试。";
-                } else if (errorString.includes('Safety') || errorString.includes('Blocked')) {
-                    userMsg = "🚧 图片或提示词包含敏感内容，被 AI 拦截了，请换个说法试试。";
-                } else if (errorString.includes('VERIFY_REQUIRED')) {
-                    userMsg = "请先完成人机验证 ✅";
-                }
-        
-                alert(userMsg);
+                const errStr = e.message || "";
+                let errKey = 'errorNetwork';
+                if(errStr.includes('503')) errKey = 'error503';
+                if(errStr.includes('Timeout')) errKey = 'errorTimeout';
+                showToast(errKey, 'error'); // 🆕 统一报错
             } finally {
                 // 只有在没有等待 turnstile token 的情况下才关闭 loading
                 if(!turnstileToken && document.getElementById('verifyModal').style.display !== 'flex') { 
