@@ -409,6 +409,36 @@
             }
         }
 
+        /* 🆕 历史记录特有样式 */
+        .history-item {
+            position: relative;
+            background: white; border-radius: 20px; overflow: hidden; cursor: pointer;
+            box-shadow: var(--sh-sm); transition: 0.3s;
+            aspect-ratio: 3/4; /* 保持统一比例 */
+        }
+        .history-item:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
+        
+        .history-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        
+        .history-info {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px 12px 12px; color: white;
+        }
+        .history-date { font-size: 10px; opacity: 0.8; margin-bottom: 2px; }
+        .history-prompt { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* 删除单条记录的按钮 */
+        .history-del-btn {
+            position: absolute; top: 8px; right: 8px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: rgba(0,0,0,0.5); color: white;
+            border: none; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; z-index: 5;
+            opacity: 0; transition: 0.2s;
+        }
+        .history-item:hover .history-del-btn { opacity: 1; }
+        
         /* 🔔 Toast 通知系统 (新增) */
         #toast-container {
             position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
@@ -744,6 +774,77 @@
             selectedStyle = ""; renderFilters();
         }
 
+        // --- History Logic (Fix: Now defined globally) ---
+        const HISTORY_KEY = 'nano_banana_history_v1';
+        const MAX_HISTORY = 20;
+        
+        function saveToHistory(base64Img, prompt) {
+            try {
+                const t = i18nData[curLang];
+                const newItem = {
+                    id: Date.now(),
+                    img: base64Img,
+                    prompt: prompt || t.untitled, 
+                    date: new Date().toLocaleString()
+                };
+                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+                history.unshift(newItem);
+                if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            } catch (e) { console.warn("History Save Failed", e); }
+        }
+        
+        window.openHistory = function() {
+            const modal = document.getElementById('historyModal');
+            const grid = document.getElementById('historyGrid');
+            const empty = document.getElementById('historyEmpty');
+            modal.classList.add('open');
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            if (history.length === 0) {
+                grid.innerHTML = ''; empty.style.display = 'block'; return;
+            }
+            empty.style.display = 'none';
+            grid.innerHTML = history.map(item => `
+                <div class="history-item" style="position:relative; background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05); aspect-ratio:3/4;">
+                    <img src="${item.img}" style="width:100%; height:100%; object-fit:cover; display:block;" onclick="restoreFromHistory('${item.id}')">
+                    <button onclick="deleteHistoryItem(event, '${item.id}')" style="position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.5); color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px;">✕</button>
+                    <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(0,0,0,0.8)); padding:20px 12px 12px; color:white;">
+                        <div style="font-size:10px; opacity:0.8;">${item.date.split(' ')[0]}</div>
+                        <div style="font-size:12px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.prompt}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        window.closeHistory = function() { document.getElementById('historyModal').classList.remove('open'); }
+        window.restoreFromHistory = function(id) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            const item = history.find(i => i.id == id);
+            if (item) {
+                document.getElementById('displayImage').src = item.img;
+                document.getElementById('promptInput').value = item.prompt;
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('imageContainer').style.display = 'inline-flex';
+                document.getElementById('imageContainer').classList.add('loaded');
+                const shareBtn = document.getElementById('shareBtnNav');
+                shareBtn.style.display = 'flex'; shareBtn.classList.add('visible');
+                fetch(item.img).then(res => res.blob()).then(blob => { currentFile = new File([blob], "history.png", { type: "image/png" }); });
+                closeHistory();
+            }
+        }
+        window.deleteHistoryItem = function(e, id) {
+            e.stopPropagation();
+            if(!confirm(i18nData[curLang].confirmDel)) return;
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            history = history.filter(i => i.id != id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            openHistory();
+        }
+        window.clearHistory = function() {
+            if(!confirm(i18nData[curLang].confirmClear)) return;
+            localStorage.removeItem(HISTORY_KEY); openHistory();
+        }
+        
+        // --- Modal Logic ---
         const previewModal = document.getElementById('previewModal');
         const previewImg = document.getElementById('previewImg');
         window.openPreview = function() { const src = document.getElementById('displayImage').src; if(!src) return; previewImg.src = src; previewModal.style.display = 'flex'; requestAnimationFrame(() => previewModal.classList.add('visible')); }
@@ -928,6 +1029,15 @@
                     document.getElementById('displayImage').classList.remove('pixelating');
                     const blob = await (await fetch(img)).blob();
                     currentFile = new File([blob], "edit.png", {type:'image/png'});
+
+                    // 👇👇👇 新增：保存到历史记录 (将 Blob 转为 DataURL 后保存)
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function() {
+                        // 这里使用 prompt 变量（在事件开始时定义的）
+                        saveToHistory(reader.result, prompt || "AI 创意生成");
+                    }
+                    
                     document.getElementById('promptInput').value = '';
                     const shareBtn = document.getElementById('shareBtnNav');
                     shareBtn.style.display = 'flex';
@@ -985,100 +1095,7 @@
              document.getElementById('promptInput').value = p;
              document.getElementById('galleryModal').classList.remove('open');
         }
-        // --- 🆕 历史记录逻辑 ---
-        const HISTORY_KEY = 'nano_banana_history_v1';
-        const MAX_HISTORY = 20;
         
-        function saveToHistory(base64Img, prompt) {
-            try {
-                const t = i18nData[curLang];
-                const newItem = {
-                    id: Date.now(),
-                    img: base64Img,
-                    // 如果 prompt 为空，使用当前语言的“无题”
-                    prompt: prompt || t.untitled, 
-                    date: new Date().toLocaleString()
-                };
-        
-                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-                history.unshift(newItem);
-                if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            } catch (e) { console.warn("Storage full", e); }
-        }
-        
-        window.openHistory = function() {
-            const modal = document.getElementById('historyModal');
-            const grid = document.getElementById('historyGrid');
-            const empty = document.getElementById('historyEmpty');
-            
-            modal.classList.add('open');
-            
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-            
-            if (history.length === 0) {
-                grid.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            
-            empty.style.display = 'none';
-            grid.innerHTML = history.map(item => `
-                <div class="history-item" style="position:relative; background:white; border-radius:20px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05); aspect-ratio:3/4;">
-                    <img src="${item.img}" style="width:100%; height:100%; object-fit:cover; display:block;" onclick="restoreFromHistory('${item.id}')">
-                    <button onclick="deleteHistoryItem(event, '${item.id}')" style="position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.5); color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px;">✕</button>
-                    <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(0,0,0,0.8)); padding:20px 12px 12px; color:white;">
-                        <div style="font-size:10px; opacity:0.8;">${item.date.split(' ')[0]}</div>
-                        <div style="font-size:12px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.prompt}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        window.closeHistory = function() {
-            document.getElementById('historyModal').classList.remove('open');
-        }
-        
-        window.restoreFromHistory = function(id) {
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-            const item = history.find(i => i.id == id);
-            if (item) {
-                document.getElementById('displayImage').src = item.img;
-                document.getElementById('promptInput').value = item.prompt;
-                
-                document.getElementById('emptyState').style.display = 'none';
-                document.getElementById('imageContainer').style.display = 'inline-flex';
-                document.getElementById('imageContainer').classList.add('loaded');
-                
-                const shareBtn = document.getElementById('shareBtnNav');
-                shareBtn.style.display = 'flex';
-                shareBtn.classList.add('visible');
-                
-                fetch(item.img)
-                    .then(res => res.blob())
-                    .then(blob => { currentFile = new File([blob], "history.png", { type: "image/png" }); });
-        
-                closeHistory();
-            }
-        }
-        
-        window.deleteHistoryItem = function(e, id) {
-            e.stopPropagation();
-            // 使用 i18n 确认文案
-            if(!confirm(i18nData[curLang].confirmDel)) return;
-            
-            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-            history = history.filter(i => i.id != id);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            openHistory();
-        }
-        
-        window.clearHistory = function() {
-            // 使用 i18n 确认文案
-            if(!confirm(i18nData[curLang].confirmClear)) return;
-            localStorage.removeItem(HISTORY_KEY);
-            openHistory();
-        }
         // Onboarding
         const obSteps = [ { id: 'emptyState', key: 's1', pos: 'bottom' }, { id: 'styleScroll', key: 's2', pos: 'top' } ];
         let curStepIdx = 0;
